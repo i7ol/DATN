@@ -34,7 +34,7 @@
         <module>shop-auth</module>
         <module>shop-product</module>
         <module>shop-order</module>
-<!--        <module>shop-cart</module>-->
+        <module>shop-cart</module>
 <!--     <module>shop-payment</module>-->
 <!--     <module>shop-promotion</module>-->
 <!--     <module>shop-notification</module>-->

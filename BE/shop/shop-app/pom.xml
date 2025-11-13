@@ -43,6 +43,11 @@
 			<artifactId>shop-order</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
+		<dependency>
+			<groupId>com.datn</groupId>
+			<artifactId>shop-cart</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
 <!--		<dependency>-->
 <!--			<groupId>com.datn</groupId>-->
 <!--			<artifactId>shop-payment</artifactId>-->
@@ -103,6 +108,9 @@
 				<configuration>
 					<source>${java.version}</source>
 					<target>${java.version}</target>
+					<compilerArgs>
+						<arg>-parameters</arg>
+					</compilerArgs>
 					<annotationProcessorPaths>
 						<path>
 							<groupId>org.projectlombok</groupId>

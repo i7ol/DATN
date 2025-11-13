@@ -43,6 +43,8 @@ public class SecurityConfig {
             "/swagger-ui.html",
             "/api/orders",
             "/api/orders/**",
+            "/api/carts",
+            "/api/carts/**",
             "/v3/api-docs.yaml"
     };
 
