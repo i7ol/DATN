@@ -1,0 +1,28 @@
+package com.datn.shopproduct.dto.request;
+
+
+import java.math.BigDecimal;
+import java.util.List;
+
+import com.datn.shopproduct.dto.ImageDTO;
+import jakarta.validation.constraints.*;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public class ProductUpdateRequest {
+    String name;
+    String sku;
+    String description;
+    @DecimalMin("0.0") BigDecimal price;
+    @Min(0) Integer stock;
+    Long categoryId;
+    List<ImageDTO> images;
+
+
+}
+
