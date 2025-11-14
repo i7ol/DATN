@@ -37,8 +37,8 @@
         <module>shop-cart</module>
         <module>shop-payment</module>
         <module>shop-inventory</module>
-<!--     <module>shop-notification</module>-->
-<!--     <module>shop-shipping</module>-->
+        <module>shop-shipping</module>
+        <!--     <module>shop-notification</module>-->
     </modules>
 
     <build>

@@ -58,7 +58,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             "/api/carts/**",
 
             "/api/inventory",
-            "/api/inventory/**"
+            "/api/inventory/**",
+
+            "/api/shipping",
+            "/api/shipping/**",
     };
 
     @Override

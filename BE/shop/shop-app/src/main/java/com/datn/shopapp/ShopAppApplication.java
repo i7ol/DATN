@@ -15,7 +15,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 		"com.datn.shoporder",
 		"com.datn.shopcart",
 		"com.datn.shoppayment",
-		"com.datn.shopinventory"
+		"com.datn.shopinventory",
+		"com.datn.shopshipping"
 })
 @EntityScan(basePackages = {
 		"com.datn.shopproduct.entity",
@@ -23,7 +24,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 		"com.datn.shopcart.entity",
 		"com.datn.shoppayment.entity",
 		"com.datn.shopcore.entity",
-		"com.datn.shopinventory.entity"
+		"com.datn.shopinventory.entity",
+		"com.datn.shopshipping.entity"
 })
 @EnableJpaRepositories(basePackages = {
 		"com.datn.shopproduct.repository",
@@ -31,7 +33,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 		"com.datn.shopcart.repository",
 		"com.datn.shoppayment.repository",
 		"com.datn.shopcore.repository",
-		"com.datn.shopinventory.repository"
+		"com.datn.shopinventory.repository",
+		"com.datn.shopshipping.repository"
 })
 public class ShopAppApplication {
 
