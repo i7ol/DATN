@@ -26,22 +26,73 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final AuthenticationService authenticationService;
 
+    // Danh sách public endpoints
+    private final String[] PUBLIC_ENDPOINTS = {
+            "/auth/token",
+            "/auth/introspect",
+
+            "/api/categories",
+            "/api/categories/**",
+
+            "/api/products",
+            "/api/products/**",
+
+            "/api/users",
+            "/api/users/**",
+
+            "/api/payments",
+            "/api/payments/**",
+            "/api/payments/create",
+            "/api/payments/update-status",
+            "/api/payments/update-status/**",
+
+            "/v3/api-docs",
+            "/v3/api-docs/**",
+            "/swagger-ui/**",
+            "/swagger-ui.html",
+            "/v3/api-docs.yaml",
+            "/api/orders",
+            "/api/orders/**",
+
+            "/api/carts",
+            "/api/carts/**",
+    };
+
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain)
             throws ServletException, IOException {
 
+        String path = request.getRequestURI();
+
+        // Bỏ qua OPTIONS
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        // Bỏ qua public endpoints
+        for (String endpoint : PUBLIC_ENDPOINTS) {
+            String regex = endpoint.replace("**", ".*");
+            if (path.matches(regex)) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+        }
+
+        // Check header Authorization
         String header = request.getHeader("Authorization");
         if (header == null || !header.startsWith("Bearer ")) {
-            filterChain.doFilter(request, response);
+            // Không token → return 401 nếu cần
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
 
         String token = header.substring(7);
 
         if (!authenticationService.validateToken(token)) {
-            filterChain.doFilter(request, response);
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
 
@@ -49,7 +100,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         List<String> roles = authenticationService.extractRoles(token);
 
         List<SimpleGrantedAuthority> authorities = roles.stream()
-                .map(role -> new SimpleGrantedAuthority("ROLE_" + role)) // Quan trọng!
+                .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
                 .collect(Collectors.toList());
 
         UsernamePasswordAuthenticationToken authentication =
@@ -59,6 +110,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         filterChain.doFilter(request, response);
-    }
-}
+    }}
+
+
 

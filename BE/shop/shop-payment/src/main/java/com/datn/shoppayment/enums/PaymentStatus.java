@@ -1,7 +1,7 @@
-package com.datn.shoporder.enums;
+package com.datn.shoppayment.enums;
 
 public enum PaymentStatus {
     PENDING,
-    PAID,
+    SUCCESS,
     FAILED
 }

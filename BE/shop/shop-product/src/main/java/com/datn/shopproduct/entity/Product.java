@@ -3,13 +3,10 @@ package com.datn.shopproduct.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -17,7 +14,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-
 @ToString(callSuper = true, exclude = {"images", "category"})
 @Entity
 @Table(name = "PRODUCTS")

@@ -36,13 +36,13 @@ public class AuthenticationService {
     @Value("${jwt.secret}")
     String jwtSecret;
 
-
     @PostConstruct
     public void init() {
         if (jwtSecret == null || jwtSecret.isBlank()) {
             throw new IllegalStateException("jwtSecret not injected!");
         }
     }
+
     private SecretKey getSigningKey() {
         return Keys.hmacShaKeyFor(jwtSecret.getBytes());
     }
@@ -66,18 +66,14 @@ public class AuthenticationService {
 
     private String generateToken(User user) {
         long now = System.currentTimeMillis();
-
-        // ✅ Lấy danh sách roleName
-        List<String> roles = user.getRoles().stream()
-                .map(Role::getName)
-                .toList();
+        List<String> roles = user.getRoles().stream().map(Role::getName).toList();
 
         return Jwts.builder()
                 .setSubject(user.getUsername())
                 .setIssuer("i7ol.com")
                 .claim("roles", roles)
                 .setIssuedAt(new Date(now))
-                .setExpiration(new Date(now + 3600_000)) // 1 giờ
+                .setExpiration(new Date(now + 3600_000)) // 1h
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -113,6 +109,4 @@ public class AuthenticationService {
                 .getBody();
         return (List<String>) claims.get("roles");
     }
-
-
 }

@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -93,6 +94,19 @@ public class OrderService {
         order.setPaymentStatus(paymentStatus);
         order.setUpdatedAt(LocalDateTime.now());
         return orderRepository.save(order);
+    }
+
+    public void updatePaymentStatus(Long orderId, String paymentStatusStr) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        PaymentStatus status = PaymentStatus.valueOf(paymentStatusStr);
+
+        order.setPaymentStatus(status);
+        orderRepository.save(order);
+    }
+    public Optional<Order> getOrderById(Long orderId) {
+        return orderRepository.findById(orderId);
     }
 
     private Order getOrder(Long id) {

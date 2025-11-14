@@ -23,14 +23,12 @@ import java.util.Set;
 @Slf4j
 public class ApplicationInitConfig {
 
-    PasswordEncoder passwordEncoder;
-    RoleRepository roleRepository;
+    final PasswordEncoder passwordEncoder;
+    final RoleRepository roleRepository;
 
     @Bean
     ApplicationRunner applicationRunner(UserRepository userRepository) {
         return args -> {
-
-            // Đảm bảo role ADMIN luôn tồn tại trong DB
             Role adminRole = roleRepository.findById(RoleEnums.ADMIN.name())
                     .orElseGet(() -> {
                         Role role = Role.builder()
@@ -40,7 +38,6 @@ public class ApplicationInitConfig {
                         return roleRepository.save(role);
                     });
 
-            // Kiểm tra nếu admin chưa tồn tại
             if (userRepository.findByUsername("admin").isEmpty()) {
                 Set<Role> roles = new HashSet<>();
                 roles.add(adminRole);
@@ -55,7 +52,6 @@ public class ApplicationInitConfig {
                 userRepository.save(admin);
                 log.warn("Admin user has been created with default password: 'admin'. Please change it!");
             } else {
-                // Nếu đã tồn tại, đảm bảo admin vẫn có role ADMIN
                 userRepository.findByUsername("admin").ifPresent(existingAdmin -> {
                     if (existingAdmin.getRoles() == null || existingAdmin.getRoles().isEmpty()) {
                         existingAdmin.setRoles(Set.of(adminRole));
@@ -67,3 +63,4 @@ public class ApplicationInitConfig {
         };
     }
 }
+

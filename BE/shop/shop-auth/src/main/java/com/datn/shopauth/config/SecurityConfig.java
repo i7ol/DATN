@@ -5,6 +5,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 
+import org.springframework.http.HttpMethod;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -32,20 +34,33 @@ public class SecurityConfig {
     private final String[] PUBLIC_ENDPOINTS = {
             "/auth/token",
             "/auth/introspect",
+
             "/api/categories",
             "/api/categories/**",
+
             "/api/products",
             "/api/products/**",
+
             "/api/users",
-            "/api/users/**","/v3/api-docs",
+            "/api/users/**",
+
+            "/api/payments",
+            "/api/payments/**",
+            "/api/payments/create",
+            "/api/payments/update-status",
+            "/api/payments/update-status/**",
+
+            "/v3/api-docs",
             "/v3/api-docs/**",
             "/swagger-ui/**",
             "/swagger-ui.html",
+            "/v3/api-docs.yaml",
             "/api/orders",
             "/api/orders/**",
+
             "/api/carts",
             "/api/carts/**",
-            "/v3/api-docs.yaml"
+
     };
 
     public SecurityConfig(@Lazy JwtAuthenticationFilter jwtFilter) {
@@ -60,8 +75,11 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .anyRequest().authenticated()
                 )
+                .httpBasic(AbstractHttpConfigurer::disable)
+                .formLogin(AbstractHttpConfigurer::disable)
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

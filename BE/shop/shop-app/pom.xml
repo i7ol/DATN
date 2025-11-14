@@ -48,11 +48,11 @@
 			<artifactId>shop-cart</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
-<!--		<dependency>-->
-<!--			<groupId>com.datn</groupId>-->
-<!--			<artifactId>shop-payment</artifactId>-->
-<!--			<version>0.0.1-SNAPSHOT</version>-->
-<!--		</dependency>-->
+		<dependency>
+			<groupId>com.datn</groupId>
+			<artifactId>shop-payment</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
 <!--		<dependency>-->
 <!--			<groupId>com.datn</groupId>-->
 <!--			<artifactId>shop-notification</artifactId>-->
