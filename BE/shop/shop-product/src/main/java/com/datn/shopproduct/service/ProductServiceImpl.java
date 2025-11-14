@@ -11,6 +11,8 @@ import com.datn.shopproduct.entity.Product;
 import com.datn.shopproduct.entity.ProductImage;
 import com.datn.shopproduct.repository.CategoryRepository;
 import com.datn.shopproduct.repository.ProductRepository;
+import com.datn.shopinventory.entity.InventoryItem;
+import com.datn.shopinventory.repository.InventoryRepository;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
@@ -27,10 +29,14 @@ public class ProductServiceImpl implements ProductService {
 
     ProductRepository productRepository;
     CategoryRepository categoryRepository;
+    InventoryRepository inventoryRepository;
 
-    public ProductServiceImpl(ProductRepository productRepository, CategoryRepository categoryRepository) {
+    public ProductServiceImpl(ProductRepository productRepository,
+                              CategoryRepository categoryRepository,
+                              InventoryRepository inventoryRepository) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
+        this.inventoryRepository = inventoryRepository;
     }
 
     @Override
@@ -40,7 +46,7 @@ public class ProductServiceImpl implements ProductService {
         product.setDescription(request.getDescription());
         product.setSku(request.getSku());
         product.setPrice(request.getPrice());
-        product.setStock(request.getStock());
+        product.setImportPrice(request.getImportPrice());
 
         // set category
         setCategoryIfPresent(product, request.getCategoryId());
@@ -48,7 +54,18 @@ public class ProductServiceImpl implements ProductService {
         // set images
         setImagesIfPresent(product, request.getImages());
 
+        // save product
         Product saved = productRepository.save(product);
+
+        // Tự động tạo InventoryItem
+        InventoryItem item = new InventoryItem();
+        item.setProductId(saved.getId());
+        item.setStock(0); // stock mặc định
+        item.setReservedQuantity(0);
+        item.setSellingPrice(saved.getPrice());
+        item.setImportPrice(saved.getImportPrice());
+        inventoryRepository.save(item);
+
         return toProductResponse(saved);
     }
 
@@ -61,7 +78,7 @@ public class ProductServiceImpl implements ProductService {
         if (request.getDescription() != null) product.setDescription(request.getDescription());
         if (request.getSku() != null) product.setSku(request.getSku());
         if (request.getPrice() != null) product.setPrice(request.getPrice());
-        if (request.getStock() != null) product.setStock(request.getStock());
+        if (request.getImportPrice() != null) product.setImportPrice(request.getImportPrice());
 
         // update category
         if (request.getCategoryId() != null) {
@@ -74,6 +91,15 @@ public class ProductServiceImpl implements ProductService {
         replaceImages(product, request.getImages());
 
         Product updated = productRepository.save(product);
+
+        // Đồng bộ giá vào Inventory nếu tồn tại
+        inventoryRepository.findByProductId(updated.getId())
+                .ifPresent(item -> {
+                    item.setSellingPrice(updated.getPrice());
+                    item.setImportPrice(updated.getImportPrice());
+                    inventoryRepository.save(item);
+                });
+
         return toProductResponse(updated);
     }
 
@@ -140,7 +166,7 @@ public class ProductServiceImpl implements ProductService {
         response.setName(product.getName());
         response.setDescription(product.getDescription());
         response.setPrice(product.getPrice());
-        response.setStock(product.getStock());
+        response.setImportPrice(product.getImportPrice());
 
         if (product.getCategory() != null) {
             response.setCategoryId(product.getCategory().getId());

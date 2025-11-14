@@ -61,6 +61,8 @@ public class SecurityConfig {
             "/api/carts",
             "/api/carts/**",
 
+            "/api/inventory",
+            "/api/inventory/**",
     };
 
     public SecurityConfig(@Lazy JwtAuthenticationFilter jwtFilter) {

@@ -18,7 +18,7 @@ public class ProductCreateRequest {
     @NotBlank String name;
     String description;
     @NotNull @DecimalMin("0.0") BigDecimal price;
-    @NotNull @Min(0) Integer stock;
+    @NotNull @DecimalMin("0.0") BigDecimal importPrice;
     Long categoryId;
     List<ImageDTO> images;
 

@@ -38,20 +38,20 @@ public class Product  {
     @Column(name = "description", columnDefinition = "CLOB")
     private String description;
 
+    // Giá bán
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal price;
 
-    @Column(nullable = false)
-    private Integer stock = 0;
+    // Giá nhập
+    @Column(name = "import_price", nullable = false, precision = 12, scale = 2)
+    private BigDecimal importPrice;
 
     @ManyToOne
     @JoinColumn(name = "category_id")
     private Category category;
 
-
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductImage> images;
-
-
 }
+
 

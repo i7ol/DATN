@@ -19,7 +19,7 @@ public class ProductUpdateRequest {
     String sku;
     String description;
     @DecimalMin("0.0") BigDecimal price;
-    @Min(0) Integer stock;
+    @DecimalMin("0.0") BigDecimal importPrice;
     Long categoryId;
     List<ImageDTO> images;
 
