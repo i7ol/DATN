@@ -19,4 +19,5 @@ public class AuthenticationController {
         AuthenticationResponse result = authenticationService.authenticate(request);
         return ApiResponse.<AuthenticationResponse>builder().result(result).build();
     }
+
 }

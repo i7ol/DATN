@@ -21,7 +21,12 @@ public enum ErrorCode {
     INVALID_REQUEST(1013,"Request invalid",HttpStatus.BAD_REQUEST),
     ORDER_NOT_FOUND(1014,"Order not found",HttpStatus.NOT_FOUND),
     INVALID_ORDER_REQUEST(1015,"Invalid order status: ",HttpStatus.NOT_FOUND),
-    INVALID_PAYMENT_REQUEST(1016,"Invalid payment status:: ",HttpStatus.NOT_FOUND),
+    INVALID_PAYMENT_REQUEST(1016,"Invalid payment status: ",HttpStatus.NOT_FOUND),
+    SLUG_EXISTED(1017,"Slug already exists",HttpStatus.BAD_REQUEST),
+    PAGE_NOT_FOUND(1018,"Page not found",HttpStatus.NOT_FOUND),
+    INVALID_INPUT(1019,"Input invalid",HttpStatus.BAD_REQUEST),
+    FILE_UPLOAD_FAILED(1020,"Input invalid",HttpStatus.BAD_REQUEST),
+    MEDIA_NOT_FOUND(1021,"Media not found",HttpStatus.NOT_FOUND)
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

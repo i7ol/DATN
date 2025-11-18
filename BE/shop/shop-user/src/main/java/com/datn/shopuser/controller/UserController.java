@@ -44,8 +44,8 @@ public class UserController {
 
 
     @GetMapping
-    List<User> getUsers(){
-        return userService.getUsers();
+    List<UserResponse> getAllUsers(){
+        return userService.getAllUsers();
     }
 
     @GetMapping("/{id}")

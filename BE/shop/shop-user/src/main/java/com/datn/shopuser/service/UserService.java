@@ -23,100 +23,167 @@
     import java.util.Set;
     import java.util.stream.Collectors;
 
-    @Service
-    @RequiredArgsConstructor
-    @FieldDefaults(level = AccessLevel.PRIVATE,makeFinal = true)
-    public class    UserService {
-        UserRepository userRepository;
-        RoleRepository roleRepository;
-        UserMapper userMapper;
-        PasswordEncoder passwordEncoder;
+@Service
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+public class UserService {
 
+    UserRepository userRepository;
+    RoleRepository roleRepository;
+    PasswordEncoder passwordEncoder;
 
-        public User createUser(UserCreationRequest request) {
-            if (userRepository.findByUsername(request.getUsername()).isPresent()) {
-                throw new AppException(ErrorCode.USER_EXISTED);
-            }
-            User user = new User();
-            user.setUsername(request.getUsername());
-            user.setPassword(passwordEncoder.encode(request.getPassword()));
-            user.setEmail(request.getEmail());
-            user.setPhone(request.getPhone());
-            user.setAddress(request.getAddress());
-            Role userRole = roleRepository.findById(RoleEnums.USER.name())
-                    .orElseGet(() -> {
-                        Role newRole = Role.builder()
+    // Tạo user mới
+    public User createUser(UserCreationRequest request) {
+        if (userRepository.findByUsername(request.getUsername()).isPresent()) {
+            throw new AppException(ErrorCode.USER_EXISTED);
+        }
+
+        User user = new User();
+        user.setUsername(request.getUsername());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setEmail(request.getEmail());
+        user.setPhone(request.getPhone());
+        user.setAddress(request.getAddress());
+
+        Role userRole = roleRepository.findById(RoleEnums.USER.name())
+                .orElseGet(() -> roleRepository.save(
+                        Role.builder()
                                 .name(RoleEnums.USER.name())
                                 .description("Default user role")
-                                .build();
-                        return roleRepository.save(newRole);
-                    });
+                                .build()
+                ));
+        user.setRoles(Set.of(userRole));
 
-            Set<Role> roles = new HashSet<>();
-            roles.add(userRole);
+        return userRepository.save(user);
+    }
+
+    // Lấy tất cả user
+    public List<UserResponse> getAllUsers() {
+        return userRepository.findAll().stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+    // Lấy User entity trực tiếp
+    public User getById(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+    }
+
+    // Lấy tất cả User entity
+    public List<User> getAllUserEntities() {
+        return userRepository.findAll();
+    }
+
+
+    // Lấy 1 user theo id
+    public UserResponse getUser(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        return mapToResponse(user);
+    }
+
+    // Cập nhật user
+    public UserResponse updateUser(Long id, UserUpdateRequest request) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        if (request.getPassword() != null && !request.getPassword().isBlank()) {
+            user.setPassword(passwordEncoder.encode(request.getPassword()));
+        }
+        if (request.getEmail() != null && !request.getEmail().isBlank()) user.setEmail(request.getEmail());
+        if (request.getPhone() != null) user.setPhone(request.getPhone());
+        if (request.getAddress() != null) user.setAddress(request.getAddress());
+
+        if (request.getRoles() != null && !request.getRoles().isEmpty()) {
+            Set<Role> roles = request.getRoles().stream()
+                    .map(roleName -> roleRepository.findById(roleName)
+                            .orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_EXISTED)))
+                    .collect(Collectors.toSet());
             user.setRoles(roles);
-           return userRepository.save(user);
-
         }
 
-        public List<User> getUsers() {
-            return userRepository.findAll();
-        }
+        userRepository.save(user);
+        return mapToResponse(user);
+    }
 
+    // Xóa user
+    public void deleteUser(Long id) {
+        userRepository.deleteById(id);
+    }
 
-        public UserResponse getUser(Long id) {
-            User user = userRepository.findById(id)
-                    .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
-
-            return UserResponse.builder()
-                    .id(user.getId())
-                    .username(user.getUsername())
-                    .email(user.getEmail())
-                    .phone(user.getPhone())
-                    .address(user.getAddress())
-                    .roles(user.getRoles() != null
-                            ? user.getRoles().stream().map(Role::getName).collect(Collectors.toList())
-                            : List.of())
-                    .build();
-        }
-
-        public UserResponse updateUser(Long id, UserUpdateRequest request) {
-            User user = userRepository.findById(id)
-                    .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
-
-            if (request.getPassword() != null && !request.getPassword().isBlank()) {
-                user.setPassword(passwordEncoder.encode(request.getPassword()));
-            }
-            if (request.getEmail() != null && !request.getEmail().isBlank()) {
-                user.setEmail(request.getEmail());
-            }
-            if (request.getPhone() != null) user.setPhone(request.getPhone());
-            if (request.getAddress() != null) user.setAddress(request.getAddress());
-
-            if (request.getRoles() != null && !request.getRoles().isEmpty()) {
-                Set<Role> roles = request.getRoles().stream()
-                        .map(roleName -> roleRepository.findById(roleName)
-                                .orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_EXISTED)))
-                        .collect(Collectors.toSet());
-                user.setRoles(roles);
-            }
-
-            userRepository.save(user);
-
-            // build response manually
-            return UserResponse.builder()
-                    .id(user.getId())
-                    .username(user.getUsername())
-                    .email(user.getEmail())
-                    .phone(user.getPhone())
-                    .address(user.getAddress())
-                    .roles(user.getRoles() != null
-                            ? user.getRoles().stream().map(Role::getName).collect(Collectors.toList())
-                            : List.of())
-                    .build();
-        }
-
-
+    // Chuyển entity -> DTO
+    private UserResponse mapToResponse(User user) {
+        return UserResponse.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .phone(user.getPhone())
+                .address(user.getAddress())
+                .roles(user.getRoles() != null
+                        ? user.getRoles().stream().map(Role::getName).toList()
+                        : List.of())
+                .pushToken(user.getPushToken())
+                .build();
+    }
+}
+//
+//    @Service
+//    @RequiredArgsConstructor
+//    @FieldDefaults(level = AccessLevel.PRIVATE,makeFinal = true)
+//    public class    UserService {
+//        UserRepository userRepository;
+//        RoleRepository roleRepository;
+//        UserMapper userMapper;
+//        PasswordEncoder passwordEncoder;
+//
+//
+//        public User createUser(UserCreationRequest request) {
+//            if (userRepository.findByUsername(request.getUsername()).isPresent()) {
+//                throw new AppException(ErrorCode.USER_EXISTED);
+//            }
+//            User user = new User();
+//            user.setUsername(request.getUsername());
+//            user.setPassword(passwordEncoder.encode(request.getPassword()));
+//            user.setEmail(request.getEmail());
+//            user.setPhone(request.getPhone());
+//            user.setAddress(request.getAddress());
+//            Role userRole = roleRepository.findById(RoleEnums.USER.name())
+//                    .orElseGet(() -> {
+//                        Role newRole = Role.builder()
+//                                .name(RoleEnums.USER.name())
+//                                .description("Default user role")
+//                                .build();
+//                        return roleRepository.save(newRole);
+//                    });
+//
+//            Set<Role> roles = new HashSet<>();
+//            roles.add(userRole);
+//            user.setRoles(roles);
+//           return userRepository.save(user);
+//
+//        }
+//
+//        public List<User> getUsers() {
+//            return userRepository.findAll();
+//        }
+//
+//
+//        public UserResponse getUser(Long id) {
+//            User user = userRepository.findById(id)
+//                    .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+//
+//            return UserResponse.builder()
+//                    .id(user.getId())
+//                    .username(user.getUsername())
+//                    .email(user.getEmail())
+//                    .phone(user.getPhone())
+//                    .address(user.getAddress())
+//                    .roles(user.getRoles() != null
+//                            ? user.getRoles().stream().map(Role::getName).collect(Collectors.toList())
+//                            : List.of())
+//                    .build();
+//        }
+//
 //        public UserResponse updateUser(Long id, UserUpdateRequest request) {
 //            User user = userRepository.findById(id)
 //                    .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
@@ -124,7 +191,11 @@
 //            if (request.getPassword() != null && !request.getPassword().isBlank()) {
 //                user.setPassword(passwordEncoder.encode(request.getPassword()));
 //            }
-//
+//            if (request.getEmail() != null && !request.getEmail().isBlank()) {
+//                user.setEmail(request.getEmail());
+//            }
+//            if (request.getPhone() != null) user.setPhone(request.getPhone());
+//            if (request.getAddress() != null) user.setAddress(request.getAddress());
 //
 //            if (request.getRoles() != null && !request.getRoles().isEmpty()) {
 //                Set<Role> roles = request.getRoles().stream()
@@ -134,17 +205,26 @@
 //                user.setRoles(roles);
 //            }
 //
-//            userMapper.updateUser(user, request);
-//
 //            userRepository.save(user);
 //
-//            return userMapper.toUserResponse(user);
+//            // build response manually
+//            return UserResponse.builder()
+//                    .id(user.getId())
+//                    .username(user.getUsername())
+//                    .email(user.getEmail())
+//                    .phone(user.getPhone())
+//                    .address(user.getAddress())
+//                    .roles(user.getRoles() != null
+//                            ? user.getRoles().stream().map(Role::getName).collect(Collectors.toList())
+//                            : List.of())
+//                    .build();
 //        }
-
-
-        public void deleteUser(Long id) {
-            userRepository.deleteById(id);
-        }
-
-}
-
+//
+//
+//
+//        public void deleteUser(Long id) {
+//            userRepository.deleteById(id);
+//        }
+//
+//}
+//

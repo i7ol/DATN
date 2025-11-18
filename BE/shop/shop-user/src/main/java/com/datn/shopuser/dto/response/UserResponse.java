@@ -19,4 +19,5 @@ public class UserResponse {
     String phone;
     String address;
     List<String> roles;
+    String pushToken;
 }

@@ -41,5 +41,7 @@ public class User extends BaseEntity {
             inverseJoinColumns = @JoinColumn(name = "role_name")
     )
     Set<Role> roles;
+    @Column(name = "push_token")
+    String pushToken;
 }
 

@@ -66,6 +66,8 @@ public class SecurityConfig {
 
             "/api/shipping",
             "/api/shipping/**",
+
+            "/api/cms/media",
     };
 
     public SecurityConfig(@Lazy JwtAuthenticationFilter jwtFilter) {
