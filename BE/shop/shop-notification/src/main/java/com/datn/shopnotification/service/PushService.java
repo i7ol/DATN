@@ -18,7 +18,7 @@ public class PushService {
 
     @PostConstruct
     public void init() {
-        try (InputStream serviceAccount = new ClassPathResource("firebase-service-account.json").getInputStream()) {
+        try (InputStream serviceAccount = new ClassPathResource("firebase-config.json").getInputStream()) {
             FirebaseOptions options = FirebaseOptions.builder()
                     .setCredentials(GoogleCredentials.fromStream(serviceAccount))
                     .build();

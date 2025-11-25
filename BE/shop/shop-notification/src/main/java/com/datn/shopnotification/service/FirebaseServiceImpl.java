@@ -1,5 +1,6 @@
 package com.datn.shopnotification.service;
 
+import com.datn.shopnotification.service.FirebaseService;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
@@ -12,24 +13,26 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
-import java.io.InputStream;
 
 @Service
 @Slf4j
 public class FirebaseServiceImpl implements FirebaseService {
 
+    private static final String FIREBASE_CONFIG_FILE = "firebase-config.json";
+
     @PostConstruct
     public void init() {
         try {
-            InputStream serviceAccount = new ClassPathResource("firebase-service-account.json").getInputStream();
+            // Đọc từ classpath
+            ClassPathResource resource = new ClassPathResource(FIREBASE_CONFIG_FILE);
 
             FirebaseOptions options = FirebaseOptions.builder()
-                    .setCredentials(GoogleCredentials.fromStream(serviceAccount))
+                    .setCredentials(GoogleCredentials.fromStream(resource.getInputStream()))
                     .build();
 
             if (FirebaseApp.getApps().isEmpty()) {
                 FirebaseApp.initializeApp(options);
-                log.info("Firebase initialized successfully.");
+                log.info("Firebase initialized successfully from classpath.");
             }
         } catch (IOException e) {
             log.error("Failed to initialize Firebase", e);
