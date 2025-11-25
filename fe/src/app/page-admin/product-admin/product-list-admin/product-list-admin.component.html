@@ -1,151 +1,397 @@
-<h1 class="brutalist-title">Danh Sách Sản Phẩm</h1>
+<div class="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8 radius">
+  <!-- HEADER -->
+  <div class="sm:flex sm:items-center sm:justify-between mb-6">
+    <span class="text-2xl font-semibold text-gray-900">Danh Sách Sản Phẩm</span>
+    <div class="flex flex-wrap gap-1">
+      <button
+        (click)="showCategoryTable = true"
+        class="mt-3 sm:mt-0 inline-flex items-center px-4 py-2 bg-purple-600 text-white text-sm font-medium rounded-md shadow-sm hover:bg-purple-700 transition"
+      >
+        Quản lý danh mục
+      </button>
+      <button
+        (click)="openAddForm()"
+        class="mt-3 sm:mt-0 inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md shadow-sm hover:bg-blue-700 transition"
+      >
+        Thêm sản phẩm
+      </button>
+    </div>
+  </div>
 
-<div class="brutalist-table-container">
-  <table class="brutalist-table">
-    <thead>
-      <tr>
-        <th>Tên sản phẩm</th>
-        <th>SKU</th>
-        <th>Giá bán</th>
-        <th>Giá nhập</th>
-        <th>Danh mục</th>
-        <th>Ảnh</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-
-    <tbody>
-      <tr *ngFor="let product of products">
-        <td>{{ product.name }}</td>
-        <td>{{ product.sku }}</td>
-        <td>{{ product.price | currency : "VND" : "symbol" : "1.0-0" }}</td>
-        <td>
-          {{ product.importPrice | currency : "VND" : "symbol" : "1.0-0" }}
-        </td>
-        <td>{{ getCategoryName(product.categoryId) }}</td>
-
-        <td>
-          <img
-            [src]="product.images?.[0]?.url || 'https://via.placeholder.com/50'"
-            width="50"
-            height="50"
-            alt="thumbnail"
-          />
-        </td>
-
-        <td class="action-buttons">
-          <button
-            class="brutalist-btn brutalist-btn-warning"
-            (click)="editProduct(product)"
+  <!-- TABLE PRODUCTS -->
+  <div class="overflow-x-auto shadow-md rounded-lg bg-white mb-6">
+    <table class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-black text-white">
+        <tr>
+          <th
+            class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider"
           >
-            Sửa
-          </button>
-          <button
-            class="brutalist-btn brutalist-btn-danger"
-            (click)="deleteProduct(product.id!)"
+            Tên sản phẩm
+          </th>
+          <th
+            class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider"
           >
-            Xóa
-          </button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-</div>
+            SKU
+          </th>
+          <th
+            class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider"
+          >
+            Giá bán
+          </th>
+          <th
+            class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider"
+          >
+            Giá nhập
+          </th>
+          <th
+            class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider"
+          >
+            Danh mục
+          </th>
+          <th
+            class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider"
+          >
+            Ảnh
+          </th>
+          <th
+            class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider"
+          >
+            Actions
+          </th>
+        </tr>
+      </thead>
+      <tbody class="bg-white divide-y divide-gray-200">
+        <tr
+          *ngFor="let product of products"
+          class="hover:bg-gray-50 transition"
+        >
+          <td class="px-6 py-4 text-sm font-semibold">{{ product.name }}</td>
+          <td class="px-6 py-4 text-sm font-semibold">{{ product.sku }}</td>
+          <td class="px-6 py-4 text-sm font-semibold">
+            {{ product.price | number : "1.0-0" }}đ
+          </td>
+          <td class="px-6 py-4 text-sm font-semibold">
+            {{ product.importPrice | number : "1.0-0" }}đ
+          </td>
+          <td class="px-6 py-4 text-sm font-semibold">
+            {{ getCategoryName(product.categoryId) }}
+          </td>
+          <td class="px-6 py-4">
+            <img
+              [src]="product.images?.[0]?.url "
+              class="w-10 h-10 rounded object-cover"
+            />
+          </td>
+          <td class="px-6 py-4 flex gap-2">
+            <button
+              (click)="editProduct(product)"
+              class="px-3 py-1 bg-yellow-400 text-white rounded hover:bg-yellow-500 text-sm"
+            >
+              Sửa
+            </button>
+            <button
+              (click)="openDeleteConfirm(product)"
+              class="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-sm"
+            >
+              Xóa
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 
-<!-- Pagination -->
-<div class="flex justify-center mt-4 mb-6">
-  <mat-paginator
-    [length]="totalItems"
-    [pageSize]="pageSize"
-    [pageIndex]="currentPage"
-    [pageSizeOptions]="[5, 10, 20]"
-    (page)="onPageChange($event)"
-    class="brutalist-paginator"
-  >
-  </mat-paginator>
-</div>
-
-<!-- Add/Edit product modal -->
-<div *ngIf="showForm" class="brutalist-modal">
-  <div class="brutalist-modal-content">
-    <h2 class="brutalist-title">
-      {{ editingProduct ? "Sửa Sản Phẩm" : "Thêm Sản Phẩm" }}
-    </h2>
-
-    <form (ngSubmit)="saveProduct()" class="space-y-4">
-      <div>
-        <label>Tên sản phẩm</label>
-        <input type="text" [(ngModel)]="form.name" name="name" required />
-      </div>
-
-      <div>
-        <label>SKU</label>
-        <input type="text" [(ngModel)]="form.sku" name="sku" required />
-      </div>
-
-      <div>
-        <label>Giá bán</label>
-        <input type="number" [(ngModel)]="form.price" name="price" required />
-      </div>
-
-      <div>
-        <label>Giá nhập</label>
-        <input
-          type="number"
-          [(ngModel)]="form.importPrice"
-          name="importPrice"
-          required
-        />
-      </div>
-
-      <div>
-        <label>Danh mục</label>
-        <select [(ngModel)]="form.categoryId" name="categoryId" required>
-          <option *ngFor="let c of categories" [value]="c.id">
-            {{ c.name }}
-          </option>
-        </select>
-      </div>
-
-      <div>
-        <label>Ảnh sản phẩm</label>
-        <input type="file" (change)="onFileSelected($event)" multiple />
-      </div>
-
-      <!-- Preview images -->
-      <div class="flex gap-2 mt-2">
-        <img
-          *ngFor="let url of previewUrls"
-          [src]="url"
-          width="50"
-          height="50"
-          alt="preview"
-        />
-      </div>
-
-      <div class="flex gap-2 mt-4">
-        <button type="submit" class="brutalist-btn brutalist-btn-green">
-          {{ editingProduct ? "Cập nhật" : "Thêm" }}
-        </button>
+  <!-- PAGINATION -->
+  <div class="flex justify-end mb-6">
+    <nav class="inline-flex -space-x-px rounded-md shadow-sm">
+      <button
+        (click)="prevPage()"
+        [disabled]="currentPage === 0"
+        class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        ‹
+      </button>
+      <ng-container *ngFor="let page of totalPagesArray; let i = index">
         <button
-          type="button"
-          class="brutalist-btn brutalist-btn-gray"
-          (click)="showForm = false"
+          (click)="goToPage(i)"
+          [class.bg-gray-200]="i === currentPage"
+          [class.text-gray-900]="i === currentPage"
+          class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
+        >
+          {{ i + 1 }}
+        </button>
+      </ng-container>
+      <button
+        (click)="nextPage()"
+        [disabled]="currentPage === totalPages - 1"
+        class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        ›
+      </button>
+    </nav>
+  </div>
+
+  <!-- ADD / EDIT PRODUCT MODAL -->
+  <div
+    *ngIf="showForm"
+    class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+  >
+    <div
+      class="bg-white w-full max-w-lg rounded-xl shadow-lg p-6 animate-fadeIn"
+    >
+      <h2 class="text-xl font-semibold mb-4">
+        {{ editingProduct ? "Sửa sản phẩm" : "Thêm sản phẩm" }}
+      </h2>
+      <form class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700"
+            >Tên sản phẩm</label
+          >
+          <input
+            type="text"
+            [(ngModel)]="form.name"
+            name="name"
+            class="mt-1 w-full border rounded px-3 py-2"
+          />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">SKU</label>
+          <input
+            type="text"
+            [(ngModel)]="form.sku"
+            name="sku"
+            class="mt-1 w-full border rounded px-3 py-2"
+          />
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700"
+              >Giá bán</label
+            >
+            <input
+              type="number"
+              [(ngModel)]="form.price"
+              name="price"
+              class="mt-1 w-full border rounded px-3 py-2"
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700"
+              >Giá nhập</label
+            >
+            <input
+              type="number"
+              [(ngModel)]="form.importPrice"
+              name="importPrice"
+              class="mt-1 w-full border rounded px-3 py-2"
+            />
+          </div>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700"
+            >Danh mục</label
+          >
+          <select
+            [(ngModel)]="form.categoryId"
+            name="categoryId"
+            class="mt-1 w-full border rounded px-3 py-2 block appearance-none max-h-40 overflow-y-auto"
+          >
+            <option *ngFor="let c of categories" [value]="c.id">
+              {{ c.name }}
+            </option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700"
+            >Ảnh sản phẩm</label
+          >
+          <input
+            type="file"
+            multiple
+            (change)="onFileSelected($event)"
+            class="mt-1 w-full"
+          />
+          <div class="flex gap-2 mt-2 flex-wrap">
+            <img
+              *ngFor="let img of previewUrls"
+              [src]="img"
+              class="w-16 h-16 object-cover rounded border"
+            />
+          </div>
+        </div>
+        <div class="flex justify-end gap-3 mt-4">
+          <button
+            type="button"
+            (click)="showForm = false"
+            class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+          >
+            Hủy
+          </button>
+          <button
+            type="button"
+            (click)="saveProduct()"
+            class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            {{ editingProduct ? "Cập nhật" : "Thêm mới" }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- CATEGORY MODAL + TABLE -->
+  <div
+    *ngIf="showCategoryTable"
+    class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+  >
+    <div
+      class="bg-white w-full max-w-3xl rounded-xl shadow-lg p-6 animate-fadeIn"
+    >
+      <!-- Nút Thêm danh mục -->
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-semibold">Danh mục</h2>
+        <button
+          (click)="openAddCategoryForm()"
+          class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm"
+        >
+          Thêm danh mục
+        </button>
+      </div>
+
+      <!-- Bảng danh mục -->
+      <div class="overflow-hidden rounded-lg border">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-black text-white sticky top-0 z-10">
+            <tr>
+              <th
+                class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider"
+              >
+                Tên danh mục
+              </th>
+              <th
+                class="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider"
+              >
+                Actions
+              </th>
+            </tr>
+          </thead>
+        </table>
+        <div class="max-h-96 overflow-y-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <tbody class="bg-white divide-y divide-gray-200">
+              <!-- INLINE ADD -->
+              <tr *ngIf="addingCategory" class="bg-gray-50">
+                <td class="px-6 py-2">
+                  <input
+                    type="text"
+                    [(ngModel)]="categoryForm.name"
+                    placeholder="Nhập tên danh mục mới"
+                    class="border px-2 py-1 rounded w-full"
+                  />
+                </td>
+                <td class="px-6 py-2 flex gap-2">
+                  <button
+                    (click)="createCategory()"
+                    class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 text-sm"
+                  >
+                    Lưu
+                  </button>
+                  <button
+                    (click)="cancelAddCategory()"
+                    class="px-3 py-1 bg-gray-400 text-white rounded hover:bg-gray-500 text-sm"
+                  >
+                    Hủy
+                  </button>
+                </td>
+              </tr>
+
+              <!-- Danh sách danh mục -->
+              <tr
+                *ngFor="let c of categories"
+                class="hover:bg-gray-50 transition"
+              >
+                <td class="px-6 py-4 text-sm font-semibold">
+                  <span *ngIf="!c.editing">{{ c.name }}</span>
+                  <input
+                    *ngIf="c.editing"
+                    type="text"
+                    [(ngModel)]="c.tempName"
+                    class="border px-2 py-1 rounded w-full"
+                  />
+                </td>
+                <td class="px-6 py-4 flex gap-2">
+                  <button
+                    *ngIf="!c.editing"
+                    (click)="startEditCategory(c)"
+                    class="px-3 py-1 bg-yellow-400 text-white rounded hover:bg-yellow-500 text-sm"
+                  >
+                    Sửa
+                  </button>
+                  <button
+                    *ngIf="c.editing"
+                    (click)="saveEditCategory(c)"
+                    class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 text-sm"
+                  >
+                    Lưu
+                  </button>
+                  <button
+                    *ngIf="c.editing"
+                    (click)="cancelEditCategory(c)"
+                    class="px-3 py-1 bg-gray-400 text-white rounded hover:bg-gray-500 text-sm"
+                  >
+                    Hủy
+                  </button>
+                  <button
+                    (click)="deleteCategory(c.id)"
+                    class="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-sm"
+                  >
+                    Xóa
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Nút đóng modal -->
+      <div class="flex justify-end mt-4">
+        <button
+          (click)="showCategoryTable = false"
+          class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+        >
+          Đóng
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DELETE CONFIRM MODAL -->
+  <div
+    *ngIf="showDeleteConfirm"
+    class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+  >
+    <div class="bg-white w-full max-w-md rounded-xl shadow-lg p-6">
+      <h3 class="text-xl text-red-600 mb-3">Xác nhận xóa</h3>
+      <p>
+        Bạn có chắc muốn xóa sản phẩm:
+        <strong>{{ productToDeleteData?.name }}</strong
+        >?
+      </p>
+      <div class="flex justify-end gap-3 mt-6">
+        <button
+          (click)="showDeleteConfirm = false"
+          class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
         >
           Hủy
         </button>
+        <button
+          (click)="confirmDelete()"
+          class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+        >
+          Xóa
+        </button>
       </div>
-    </form>
+    </div>
   </div>
-</div>
-
-<!-- Add product button -->
-<div class="flex justify-center mb-10">
-  <button
-    class="brutalist-btn brutalist-btn-green flex items-center gap-2"
-    (click)="openAddForm()"
-  >
-    <span class="material-icons text-sm">add</span>
-    Thêm sản phẩm
-  </button>
 </div>
