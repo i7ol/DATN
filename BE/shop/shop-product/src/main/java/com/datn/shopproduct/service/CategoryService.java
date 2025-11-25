@@ -6,7 +6,6 @@ import com.datn.shopproduct.dto.request.CategoryCreateRequest;
 import com.datn.shopproduct.dto.request.CategoryUpdateRequest;
 import com.datn.shopproduct.dto.response.CategoryResponse;
 import com.datn.shopproduct.entity.Category;
-import com.datn.shopproduct.mapper.CategoryMapper;
 import com.datn.shopproduct.repository.CategoryRepository;
 import org.springframework.stereotype.Service;
 
@@ -19,7 +18,7 @@ public class CategoryService {
     private final CategoryRepository categoryRepository;
 
 
-    public CategoryService(CategoryRepository categoryRepository, CategoryMapper categoryMapper) {
+    public CategoryService(CategoryRepository categoryRepository) {
         this.categoryRepository = categoryRepository;
     }
 

@@ -7,6 +7,7 @@ import com.datn.shopproduct.dto.ImageDTO;
 import jakarta.validation.constraints.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.springframework.web.multipart.MultipartFile;
 
 @Data
 @Builder
@@ -20,7 +21,7 @@ public class ProductCreateRequest {
     @NotNull @DecimalMin("0.0") BigDecimal price;
     @NotNull @DecimalMin("0.0") BigDecimal importPrice;
     Long categoryId;
-    List<ImageDTO> images;
+    List<MultipartFile> images;
 
 }
 

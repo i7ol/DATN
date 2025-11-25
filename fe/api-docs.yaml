@@ -1,0 +1,2212 @@
+openapi: 3.1.0
+info:
+  title: Shop App API
+  description: API documentation for Shop App
+  version: v1
+servers:
+- url: http://localhost:8080
+  description: Generated server url
+paths:
+  /api/users/{id}:
+    get:
+      tags:
+      - user-controller
+      operationId: getUser
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseUserResponse"
+    put:
+      tags:
+      - user-controller
+      operationId: updateUser
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserUpdateRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+    delete:
+      tags:
+      - user-controller
+      operationId: deleteUser
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseVoid"
+  /api/shipping/update-status/{id}:
+    put:
+      tags:
+      - shipping-controller
+      operationId: updateStatus
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: status
+        in: query
+        required: true
+        schema:
+          type: string
+          enum:
+          - PENDING
+          - SHIPPED
+          - DELIVERED
+          - CANCELLED
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ShippingResponse"
+  /api/products/{id}:
+    get:
+      tags:
+      - product-controller
+      operationId: getProductById
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ProductResponse"
+    put:
+      tags:
+      - product-controller
+      operationId: updateProduct
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                product:
+                  type: string
+                files:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+              required:
+              - product
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ProductResponse"
+    delete:
+      tags:
+      - product-controller
+      operationId: deleteProduct
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+  /api/payments/update-status:
+    put:
+      tags:
+      - payment-controller
+      operationId: updateStatus_1
+      parameters:
+      - name: paymentId
+        in: query
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: status
+        in: query
+        required: true
+        schema:
+          type: string
+          enum:
+          - PENDING
+          - SUCCESS
+          - FAILED
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PaymentResponse"
+  /api/orders/{id}/status:
+    put:
+      tags:
+      - order-controller
+      operationId: updateOrderStatus
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StatusUpdateRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/Order"
+  /api/orders/{id}/payment:
+    put:
+      tags:
+      - order-controller
+      operationId: updatePaymentStatus
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PaymentUpdateRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/Order"
+  /api/notifications/{id}/read:
+    put:
+      tags:
+      - notification-controller
+      operationId: markAsRead
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+  /api/notification/settings/me:
+    get:
+      tags:
+      - notification-setting-controller
+      operationId: getMySettings
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/NotificationSetting"
+    put:
+      tags:
+      - notification-setting-controller
+      operationId: updateMySettings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NotificationSetting"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/NotificationSetting"
+  /api/inventory:
+    put:
+      tags:
+      - inventory-controller
+      operationId: update
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InventoryUpdateRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/InventoryResponse"
+  /api/cms/posts/admin/{id}:
+    put:
+      tags:
+      - post-controller
+      operationId: update_1
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PostRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PostResponse"
+    delete:
+      tags:
+      - post-controller
+      operationId: delete
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+  /api/cms/pages/admin/{id}:
+    put:
+      tags:
+      - page-controller
+      operationId: update_2
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PageRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PageResponse"
+  /api/cms/media/admin/{id}:
+    put:
+      tags:
+      - media-controller
+      operationId: update_3
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MediaRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/MediaResponse"
+    delete:
+      tags:
+      - media-controller
+      operationId: delete_1
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+  /api/cms/banners/admin/{id}:
+    put:
+      tags:
+      - banner-controller
+      operationId: update_4
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BannerRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BannerResponse"
+    delete:
+      tags:
+      - banner-controller
+      operationId: delete_2
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+  /api/categories/{id}:
+    put:
+      tags:
+      - category-controller
+      operationId: updateCate
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CategoryUpdateRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/CategoryResponse"
+    delete:
+      tags:
+      - category-controller
+      operationId: deleteCate
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+  /api/carts/update/{productId}:
+    put:
+      tags:
+      - cart-controller
+      operationId: updateItem
+      parameters:
+      - name: userId
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+      - name: guestId
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: productId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCartItemRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/CartResponse"
+  /auth/token:
+    post:
+      tags:
+      - authentication-controller
+      operationId: authenticate
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuthenticationRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseAuthenticationResponse"
+  /api/users:
+    get:
+      tags:
+      - user-controller
+      operationId: getAllUsers
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserResponse"
+    post:
+      tags:
+      - user-controller
+      operationId: createUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserCreationRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseUser"
+  /api/shipping:
+    post:
+      tags:
+      - shipping-controller
+      operationId: create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ShippingRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ShippingResponse"
+  /api/products:
+    get:
+      tags:
+      - product-controller
+      operationId: getAllProducts
+      parameters:
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      - name: size
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 10
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PageProductResponse"
+    post:
+      tags:
+      - product-controller
+      operationId: createProduct
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                product:
+                  type: string
+                files:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+              required:
+              - product
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ProductResponse"
+  /api/payments/process:
+    post:
+      tags:
+      - payment-controller
+      operationId: processPayment
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PaymentRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PaymentResponse"
+  /api/payments/create:
+    post:
+      tags:
+      - payment-controller
+      operationId: createPayment
+      parameters:
+      - name: orderId
+        in: query
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: method
+        in: query
+        required: true
+        schema:
+          type: string
+          enum:
+          - CASH
+          - ONLINE
+          - MOMO
+          - PAYPAL
+          - CREDIT_CARD
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PaymentResponse"
+  /api/orders:
+    get:
+      tags:
+      - order-controller
+      operationId: getAllOrders
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Order"
+    post:
+      tags:
+      - order-controller
+      operationId: createOrder
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateOrderRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/Order"
+  /api/notifications:
+    post:
+      tags:
+      - notification-controller
+      operationId: create_1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NotificationRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/NotificationResponse"
+  /api/inventory/reserve/{productId}/{qty}:
+    post:
+      tags:
+      - inventory-controller
+      operationId: reserve
+      parameters:
+      - name: productId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: qty
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int32
+      responses:
+        "200":
+          description: OK
+  /api/inventory/release/{productId}/{qty}:
+    post:
+      tags:
+      - inventory-controller
+      operationId: release
+      parameters:
+      - name: productId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: qty
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int32
+      responses:
+        "200":
+          description: OK
+  /api/inventory/deduct/{productId}/{qty}:
+    post:
+      tags:
+      - inventory-controller
+      operationId: deduct
+      parameters:
+      - name: productId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: qty
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int32
+      responses:
+        "200":
+          description: OK
+  /api/cms/posts/admin:
+    post:
+      tags:
+      - post-controller
+      operationId: create_2
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PostRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PostResponse"
+  /api/cms/pages/admin:
+    post:
+      tags:
+      - page-controller
+      operationId: create_3
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PageRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PageResponse"
+  /api/cms/media/admin:
+    post:
+      tags:
+      - media-controller
+      operationId: create_4
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MediaRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/MediaResponse"
+  /api/cms/media/admin/upload:
+    post:
+      tags:
+      - media-controller
+      operationId: upload
+      parameters:
+      - name: fileName
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: active
+        in: query
+        required: false
+        schema:
+          type: boolean
+          default: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+              required:
+              - file
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/MediaResponse"
+  /api/cms/banners/admin:
+    post:
+      tags:
+      - banner-controller
+      operationId: create_5
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BannerRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BannerResponse"
+  /api/categories:
+    get:
+      tags:
+      - category-controller
+      operationId: getAllCate
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CategoryResponse"
+    post:
+      tags:
+      - category-controller
+      operationId: createCate
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CategoryCreateRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/CategoryResponse"
+  /api/carts/merge:
+    post:
+      tags:
+      - cart-controller
+      operationId: mergeGuestCart
+      parameters:
+      - name: guestId
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: userId
+        in: query
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+  /api/carts/add:
+    post:
+      tags:
+      - cart-controller
+      operationId: addItem
+      parameters:
+      - name: userId
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+      - name: guestId
+        in: query
+        required: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AddCartItemRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/CartResponse"
+  /api/shipping/{id}:
+    get:
+      tags:
+      - shipping-controller
+      operationId: get
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ShippingResponse"
+  /api/shipping/by-order/{orderId}:
+    get:
+      tags:
+      - shipping-controller
+      operationId: getByOrder
+      parameters:
+      - name: orderId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ShippingResponse"
+  /api/payments/{paymentId}:
+    get:
+      tags:
+      - payment-controller
+      operationId: getPayment
+      parameters:
+      - name: paymentId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PaymentResponse"
+  /api/orders/{orderId}:
+    get:
+      tags:
+      - order-controller
+      operationId: getOrderById
+      parameters:
+      - name: orderId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/Order"
+  /api/orders/user/{userId}:
+    get:
+      tags:
+      - order-controller
+      operationId: getOrdersByUser
+      parameters:
+      - name: userId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Order"
+  /api/orders/guests:
+    get:
+      tags:
+      - order-controller
+      operationId: getGuestOrders
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Order"
+  /api/notifications/{id}:
+    get:
+      tags:
+      - notification-controller
+      operationId: getById
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/NotificationResponse"
+  /api/notifications/me:
+    get:
+      tags:
+      - notification-controller
+      operationId: myNotifications
+      parameters:
+      - name: arg0
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      - name: arg1
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 10
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PageNotificationResponse"
+  /api/notifications/me/unread-count:
+    get:
+      tags:
+      - notification-controller
+      operationId: unreadCount
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: integer
+                format: int64
+  /api/inventory/{productId}:
+    get:
+      tags:
+      - inventory-controller
+      operationId: get_1
+      parameters:
+      - name: productId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/InventoryResponse"
+  /api/cms/posts:
+    get:
+      tags:
+      - post-controller
+      operationId: getAllActive
+      parameters:
+      - name: arg0
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/Pageable"
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PagePostResponse"
+  /api/cms/posts/slug/{slug}:
+    get:
+      tags:
+      - post-controller
+      operationId: getBySlug
+      parameters:
+      - name: slug
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PostResponse"
+  /api/cms/posts/category/{categoryId}:
+    get:
+      tags:
+      - post-controller
+      operationId: getByCategory
+      parameters:
+      - name: categoryId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: arg1
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/Pageable"
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PagePostResponse"
+  /api/cms/pages/slug/{slug}:
+    get:
+      tags:
+      - page-controller
+      operationId: getBySlug_1
+      parameters:
+      - name: slug
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PageResponse"
+  /api/cms/media/all:
+    get:
+      tags:
+      - media-controller
+      operationId: getAll
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MediaResponse"
+  /api/cms/banners/position/{position}:
+    get:
+      tags:
+      - banner-controller
+      operationId: getByPosition
+      parameters:
+      - name: position
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/BannerResponse"
+  /api/carts:
+    get:
+      tags:
+      - cart-controller
+      operationId: getCart
+      parameters:
+      - name: userId
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+      - name: guestId
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/CartResponse"
+  /api/carts/total:
+    get:
+      tags:
+      - cart-controller
+      operationId: getTotal
+      parameters:
+      - name: userId
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+      - name: guestId
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: number
+  /api/carts/remove:
+    delete:
+      tags:
+      - cart-controller
+      operationId: removeItem
+      parameters:
+      - name: userId
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+      - name: guestId
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: productId
+        in: query
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/CartResponse"
+components:
+  schemas:
+    UserUpdateRequest:
+      type: object
+      properties:
+        password:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        address:
+          type: string
+        roles:
+          type: array
+          items:
+            type: string
+    UserResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        username:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        address:
+          type: string
+        roles:
+          type: array
+          items:
+            type: string
+        pushToken:
+          type: string
+    ShippingResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        orderId:
+          type: integer
+          format: int64
+        recipientName:
+          type: string
+        recipientPhone:
+          type: string
+        recipientAddress:
+          type: string
+        shippingCompany:
+          type: string
+        shippingMethod:
+          type: string
+        trackingNumber:
+          type: string
+        shippingFee:
+          type: number
+          format: double
+        status:
+          type: string
+          enum:
+          - PENDING
+          - SHIPPED
+          - DELIVERED
+          - CANCELLED
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+    ImageDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        url:
+          type: string
+    ProductResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        sku:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+        importPrice:
+          type: number
+        categoryId:
+          type: integer
+          format: int64
+        categoryName:
+          type: string
+        images:
+          type: array
+          items:
+            $ref: "#/components/schemas/ImageDTO"
+    PaymentResponse:
+      type: object
+      properties:
+        paymentId:
+          type: integer
+          format: int64
+        orderId:
+          type: integer
+          format: int64
+        status:
+          type: string
+          enum:
+          - PENDING
+          - SUCCESS
+          - FAILED
+    StatusUpdateRequest:
+      type: object
+      properties:
+        status:
+          type: string
+    Order:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        userId:
+          type: integer
+          format: int64
+        guestName:
+          type: string
+        guestEmail:
+          type: string
+        guestPhone:
+          type: string
+        shippingAddress:
+          type: string
+        billingAddress:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/OrderItem"
+        totalPrice:
+          type: number
+        status:
+          type: string
+          enum:
+          - NEW
+          - CONFIRMED
+          - PROCESSING
+          - COMPLETED
+          - CANCELLED
+        paymentStatus:
+          type: string
+          enum:
+          - PENDING
+          - PAID
+          - FAILED
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    OrderItem:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        productId:
+          type: integer
+          format: int64
+        productName:
+          type: string
+        price:
+          type: number
+        quantity:
+          type: integer
+          format: int32
+        order:
+          $ref: "#/components/schemas/Order"
+    PaymentUpdateRequest:
+      type: object
+      properties:
+        paymentStatus:
+          type: string
+    NotificationSetting:
+      type: object
+      properties:
+        userId:
+          type: integer
+          format: int64
+        emailEnabled:
+          type: boolean
+        smsEnabled:
+          type: boolean
+        pushEnabled:
+          type: boolean
+    InventoryUpdateRequest:
+      type: object
+      properties:
+        productId:
+          type: integer
+          format: int64
+        stock:
+          type: integer
+          format: int32
+        importPrice:
+          type: number
+        sellingPrice:
+          type: number
+    InventoryResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        productId:
+          type: integer
+          format: int64
+        stock:
+          type: integer
+          format: int32
+        reservedQuantity:
+          type: integer
+          format: int32
+        availableQuantity:
+          type: integer
+          format: int32
+        importPrice:
+          type: number
+        sellingPrice:
+          type: number
+    PostRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        slug:
+          type: string
+        summary:
+          type: string
+        content:
+          type: string
+        categoryId:
+          type: integer
+          format: int64
+        author:
+          type: string
+        active:
+          type: boolean
+    PostResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        title:
+          type: string
+        slug:
+          type: string
+        summary:
+          type: string
+        content:
+          type: string
+        categoryId:
+          type: integer
+          format: int64
+        author:
+          type: string
+        active:
+          type: boolean
+        publishedAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    PageRequest:
+      type: object
+      properties:
+        slug:
+          type: string
+        title:
+          type: string
+        summary:
+          type: string
+        content:
+          type: string
+        metaTitle:
+          type: string
+        metaDescription:
+          type: string
+        active:
+          type: boolean
+    PageResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        slug:
+          type: string
+        title:
+          type: string
+        summary:
+          type: string
+        content:
+          type: string
+        metaTitle:
+          type: string
+        metaDescription:
+          type: string
+        active:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    MediaRequest:
+      type: object
+      properties:
+        fileName:
+          type: string
+          minLength: 1
+        url:
+          type: string
+          minLength: 1
+        contentType:
+          type: string
+          minLength: 1
+        size:
+          type: integer
+          format: int64
+        active:
+          type: boolean
+      required:
+      - active
+      - contentType
+      - fileName
+      - size
+      - url
+    MediaResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        fileName:
+          type: string
+        url:
+          type: string
+        contentType:
+          type: string
+        size:
+          type: integer
+          format: int64
+        active:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    BannerRequest:
+      type: object
+      properties:
+        imageUrl:
+          type: string
+        link:
+          type: string
+        position:
+          type: string
+        sortOrder:
+          type: integer
+          format: int32
+        active:
+          type: boolean
+    BannerResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        imageUrl:
+          type: string
+        link:
+          type: string
+        position:
+          type: string
+        sortOrder:
+          type: integer
+          format: int32
+        active:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    CategoryUpdateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+    CategoryResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        description:
+          type: string
+    UpdateCartItemRequest:
+      type: object
+      properties:
+        quantity:
+          type: integer
+          format: int32
+          minimum: 1
+    CartItemResponse:
+      type: object
+      properties:
+        productId:
+          type: integer
+          format: int64
+        productName:
+          type: string
+        quantity:
+          type: integer
+          format: int32
+        price:
+          type: number
+    CartResponse:
+      type: object
+      properties:
+        cartId:
+          type: integer
+          format: int64
+        user:
+          $ref: "#/components/schemas/UserResponse"
+        guestId:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/CartItemResponse"
+    AuthenticationRequest:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+    ApiResponseAuthenticationResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+        result:
+          $ref: "#/components/schemas/AuthenticationResponse"
+    AuthenticationResponse:
+      type: object
+      properties:
+        token:
+          type: string
+        authenticated:
+          type: boolean
+    UserCreationRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          maxLength: 2147483647
+          minLength: 3
+        password:
+          type: string
+          maxLength: 2147483647
+          minLength: 3
+        email:
+          type: string
+          minLength: 1
+        phone:
+          type: string
+        address:
+          type: string
+      required:
+      - email
+      - password
+      - username
+    ApiResponseUser:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+        result:
+          $ref: "#/components/schemas/User"
+    Role:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        username:
+          type: string
+        password:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        address:
+          type: string
+        roles:
+          type: array
+          items:
+            $ref: "#/components/schemas/Role"
+          uniqueItems: true
+        pushToken:
+          type: string
+    ShippingRequest:
+      type: object
+      properties:
+        orderId:
+          type: integer
+          format: int64
+        shippingCompany:
+          type: string
+        shippingMethod:
+          type: string
+        trackingNumber:
+          type: string
+        shippingFee:
+          type: number
+          format: double
+    PaymentRequest:
+      type: object
+      properties:
+        orderId:
+          type: integer
+          format: int64
+        amount:
+          type: number
+        method:
+          type: string
+    CreateOrderRequest:
+      type: object
+      properties:
+        userId:
+          type: integer
+          format: int64
+        guestName:
+          type: string
+        guestEmail:
+          type: string
+        guestPhone:
+          type: string
+        shippingAddress:
+          type: string
+        billingAddress:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/OrderItemRequest"
+          minItems: 1
+      required:
+      - items
+    OrderItemRequest:
+      type: object
+      properties:
+        productId:
+          type: integer
+          format: int64
+        quantity:
+          type: integer
+          format: int32
+          minimum: 1
+      required:
+      - productId
+    NotificationRequest:
+      type: object
+      properties:
+        receiverId:
+          type: integer
+          format: int64
+        title:
+          type: string
+        message:
+          type: string
+        channel:
+          type: string
+          enum:
+          - EMAIL
+          - SMS
+          - PUSH
+        broadcast:
+          type: boolean
+    NotificationResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        receiverId:
+          type: integer
+          format: int64
+        title:
+          type: string
+        message:
+          type: string
+        readFlag:
+          type: boolean
+        status:
+          type: string
+        channel:
+          type: string
+        broadcast:
+          type: boolean
+        messageCount:
+          type: integer
+          format: int32
+        createdAt:
+          type: string
+          format: date-time
+    CategoryCreateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+        description:
+          type: string
+      required:
+      - name
+    AddCartItemRequest:
+      type: object
+      properties:
+        productId:
+          type: integer
+          format: int64
+        quantity:
+          type: integer
+          format: int32
+          minimum: 1
+      required:
+      - productId
+    ApiResponseUserResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+        result:
+          $ref: "#/components/schemas/UserResponse"
+    PageProductResponse:
+      type: object
+      properties:
+        totalPages:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
+        size:
+          type: integer
+          format: int32
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProductResponse"
+        number:
+          type: integer
+          format: int32
+        sort:
+          $ref: "#/components/schemas/SortObject"
+        first:
+          type: boolean
+        last:
+          type: boolean
+        numberOfElements:
+          type: integer
+          format: int32
+        pageable:
+          $ref: "#/components/schemas/PageableObject"
+        empty:
+          type: boolean
+    PageableObject:
+      type: object
+      properties:
+        offset:
+          type: integer
+          format: int64
+        sort:
+          $ref: "#/components/schemas/SortObject"
+        pageNumber:
+          type: integer
+          format: int32
+        paged:
+          type: boolean
+        pageSize:
+          type: integer
+          format: int32
+        unpaged:
+          type: boolean
+    SortObject:
+      type: object
+      properties:
+        empty:
+          type: boolean
+        sorted:
+          type: boolean
+        unsorted:
+          type: boolean
+    PageNotificationResponse:
+      type: object
+      properties:
+        totalPages:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
+        size:
+          type: integer
+          format: int32
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/NotificationResponse"
+        number:
+          type: integer
+          format: int32
+        sort:
+          $ref: "#/components/schemas/SortObject"
+        first:
+          type: boolean
+        last:
+          type: boolean
+        numberOfElements:
+          type: integer
+          format: int32
+        pageable:
+          $ref: "#/components/schemas/PageableObject"
+        empty:
+          type: boolean
+    Pageable:
+      type: object
+      properties:
+        page:
+          type: integer
+          format: int32
+          minimum: 0
+        size:
+          type: integer
+          format: int32
+          minimum: 1
+        sort:
+          type: array
+          items:
+            type: string
+    PagePostResponse:
+      type: object
+      properties:
+        totalPages:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
+        size:
+          type: integer
+          format: int32
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/PostResponse"
+        number:
+          type: integer
+          format: int32
+        sort:
+          $ref: "#/components/schemas/SortObject"
+        first:
+          type: boolean
+        last:
+          type: boolean
+        numberOfElements:
+          type: integer
+          format: int32
+        pageable:
+          $ref: "#/components/schemas/PageableObject"
+        empty:
+          type: boolean
+    ApiResponseVoid:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+        result: {}

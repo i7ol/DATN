@@ -68,6 +68,7 @@ public class SecurityConfig {
             "/api/shipping/**",
 
             "/api/cms/media",
+            "/uploads/**",
     };
 
     public SecurityConfig(@Lazy JwtAuthenticationFilter jwtFilter) {
@@ -82,6 +83,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
+
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .anyRequest().authenticated()
                 )

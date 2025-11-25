@@ -1,0 +1,151 @@
+<h1 class="brutalist-title">Danh Sách Sản Phẩm</h1>
+
+<div class="brutalist-table-container">
+  <table class="brutalist-table">
+    <thead>
+      <tr>
+        <th>Tên sản phẩm</th>
+        <th>SKU</th>
+        <th>Giá bán</th>
+        <th>Giá nhập</th>
+        <th>Danh mục</th>
+        <th>Ảnh</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr *ngFor="let product of products">
+        <td>{{ product.name }}</td>
+        <td>{{ product.sku }}</td>
+        <td>{{ product.price | currency : "VND" : "symbol" : "1.0-0" }}</td>
+        <td>
+          {{ product.importPrice | currency : "VND" : "symbol" : "1.0-0" }}
+        </td>
+        <td>{{ getCategoryName(product.categoryId) }}</td>
+
+        <td>
+          <img
+            [src]="product.images?.[0]?.url || 'https://via.placeholder.com/50'"
+            width="50"
+            height="50"
+            alt="thumbnail"
+          />
+        </td>
+
+        <td class="action-buttons">
+          <button
+            class="brutalist-btn brutalist-btn-warning"
+            (click)="editProduct(product)"
+          >
+            Sửa
+          </button>
+          <button
+            class="brutalist-btn brutalist-btn-danger"
+            (click)="deleteProduct(product.id!)"
+          >
+            Xóa
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Pagination -->
+<div class="flex justify-center mt-4 mb-6">
+  <mat-paginator
+    [length]="totalItems"
+    [pageSize]="pageSize"
+    [pageIndex]="currentPage"
+    [pageSizeOptions]="[5, 10, 20]"
+    (page)="onPageChange($event)"
+    class="brutalist-paginator"
+  >
+  </mat-paginator>
+</div>
+
+<!-- Add/Edit product modal -->
+<div *ngIf="showForm" class="brutalist-modal">
+  <div class="brutalist-modal-content">
+    <h2 class="brutalist-title">
+      {{ editingProduct ? "Sửa Sản Phẩm" : "Thêm Sản Phẩm" }}
+    </h2>
+
+    <form (ngSubmit)="saveProduct()" class="space-y-4">
+      <div>
+        <label>Tên sản phẩm</label>
+        <input type="text" [(ngModel)]="form.name" name="name" required />
+      </div>
+
+      <div>
+        <label>SKU</label>
+        <input type="text" [(ngModel)]="form.sku" name="sku" required />
+      </div>
+
+      <div>
+        <label>Giá bán</label>
+        <input type="number" [(ngModel)]="form.price" name="price" required />
+      </div>
+
+      <div>
+        <label>Giá nhập</label>
+        <input
+          type="number"
+          [(ngModel)]="form.importPrice"
+          name="importPrice"
+          required
+        />
+      </div>
+
+      <div>
+        <label>Danh mục</label>
+        <select [(ngModel)]="form.categoryId" name="categoryId" required>
+          <option *ngFor="let c of categories" [value]="c.id">
+            {{ c.name }}
+          </option>
+        </select>
+      </div>
+
+      <div>
+        <label>Ảnh sản phẩm</label>
+        <input type="file" (change)="onFileSelected($event)" multiple />
+      </div>
+
+      <!-- Preview images -->
+      <div class="flex gap-2 mt-2">
+        <img
+          *ngFor="let url of previewUrls"
+          [src]="url"
+          width="50"
+          height="50"
+          alt="preview"
+        />
+      </div>
+
+      <div class="flex gap-2 mt-4">
+        <button type="submit" class="brutalist-btn brutalist-btn-green">
+          {{ editingProduct ? "Cập nhật" : "Thêm" }}
+        </button>
+        <button
+          type="button"
+          class="brutalist-btn brutalist-btn-gray"
+          (click)="showForm = false"
+        >
+          Hủy
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Add product button -->
+<div class="flex justify-center mb-10">
+  <button
+    class="brutalist-btn brutalist-btn-green flex items-center gap-2"
+    (click)="openAddForm()"
+  >
+    <span class="material-icons text-sm">add</span>
+    Thêm sản phẩm
+  </button>
+</div>

@@ -8,11 +8,11 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @Data
-@Builder
-@NoArgsConstructor
 @AllArgsConstructor
-
+@NoArgsConstructor
+@Builder
 public class ProductResponse {
+
     private Long id;
     private String sku;
     private String name;
@@ -21,5 +21,8 @@ public class ProductResponse {
     private BigDecimal importPrice;
     private Long categoryId;
     private String categoryName;
+
     private List<ImageDTO> images;
+
+
 }

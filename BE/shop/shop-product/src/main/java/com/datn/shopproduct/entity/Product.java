@@ -1,20 +1,20 @@
 package com.datn.shopproduct.entity;
 
-
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
-
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@ToString(callSuper = true, exclude = {"images", "category"})
 @Entity
 @Table(name = "PRODUCTS")
 public class Product  {
@@ -38,11 +38,9 @@ public class Product  {
     @Column(name = "description", columnDefinition = "CLOB")
     private String description;
 
-    // Giá bán
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal price;
 
-    // Giá nhập
     @Column(name = "import_price", nullable = false, precision = 12, scale = 2)
     private BigDecimal importPrice;
 
@@ -50,8 +48,7 @@ public class Product  {
     @JoinColumn(name = "category_id")
     private Category category;
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ProductImage> images;
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<ProductImage> images = new ArrayList<>();
 }
-
-

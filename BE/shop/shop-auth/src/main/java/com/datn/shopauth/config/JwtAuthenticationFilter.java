@@ -64,6 +64,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             "/api/shipping/**",
 
             "/api/cms/media",
+            "/uploads/**",
     };
 
     @Override
