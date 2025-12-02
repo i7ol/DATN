@@ -1,6 +1,6 @@
 package com.datn.shopcms.repository;
 
-import com.datn.shopcms.entity.Post;
+import com.datn.shopdatabase.entity.Post;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

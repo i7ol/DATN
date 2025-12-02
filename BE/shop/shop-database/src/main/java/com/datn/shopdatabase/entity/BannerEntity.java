@@ -1,4 +1,4 @@
-package com.datn.shopcms.entity;
+package com.datn.shopdatabase.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -8,26 +8,33 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.time.Instant;
 
 @Entity
-@Table(name = "cms_media")
+@Table(name = "cms_banners")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Media {
+public class Banner {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String fileName;
-    private String url;
-    private String contentType;
+    @Column(nullable=false, length=1000)
+    private String imageUrl;
 
-    @Column(name = "media_size")
-    private Long size;
-    private Boolean active;
+    @Column(length=1000)
+    private String link;
+
+    @Column(length=100)
+    private String position;
+
+    private Integer sortOrder = 0;
+
+    private Boolean active = true;
+
     @CreationTimestamp
     @Column(updatable=false)
     private Instant createdAt;
+
     @UpdateTimestamp
     private Instant updatedAt;
 }

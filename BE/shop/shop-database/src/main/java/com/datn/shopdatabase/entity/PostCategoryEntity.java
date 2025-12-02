@@ -1,4 +1,4 @@
-package com.datn.shopcms.entity;
+package com.datn.shopdatabase.entity;
 
 import jakarta.persistence.*;
 import lombok.*;

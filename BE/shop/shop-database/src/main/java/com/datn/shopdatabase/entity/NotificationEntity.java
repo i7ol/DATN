@@ -1,4 +1,4 @@
-package com.datn.shopnotification.entity;
+package com.datn.shopdatabase.entity;
 
 import com.datn.shopnotification.enums.NotificationChannel;
 import com.datn.shopnotification.enums.NotificationStatus;

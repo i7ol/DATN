@@ -1,6 +1,6 @@
 package com.datn.shopcms.repository;
 
-import com.datn.shopcms.entity.Page;
+import com.datn.shopdatabase.entity.Page;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 

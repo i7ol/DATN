@@ -1,4 +1,4 @@
-package com.datn.shopnotification.entity;
+package com.datn.shopdatabase.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
