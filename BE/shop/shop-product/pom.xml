@@ -18,12 +18,12 @@
 		<!-- Dùng chung cho tất cả module -->
 		<dependency>
 			<groupId>com.datn</groupId>
-			<artifactId>shop-core</artifactId>
+			<artifactId>shop-database</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.datn</groupId>
-			<artifactId>shop-inventory</artifactId>
+			<artifactId>shop-object</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
@@ -40,11 +40,7 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>io.minio</groupId>
-			<artifactId>minio</artifactId>
-			<version>8.5.12</version>
-		</dependency>
+
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
@@ -62,6 +58,16 @@
 			<artifactId>springdoc-openapi-starter-common</artifactId>
 			<version>2.8.9</version>
 			<scope>compile</scope>
+		</dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
 		</dependency>
 
 	</dependencies>

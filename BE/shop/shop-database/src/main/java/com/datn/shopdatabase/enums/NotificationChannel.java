@@ -1,4 +1,4 @@
-package com.datn.shopnotification.enums;
+package com.datn.shopdatabase.enums;
 
 public enum NotificationChannel {
     EMAIL,

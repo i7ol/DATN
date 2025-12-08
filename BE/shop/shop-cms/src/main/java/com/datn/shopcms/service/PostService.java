@@ -1,13 +1,13 @@
 package com.datn.shopcms.service;
 
-import com.datn.shopcms.dto.request.PostRequest;
-import com.datn.shopcms.dto.response.PostResponse;
-import com.datn.shopcms.entity.Post;
-import com.datn.shopcms.entity.PostCategory;
-import com.datn.shopcms.repository.PostCategoryRepository;
-import com.datn.shopcms.repository.PostRepository;
-import com.datn.shopcore.exception.AppException;
-import com.datn.shopcore.exception.ErrorCode;
+import com.datn.shopobject.dto.request.PostRequest;
+import com.datn.shopobject.dto.response.PostResponse;
+import com.datn.shopdatabase.entity.PostEntity;
+import com.datn.shopdatabase.entity.PostCategoryEntity;
+import com.datn.shopdatabase.repository.PostCategoryRepository;
+import com.datn.shopdatabase.repository.PostRepository;
+import com.datn.shopdatabase.exception.AppException;
+import com.datn.shopdatabase.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,8 +17,8 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class PostService {
 
-    private final PostRepository postRepository;
-    private final PostCategoryRepository categoryRepository;
+    private  PostRepository postRepository;
+    private  PostCategoryRepository categoryRepository;
 
     // Tạo bài viết
     public PostResponse create(PostRequest req) {
@@ -26,10 +26,10 @@ public class PostService {
             throw new AppException(ErrorCode.SLUG_EXISTED);
         }
 
-        PostCategory category = categoryRepository.findById(req.categoryId())
+        PostCategoryEntity category = categoryRepository.findById(req.categoryId())
                 .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
 
-        Post post = Post.builder()
+            PostEntity post = PostEntity.builder()
                 .title(req.title())
                 .slug(req.slug())
                 .summary(req.summary())
@@ -39,16 +39,16 @@ public class PostService {
                 .active(req.active() != null ? req.active() : true)
                 .build();
 
-        Post saved = postRepository.save(post);
+        PostEntity saved = postRepository.save(post);
         return map(saved);
     }
 
     // Cập nhật bài viết
     public PostResponse update(Long id, PostRequest req) {
-        Post post = postRepository.findById(id)
+        PostEntity post = postRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
 
-        PostCategory category = categoryRepository.findById(req.categoryId())
+        PostCategoryEntity category = categoryRepository.findById(req.categoryId())
                 .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
 
         post.setTitle(req.title());
@@ -65,14 +65,14 @@ public class PostService {
 
     // Xóa bài viết
     public void delete(Long id) {
-        Post post = postRepository.findById(id)
+        PostEntity post = postRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
         postRepository.delete(post);
     }
 
     // Lấy bài viết theo slug
     public PostResponse getBySlug(String slug) {
-        Post post = postRepository.findBySlug(slug)
+        PostEntity post = postRepository.findBySlug(slug)
                 .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
         return map(post);
     }
@@ -90,7 +90,7 @@ public class PostService {
     }
 
     // Mapping entity -> DTO
-    private PostResponse map(Post p) {
+    private PostResponse map(PostEntity p) {
         return new PostResponse(
                 p.getId(),
                 p.getTitle(),

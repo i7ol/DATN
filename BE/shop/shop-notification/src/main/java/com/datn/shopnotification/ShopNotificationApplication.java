@@ -1,0 +1,13 @@
+//package com.datn.shopnotification;
+//
+//import org.springframework.boot.SpringApplication;
+//import org.springframework.boot.autoconfigure.SpringBootApplication;
+//
+//
+//public class ShopNotificationApplication {
+//
+//    public static void main(String[] args) {
+//        SpringApplication.run(ShopNotificationApplication.class, args);
+//    }
+//
+//}

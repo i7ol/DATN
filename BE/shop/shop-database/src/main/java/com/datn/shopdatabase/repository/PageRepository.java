@@ -1,9 +1,12 @@
-package com.datn.shopcms.repository;
+package com.datn.shopdatabase.repository;
 
-import com.datn.shopdatabase.entity.Page;
+
+import com.datn.shopdatabase.entity.PageEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
-import java.util.Optional;
+import org.springframework.stereotype.Repository;
 
-public interface PageRepository extends JpaRepository<Page, Long> {
-    Optional<Page> findBySlug(String slug);
+import java.util.Optional;
+@Repository
+public interface PageRepository extends JpaRepository<PageEntity, Long> {
+    Optional<PageEntity> findBySlug(String slug);
 }

@@ -1,6 +1,5 @@
 package com.datn.shopnotification.scheduler;
 
-import com.datn.shopnotification.entity.Notification;
 import com.datn.shopnotification.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

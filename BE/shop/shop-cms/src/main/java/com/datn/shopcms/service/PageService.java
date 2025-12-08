@@ -1,24 +1,24 @@
 package com.datn.shopcms.service;
 
-import com.datn.shopcms.dto.request.PageRequest;
-import com.datn.shopcms.dto.response.PageResponse;
-import com.datn.shopcms.entity.Page;
-import com.datn.shopcms.repository.PageRepository;
-import com.datn.shopcore.exception.AppException;
-import com.datn.shopcore.exception.ErrorCode;
+import com.datn.shopobject.dto.request.PageRequest;
+import com.datn.shopobject.dto.response.PageResponse;
+import com.datn.shopdatabase.entity.PageEntity;
+import com.datn.shopdatabase.repository.PageRepository;
+import com.datn.shopdatabase.exception.AppException;
+import com.datn.shopdatabase.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
 public class PageService {
-    private final PageRepository pageRepository;
+    private PageRepository pageRepository;
 
     public PageResponse create(PageRequest req) {
         if (pageRepository.findBySlug(req.slug()).isPresent())
             throw new AppException(ErrorCode.SLUG_EXISTED);
 
-        Page page = Page.builder()
+        PageEntity page = PageEntity.builder()
                 .slug(req.slug())
                 .title(req.title())
                 .summary(req.summary())
@@ -28,12 +28,12 @@ public class PageService {
                 .active(Boolean.TRUE.equals(req.active()))
                 .build();
 
-        Page saved = pageRepository.save(page);
+        PageEntity saved = pageRepository.save(page);
         return map(saved);
     }
 
     public PageResponse update(Long id, PageRequest req) {
-        Page page = pageRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+        PageEntity page = pageRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
         page.setTitle(req.title());
         page.setSummary(req.summary());
         page.setContent(req.content());
@@ -45,9 +45,9 @@ public class PageService {
     }
 
     public PageResponse getBySlug(String slug) {
-        Page page = pageRepository.findBySlug(slug).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+        PageEntity page = pageRepository.findBySlug(slug).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
         return map(page);
     }
 
-    private PageResponse map(Page p) { return new PageResponse(p.getId(), p.getSlug(), p.getTitle(), p.getSummary(), p.getContent(), p.getMetaTitle(), p.getMetaDescription(), p.getActive(), p.getCreatedAt(), p.getUpdatedAt()); }
+    private PageResponse map(PageEntity p) { return new PageResponse(p.getId(), p.getSlug(), p.getTitle(), p.getSummary(), p.getContent(), p.getMetaTitle(), p.getMetaDescription(), p.getActive(), p.getCreatedAt(), p.getUpdatedAt()); }
 }

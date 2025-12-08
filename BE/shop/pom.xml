@@ -27,9 +27,13 @@
     </dependencyManagement>
 
     <modules>
-        <!-- thêm module con tại đây-->
+        <!-- Ứng dụng chạy -->
         <module>shop-app</module>
-        <module>shop-core</module>
+        <module>shop-admin</module>
+
+        <!-- Các module service (library) -->
+        <module>shop-database</module>
+        <module>shop-object</module>
         <module>shop-user</module>
         <module>shop-auth</module>
         <module>shop-product</module>

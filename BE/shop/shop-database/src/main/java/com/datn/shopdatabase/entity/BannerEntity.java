@@ -2,10 +2,6 @@ package com.datn.shopdatabase.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-
-import java.time.Instant;
 
 @Entity
 @Table(name = "cms_banners")
@@ -13,7 +9,7 @@ import java.time.Instant;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Banner {
+public class BannerEntity extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -31,10 +27,5 @@ public class Banner {
 
     private Boolean active = true;
 
-    @CreationTimestamp
-    @Column(updatable=false)
-    private Instant createdAt;
 
-    @UpdateTimestamp
-    private Instant updatedAt;
 }

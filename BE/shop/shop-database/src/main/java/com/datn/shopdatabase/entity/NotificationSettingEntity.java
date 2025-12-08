@@ -12,7 +12,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class NotificationSetting {
+public class NotificationSettingEntity extends BaseEntity {
     @Id
     private Long userId;
 

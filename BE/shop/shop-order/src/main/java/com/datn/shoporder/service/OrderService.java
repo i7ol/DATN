@@ -1,47 +1,41 @@
 package com.datn.shoporder.service;
 
-import com.datn.shopcore.exception.AppException;
-import com.datn.shopcore.exception.ErrorCode;
-import com.datn.shoporder.dto.request.CreateOrderRequest;
-import com.datn.shoporder.dto.request.OrderItemRequest;
-import com.datn.shoporder.entity.Order;
-import com.datn.shoporder.entity.OrderItem;
-import com.datn.shoporder.enums.OrderStatus;
-import com.datn.shoporder.enums.PaymentStatus;
-import com.datn.shoporder.repository.OrderRepository;
-import com.datn.shopproduct.entity.Product;
-import com.datn.shopproduct.repository.ProductRepository;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
+import com.datn.shopdatabase.entity.OrderEntity;
+import com.datn.shopdatabase.entity.OrderItemEntity;
+import com.datn.shopdatabase.entity.ProductEntity;
+import com.datn.shopdatabase.enums.OrderStatus;
+import com.datn.shopdatabase.enums.PaymentStatus;
+import com.datn.shopdatabase.exception.AppException;
+import com.datn.shopdatabase.exception.ErrorCode;
+import com.datn.shopdatabase.repository.OrderRepository;
+import com.datn.shopdatabase.repository.ProductRepository;
+import com.datn.shopobject.dto.request.CreateOrderRequest;
 import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE,makeFinal = true)
 public class OrderService {
 
-      OrderRepository orderRepository;
-      ProductRepository productRepository;
+    private  OrderRepository orderRepository;
+    private  ProductRepository productRepository;
 
-
+    // ---------------------------------------------------
+    // TẠO ĐƠN HÀNG
+    // ---------------------------------------------------
     @Transactional
-    public Order createOrder(CreateOrderRequest request) {
-        Order order = new Order();
+    public OrderEntity createOrder(CreateOrderRequest request) {
+        OrderEntity order = new OrderEntity();
 
-        // Nếu userId != null → khách đăng nhập
         if (request.getUserId() != null) {
             order.setUserId(request.getUserId());
         } else {
-            // Guest checkout
             order.setGuestName(request.getGuestName());
             order.setGuestEmail(request.getGuestEmail());
             order.setGuestPhone(request.getGuestPhone());
@@ -49,78 +43,78 @@ public class OrderService {
             order.setBillingAddress(request.getBillingAddress());
         }
 
-        // Tạo OrderItem
-        List<OrderItem> items = request.getItems().stream().map(dto -> {
-            Product product = productRepository.findById(dto.getProductId())
+        // Tạo danh sách item
+        List<OrderItemEntity> items = request.getItems().stream().map(dto -> {
+            ProductEntity product = productRepository.findById(dto.getProductId())
                     .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
-            OrderItem item = new OrderItem();
+
+            OrderItemEntity item = new OrderItemEntity();
             item.setProductId(product.getId());
             item.setProductName(product.getName());
-            item.setPrice(product.getPrice().multiply(BigDecimal.valueOf(dto.getQuantity())));
             item.setQuantity(dto.getQuantity());
+            item.setPrice(product.getPrice().multiply(BigDecimal.valueOf(dto.getQuantity())));
+            item.setOrder(order);
             return item;
         }).collect(Collectors.toList());
 
-        BigDecimal totalPrice = items.stream()
-                .map(OrderItem::getPrice)
+        // Tổng tiền
+        BigDecimal total = items.stream().map(OrderItemEntity::getPrice)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         order.setItems(items);
-        items.forEach(i -> i.setOrder(order));
-        order.setTotalPrice(totalPrice);
+        order.setTotalPrice(total);
         order.setStatus(OrderStatus.NEW);
         order.setPaymentStatus(PaymentStatus.PENDING);
-        order.setCreatedAt(LocalDateTime.now());
-        order.setUpdatedAt(LocalDateTime.now());
 
         return orderRepository.save(order);
     }
 
-    public List<Order> getOrdersByUserById(Long userId) {
-        return orderRepository.findByUserId(userId);
-    }
-
+    // ---------------------------------------------------
+    // UPDATE STATUS
+    // ---------------------------------------------------
     @Transactional
-    public Order updateStatus(Long orderId, OrderStatus status) {
-        Order order = getOrder(orderId);
+    public OrderEntity updateStatus(Long orderId, OrderStatus status) {
+        OrderEntity order = getOrder(orderId);
         order.setStatus(status);
-        order.setUpdatedAt(LocalDateTime.now());
         return orderRepository.save(order);
     }
 
     @Transactional
-    public Order updatePaymentStatus(Long orderId, PaymentStatus paymentStatus) {
-        Order order = getOrder(orderId);
-        order.setPaymentStatus(paymentStatus);
-        order.setUpdatedAt(LocalDateTime.now());
+    public OrderEntity updatePaymentStatus(Long orderId, PaymentStatus status) {
+        OrderEntity order = getOrder(orderId);
+        order.setPaymentStatus(status);
         return orderRepository.save(order);
     }
 
-    public void updatePaymentStatus(Long orderId, String paymentStatusStr) {
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Order not found"));
-
-        PaymentStatus status = PaymentStatus.valueOf(paymentStatusStr);
-
-        order.setPaymentStatus(status);
+    // Khi PaymentService gọi (bằng String)
+    @Transactional
+    public void updatePaymentStatus(Long orderId, String paymentStatus) {
+        OrderEntity order = getOrder(orderId);
+        order.setPaymentStatus(PaymentStatus.valueOf(paymentStatus));
         orderRepository.save(order);
     }
-    public Optional<Order> getOrderById(Long orderId) {
-        return orderRepository.findById(orderId);
+
+    // ---------------------------------------------------
+    // GET
+    // ---------------------------------------------------
+    public Optional<OrderEntity> getOrderById(Long id) {
+        return orderRepository.findById(id);
     }
 
-    private Order getOrder(Long id) {
+    private OrderEntity getOrder(Long id) {
         return orderRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
     }
-    @Transactional(readOnly = true)
-    public List<Order> getAllOrders() {
+
+    public List<OrderEntity> getOrdersByUserId(Long userId) {
+        return orderRepository.findByUserId(userId);
+    }
+
+    public List<OrderEntity> getAllOrders() {
         return orderRepository.findAll();
     }
 
-    @Transactional(readOnly = true)
-    public List<Order> getGuestOrders() {
+    public List<OrderEntity> getGuestOrders() {
         return orderRepository.findByUserIdIsNull();
     }
-
 }

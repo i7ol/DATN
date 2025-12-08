@@ -1,103 +1,119 @@
+
 package com.datn.shopproduct.service;
 
-import com.datn.shopcore.exception.AppException;
-import com.datn.shopcore.exception.ErrorCode;
-import com.datn.shopproduct.dto.ImageDTO;
-import com.datn.shopproduct.dto.request.ProductCreateRequest;
-import com.datn.shopproduct.dto.request.ProductUpdateRequest;
-import com.datn.shopproduct.dto.response.ProductResponse;
-import com.datn.shopproduct.entity.Category;
-import com.datn.shopproduct.entity.Product;
-import com.datn.shopproduct.entity.ProductImage;
-import com.datn.shopproduct.minio.MinioChannel;
-import com.datn.shopproduct.repository.CategoryRepository;
-import com.datn.shopproduct.repository.ProductRepository;
-import com.datn.shopinventory.entity.InventoryItem;
-import com.datn.shopinventory.repository.InventoryRepository;
-import lombok.AccessLevel;
-import lombok.experimental.FieldDefaults;
+import com.datn.shopdatabase.entity.*;
+import com.datn.shopdatabase.exception.AppException;
+import com.datn.shopdatabase.exception.ErrorCode;
+import com.datn.shopdatabase.minio.MinioChannel;
+import com.datn.shopdatabase.repository.*;
+import com.datn.shopobject.dto.ImageDTO;
+import com.datn.shopobject.dto.request.ProductCreateRequest;
+import com.datn.shopobject.dto.request.ProductUpdateRequest;
+import com.datn.shopobject.dto.request.VariantRequest;
+import com.datn.shopobject.dto.request.VariantUpdateRequest;
+import com.datn.shopobject.dto.response.ProductResponse;
+import com.datn.shopobject.dto.response.VariantResponse;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 @Transactional
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ProductServiceImpl implements ProductService {
 
-    ProductRepository productRepository;
-    CategoryRepository categoryRepository;
-    InventoryRepository inventoryRepository;
-    MinioChannel minioChannel;
+    private final ProductRepository productRepository;
+    private final CategoryRepository categoryRepository;
+    private final ProductVariantRepository variantRepository;
+    private final ProductImageRepository productImageRepository;
+    private final InventoryRepository inventoryRepository;
+    private final MinioChannel minioChannel;
 
-    public ProductServiceImpl(ProductRepository productRepository,
-                              CategoryRepository categoryRepository,
-                              InventoryRepository inventoryRepository,
-                              MinioChannel minioChannel) {
-        this.productRepository = productRepository;
-        this.categoryRepository = categoryRepository;
-        this.inventoryRepository = inventoryRepository;
-        this.minioChannel = minioChannel;
-    }
-
-    // ====================================================
-    // CREATE PRODUCT
-    // ====================================================
+    // ================== CREATE PRODUCT ==================
     @Override
     public ProductResponse createProduct(ProductCreateRequest request, List<MultipartFile> files) {
-        Product product = new Product();
+        ProductEntity product = new ProductEntity();
         product.setName(request.getName());
         product.setSku(request.getSku());
         product.setDescription(request.getDescription());
         product.setPrice(request.getPrice());
         product.setImportPrice(request.getImportPrice());
 
-        // Set category
-        Category category = categoryRepository.findById(request.getCategoryId())
-                .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
-        product.setCategory(category);
-
-        // Save product để có ID
-        Product saved = productRepository.save(product);
-
-        // Upload nhiều ảnh, dùng biến final để lambda
-        if (files != null && !files.isEmpty()) {
-            final Product finalSaved = saved; // biến final cho lambda
-            List<ProductImage> images = files.stream()
-                    .map(file -> {
-                        String url = minioChannel.upload(file);
-                        ProductImage img = new ProductImage();
-                        img.setUrl(url);
-                        img.setProduct(finalSaved);
-                        return img;
-                    })
-                    .collect(Collectors.toList());
-            finalSaved.setImages(images);
-            saved = productRepository.save(finalSaved);
+        if (request.getCategoryId() != null) {
+            CategoryEntity category = categoryRepository.findById(request.getCategoryId())
+                    .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
+            product.setCategory(category);
         }
 
-        // Tạo inventory
-        InventoryItem item = new InventoryItem();
-        item.setProductId(saved.getId());
-        item.setStock(0);
-        item.setReservedQuantity(0);
-        item.setSellingPrice(saved.getPrice());
-        item.setImportPrice(saved.getImportPrice());
-        inventoryRepository.save(item);
+        ProductEntity saved = productRepository.save(product);
+
+        uploadImages(saved, files);
+
+        if (request.getVariants() != null) {
+            for (VariantRequest v : request.getVariants()) {
+                ProductVariantEntity variant = createVariant(saved, v.getSizeName(), v.getColor());
+                saved.getVariants().add(variant);
+            }
+        }
 
         return toResponse(saved);
     }
 
+    // ================== UPDATE PRODUCT ==================
     @Override
     public ProductResponse updateProduct(Long id, ProductUpdateRequest request, List<MultipartFile> files) {
-        Product product = productRepository.findById(id)
+        ProductEntity product = productRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
 
+        updateBasicInfo(product, request);
+        // Xóa các ảnh cũ nếu có
+        if (request.getDeletedImageIds() != null) {
+            for (Long imgId : request.getDeletedImageIds()) {
+                // Xóa khỏi collection ProductEntity
+                product.getImages().removeIf(img -> img.getId().equals(imgId));
+                // Xóa khỏi DB + MinIO
+                productImageRepository.findById(imgId).ifPresent(img -> {
+                    minioChannel.delete(img.getUrl()); // xóa file trong MinIO
+                    productImageRepository.delete(img);
+                });
+            }
+        }
+
+        uploadImages(product, files);
+        handleVariants(product, request.getVariants());
+
+        ProductEntity saved = productRepository.save(product);
+        return toResponse(saved);
+    }
+
+    // ================== DELETE PRODUCT ==================
+    @Override
+    public void deleteProduct(Long id) {
+        productRepository.deleteById(id);
+    }
+
+    // ================== GET PRODUCT ==================
+    @Override
+    public ProductResponse getProduct(Long id) {
+        ProductEntity product = productRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+        return toResponse(product);
+    }
+
+    @Override
+    public Page<ProductResponse> getAllProducts(Pageable pageable) {
+        return productRepository.findAll(pageable).map(this::toResponse);
+    }
+
+    // ================== HELPER METHODS ==================
+
+    private void updateBasicInfo(ProductEntity product, ProductUpdateRequest request) {
         if (request.getName() != null) product.setName(request.getName());
         if (request.getSku() != null) product.setSku(request.getSku());
         if (request.getDescription() != null) product.setDescription(request.getDescription());
@@ -105,68 +121,83 @@ public class ProductServiceImpl implements ProductService {
         if (request.getImportPrice() != null) product.setImportPrice(request.getImportPrice());
 
         if (request.getCategoryId() != null) {
-            Category category = categoryRepository.findById(request.getCategoryId())
+            CategoryEntity category = categoryRepository.findById(request.getCategoryId())
                     .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
             product.setCategory(category);
         }
+    }
 
-        // Thêm ảnh mới nhưng giữ ảnh cũ
+    private void uploadImages(ProductEntity product, List<MultipartFile> files) {
         if (files != null && !files.isEmpty()) {
-            files.forEach(file -> {
+            if (product.getImages() == null) product.setImages(new ArrayList<>());
+            for (MultipartFile file : files) {
                 String url = minioChannel.upload(file);
-                ProductImage img = new ProductImage();
+                ProductImageEntity img = new ProductImageEntity();
                 img.setUrl(url);
                 img.setProduct(product);
                 product.getImages().add(img);
-            });
+            }
+        }
+    }
+
+    private ProductVariantEntity createVariant(ProductEntity product, String sizeName, String color) {
+        ProductVariantEntity variant = new ProductVariantEntity();
+        variant.setSizeName(sizeName);
+        variant.setColor(color);
+        variant.setProduct(product);
+        variantRepository.save(variant);
+
+        InventoryItemEntity inv = new InventoryItemEntity();
+        inv.setVariantId(variant.getId());
+        inv.setStock(0);
+        inv.setReservedQuantity(0);
+        inv.setImportPrice(product.getImportPrice());
+        inv.setSellingPrice(product.getPrice());
+        inventoryRepository.save(inv);
+
+        return variant;
+    }
+
+    private void updateInventory(ProductVariantEntity variant, ProductEntity product) {
+        inventoryRepository.findByVariantId(variant.getId()).ifPresent(inv -> {
+            inv.setImportPrice(product.getImportPrice());
+            inv.setSellingPrice(product.getPrice());
+            inventoryRepository.save(inv);
+        });
+    }
+
+    private void handleVariants(ProductEntity product, List<VariantUpdateRequest> incoming) {
+        Map<Long, ProductVariantEntity> oldMap = product.getVariants().stream()
+                .collect(Collectors.toMap(ProductVariantEntity::getId, v -> v));
+
+        List<VariantUpdateRequest> updates = incoming != null ? incoming : new ArrayList<>();
+
+        for (VariantUpdateRequest vr : updates) {
+            if (vr.getId() == null) {
+                ProductVariantEntity newVar = createVariant(product, vr.getSizeName(), vr.getColor());
+                product.getVariants().add(newVar);
+            } else {
+                ProductVariantEntity exist = oldMap.get(vr.getId());
+                if (exist != null) {
+                    exist.setSizeName(vr.getSizeName());
+                    exist.setColor(vr.getColor());
+                    variantRepository.save(exist);
+                    updateInventory(exist, product);
+                    oldMap.remove(vr.getId());
+                }
+            }
         }
 
-        Product updated = productRepository.save(product);
-
-        // Đồng bộ giá inventory
-        inventoryRepository.findByProductId(updated.getId()).ifPresent(item -> {
-            item.setSellingPrice(updated.getPrice());
-            item.setImportPrice(updated.getImportPrice());
-            inventoryRepository.save(item);
-        });
-
-        return toResponse(updated);
+        // Xóa những variant còn lại
+        for (ProductVariantEntity toDelete : oldMap.values()) {
+            product.getVariants().remove(toDelete);
+            inventoryRepository.findByVariantId(toDelete.getId())
+                    .ifPresent(inventoryRepository::delete);
+            variantRepository.delete(toDelete);
+        }
     }
 
-
-
-    // ====================================================
-    // DELETE PRODUCT
-    // ====================================================
-    @Override
-    public void deleteProduct(Long id) {
-        productRepository.deleteById(id);
-    }
-
-    // ====================================================
-    // GET PRODUCT BY ID
-    // ====================================================
-    @Override
-    public ProductResponse getProduct(Long id) {
-        Product product = productRepository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
-        return toResponse(product);
-    }
-
-    // ====================================================
-    // GET ALL PRODUCTS (Pageable)
-    // ====================================================
-    @Override
-    public Page<ProductResponse> getAllProducts(Pageable pageable) {
-        return productRepository.findAll(pageable)
-                .map(this::toResponse);
-    }
-
-    // ====================================================
-    // HELPER: Convert Product -> ProductResponse
-    // ====================================================
-
-    private ProductResponse toResponse(Product product) {
+    private ProductResponse toResponse(ProductEntity product) {
         ProductResponse res = new ProductResponse();
         res.setId(product.getId());
         res.setName(product.getName());
@@ -181,10 +212,26 @@ public class ProductServiceImpl implements ProductService {
         }
 
         if (product.getImages() != null && !product.getImages().isEmpty()) {
-            List<ImageDTO> images = product.getImages().stream()
+            res.setImages(product.getImages().stream()
                     .map(img -> new ImageDTO(img.getId(), img.getUrl()))
-                    .collect(Collectors.toList());
-            res.setImages(images);
+                    .collect(Collectors.toList()));
+        }
+
+        if (product.getVariants() != null && !product.getVariants().isEmpty()) {
+            List<VariantResponse> variants = product.getVariants().stream().map(v -> {
+                VariantResponse vr = new VariantResponse();
+                vr.setId(v.getId());
+                vr.setSizeName(v.getSizeName());
+                vr.setColor(v.getColor());
+                inventoryRepository.findByVariantId(v.getId()).ifPresent(inv -> {
+                    vr.setStock(inv.getStock());
+                    vr.setAvailableQuantity(inv.getAvailableQuantity());
+                    vr.setImportPrice(inv.getImportPrice());
+                    vr.setSellingPrice(inv.getSellingPrice());
+                });
+                return vr;
+            }).collect(Collectors.toList());
+            res.setVariants(variants);
         }
 
         return res;

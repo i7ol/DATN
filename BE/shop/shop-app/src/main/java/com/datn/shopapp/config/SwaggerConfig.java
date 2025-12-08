@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class SwaggerConfig {
 
-    @Bean
+    @Bean(name = "shopAppOpenAPI")
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
                 .info(new Info()

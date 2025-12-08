@@ -1,42 +1,41 @@
 package com.datn.shopshipping.service;
 
-import com.datn.shopshipping.dto.request.ShippingRequest;
-import com.datn.shopshipping.entity.ShippingOrder;
-import com.datn.shopshipping.repository.ShippingRepository;
-import com.datn.shoporder.entity.Order;
-import com.datn.shoporder.repository.OrderRepository;
-import com.datn.shopcore.entity.User;
-import com.datn.shopcore.repository.UserRepository;
+import com.datn.shopdatabase.entity.OrderEntity;
+import com.datn.shopdatabase.entity.ShippingOrderEntity;
+import com.datn.shopdatabase.entity.UserEntity;
+import com.datn.shopobject.dto.request.ShippingRequest;
+import com.datn.shopdatabase.repository.ShippingRepository;
+import com.datn.shopdatabase.repository.OrderRepository;
+import com.datn.shopdatabase.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class ShippingService {
 
-    private final ShippingRepository shippingRepository;
-    private final OrderRepository orderRepository;
-    private final UserRepository userRepository;
+    private  ShippingRepository shippingRepository;
+    private  OrderRepository orderRepository;
+    private  UserRepository userRepository;
 
-    public ShippingOrder create(ShippingRequest request) {
-        Order order = orderRepository.findById(request.getOrderId())
+    public ShippingOrderEntity create(ShippingRequest request) {
+        OrderEntity order = orderRepository.findById(request.getOrderId())
                 .orElseThrow(() -> new RuntimeException("Order not found with id " + request.getOrderId()));
 
-        ShippingOrder shippingOrder = ShippingOrder.builder()
+        ShippingOrderEntity shippingOrder = ShippingOrderEntity.builder()
                 .orderId(order.getId())
                 .shippingCompany(request.getShippingCompany())
                 .shippingMethod(request.getShippingMethod())
                 .trackingNumber(request.getTrackingNumber())
                 .shippingFee(request.getShippingFee())
-                .status(ShippingOrder.Status.PENDING)
+                .status(ShippingOrderEntity.Status.PENDING)
                 .build();
 
         // Lấy thông tin recipient từ order
         if (order.getUserId() != null) {
-            User user = userRepository.findById(order.getUserId())
+            UserEntity user = userRepository.findById(order.getUserId())
                     .orElseThrow(() -> new RuntimeException("User not found with id " + order.getUserId()));
             shippingOrder.setRecipientName(user.getUsername());
             shippingOrder.setRecipientPhone(user.getPhone());
@@ -50,19 +49,19 @@ public class ShippingService {
         return shippingRepository.save(shippingOrder);
     }
 
-    public ShippingOrder updateStatus(Long id, ShippingOrder.Status status) {
-        ShippingOrder shippingOrder = shippingRepository.findById(id)
+    public ShippingOrderEntity updateStatus(Long id, ShippingOrderEntity.Status status) {
+        ShippingOrderEntity shippingOrder = shippingRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Shipping order not found with id " + id));
         shippingOrder.setStatus(status);
         return shippingRepository.save(shippingOrder);
     }
 
-    public ShippingOrder get(Long id) {
+    public ShippingOrderEntity get(Long id) {
         return shippingRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Shipping order not found with id " + id));
     }
 
-    public List<ShippingOrder> getByOrderId(Long orderId) {
+    public List<ShippingOrderEntity> getByOrderId(Long orderId) {
         return shippingRepository.findByOrderId(orderId);
     }
 }

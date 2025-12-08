@@ -1,7 +1,8 @@
 package com.datn.shopnotification.service;
 
-import com.datn.shopnotification.dto.request.NotificationRequest;
-import com.datn.shopnotification.dto.response.NotificationResponse;
+import com.datn.shopdatabase.entity.NotificationEntity;
+import com.datn.shopobject.dto.request.NotificationRequest;
+import com.datn.shopobject.dto.response.NotificationResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -12,5 +13,5 @@ public interface NotificationService {
     void markAsRead(Long id);
     long unreadCount(Long userId);
     int processPendingNotifications();
-    void send(com.datn.shopnotification.entity.Notification notification);
+    void send(NotificationEntity notification);
 }

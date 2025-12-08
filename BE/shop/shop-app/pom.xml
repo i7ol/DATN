@@ -20,59 +20,62 @@
 	<dependencies>
 		<dependency>
 			<groupId>com.datn</groupId>
-			<artifactId>shop-core</artifactId>
+			<artifactId>shop-database</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
+		<dependency>
+			<groupId>com.datn</groupId>
+			<artifactId>shop-object</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+
+		<!-- USER services -->
 		<dependency>
 			<groupId>com.datn</groupId>
 			<artifactId>shop-user</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
+
 		<dependency>
 			<groupId>com.datn</groupId>
 			<artifactId>shop-auth</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
+
 		<dependency>
 			<groupId>com.datn</groupId>
 			<artifactId>shop-product</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
+
+<!--		<dependency>-->
+<!--			<groupId>com.datn</groupId>-->
+<!--			<artifactId>shop-cart</artifactId>-->
+<!--			<version>0.0.1-SNAPSHOT</version>-->
+<!--		</dependency>-->
+
 		<dependency>
 			<groupId>com.datn</groupId>
 			<artifactId>shop-order</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
+
+<!--		<dependency>-->
+<!--			<groupId>com.datn</groupId>-->
+<!--			<artifactId>shop-payment</artifactId>-->
+<!--			<version>0.0.1-SNAPSHOT</version>-->
+<!--		</dependency>-->
+
+<!--		<dependency>-->
+<!--			<groupId>com.datn</groupId>-->
+<!--			<artifactId>shop-shipping</artifactId>-->
+<!--			<version>0.0.1-SNAPSHOT</version>-->
+<!--		</dependency>-->
 		<dependency>
-			<groupId>com.datn</groupId>
-			<artifactId>shop-cart</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>com.datn</groupId>
-			<artifactId>shop-payment</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>com.datn</groupId>
-			<artifactId>shop-inventory</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>com.datn</groupId>
-			<artifactId>shop-shipping</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>com.datn</groupId>
-			<artifactId>shop-cms</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>com.datn</groupId>
-			<artifactId>shop-notification</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>

@@ -2,10 +2,6 @@ package com.datn.shopdatabase.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-
-import java.time.Instant;
 
 @Entity
 @Table(name = "cms_media")
@@ -13,7 +9,7 @@ import java.time.Instant;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Media {
+public class MediaEntity extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -25,9 +21,5 @@ public class Media {
     @Column(name = "media_size")
     private Long size;
     private Boolean active;
-    @CreationTimestamp
-    @Column(updatable=false)
-    private Instant createdAt;
-    @UpdateTimestamp
-    private Instant updatedAt;
+
 }

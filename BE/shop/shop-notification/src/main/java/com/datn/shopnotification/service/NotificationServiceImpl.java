@@ -1,13 +1,13 @@
 package com.datn.shopnotification.service;
 
-import com.datn.shopnotification.dto.request.NotificationRequest;
-import com.datn.shopnotification.dto.response.NotificationResponse;
-import com.datn.shopnotification.entity.*;
-import com.datn.shopnotification.enums.NotificationChannel;
-import com.datn.shopnotification.enums.NotificationStatus;
-import com.datn.shopnotification.repository.NotificationRepository;
-import com.datn.shopnotification.service.NotificationSettingService;
-import com.datn.shopcore.entity.User;
+import com.datn.shopdatabase.entity.NotificationEntity;
+import com.datn.shopdatabase.entity.NotificationSettingEntity;
+import com.datn.shopobject.dto.request.NotificationRequest;
+import com.datn.shopobject.dto.response.NotificationResponse;
+import com.datn.shopdatabase.enums.NotificationChannel;
+import com.datn.shopdatabase.enums.NotificationStatus;
+import com.datn.shopdatabase.repository.NotificationRepository;
+import com.datn.shopdatabase.entity.UserEntity;
 import com.datn.shopuser.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,12 +23,12 @@ import java.util.List;
 @Slf4j
 public class NotificationServiceImpl implements NotificationService {
 
-    private final NotificationRepository repository;
-    private final MailService mailService;
-    private final SmsService smsService;
-    private final FirebaseService firebaseService;
-    private final UserService userService; // Dùng service từ shop-user
-    private final NotificationSettingService settingService;
+    private  NotificationRepository repository;
+    private  MailService mailService;
+    private  SmsService smsService;
+    private  FirebaseService firebaseService;
+    private  UserService userService; // Dùng service từ shop-user
+    private  NotificationSettingService settingService;
 
     @Override
     @Transactional
@@ -51,20 +51,20 @@ public class NotificationServiceImpl implements NotificationService {
         }
 
         // Normal notification
-        User user = userService.getById(request.getReceiverId());
-        Notification notification = buildNotification(user, request, false);
+        UserEntity user = userService.getById(request.getReceiverId());
+        NotificationEntity notification = buildNotification(user, request, false);
 
-        Notification saved = repository.save(notification);
+        NotificationEntity saved = repository.save(notification);
         return toResponse(saved);
     }
 
 
     private int broadcastNotification(NotificationRequest request) {
-        List<User> users = userService.getAllUserEntities();
+        List<UserEntity> users = userService.getAllUserEntities();
         int count = 0;
 
-        for (User u : users) {
-            Notification n = buildNotification(u, request, true);
+        for (UserEntity u : users) {
+            NotificationEntity n = buildNotification(u, request, true);
             repository.save(n);
             count++;
         }
@@ -73,8 +73,8 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
 
-    private Notification buildNotification(User user, NotificationRequest request, boolean broadcast) {
-        return Notification.builder()
+    private NotificationEntity buildNotification(UserEntity user, NotificationRequest request, boolean broadcast) {
+        return NotificationEntity.builder()
                 .receiverId(user.getId())
                 .receiverEmail(user.getEmail())
                 .receiverPhone(user.getPhone())
@@ -89,7 +89,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public NotificationResponse getById(Long id) {
-        Notification n = repository.findById(id)
+        NotificationEntity n = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Notification not found"));
         return toResponse(n);
     }
@@ -103,7 +103,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     @Transactional
     public void markAsRead(Long id) {
-        Notification n = repository.findById(id)
+        NotificationEntity n = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Notification not found"));
         if (!n.isReadFlag()) {
             n.setReadFlag(true);
@@ -119,15 +119,15 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     @Transactional
     public int processPendingNotifications() {
-        List<Notification> pending = repository.findAllByStatus(NotificationStatus.PENDING);
-        for (Notification n : pending) send(n);
+        List<NotificationEntity> pending = repository.findAllByStatus(NotificationStatus.PENDING);
+        for (NotificationEntity n : pending) send(n);
         return pending.size();
     }
 
     @Override
     @Transactional
-    public void send(Notification notification) {
-        NotificationSetting setting = settingService.getByUser(notification.getReceiverId());
+    public void send(NotificationEntity notification) {
+        NotificationSettingEntity setting = settingService.getByUser(notification.getReceiverId());
 
         try {
             switch (notification.getChannel()) {
@@ -156,7 +156,7 @@ public class NotificationServiceImpl implements NotificationService {
         }
     }
 
-    private NotificationResponse toResponse(Notification n) {
+    private NotificationResponse toResponse(NotificationEntity n) {
         return NotificationResponse.builder()
                 .id(n.getId())
                 .receiverId(n.getReceiverId())

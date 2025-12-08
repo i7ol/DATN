@@ -1,7 +1,8 @@
-package com.datn.shopnotification.repository;
+package com.datn.shopdatabase.repository;
 
-import com.datn.shopnotification.entity.NotificationSetting;
+
+import com.datn.shopdatabase.entity.NotificationSettingEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface NotificationSettingRepository extends JpaRepository<NotificationSetting, Long> {
+public interface NotificationSettingRepository extends JpaRepository<NotificationSettingEntity, Long> {
 }

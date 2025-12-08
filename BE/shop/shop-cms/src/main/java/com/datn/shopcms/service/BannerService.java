@@ -1,11 +1,11 @@
 package com.datn.shopcms.service;
 
-import com.datn.shopcms.dto.request.BannerRequest;
-import com.datn.shopcms.dto.response.BannerResponse;
-import com.datn.shopcms.entity.Banner;
-import com.datn.shopcms.repository.BannerRepository;
-import com.datn.shopcore.exception.AppException;
-import com.datn.shopcore.exception.ErrorCode;
+import com.datn.shopdatabase.entity.BannerEntity;
+import com.datn.shopobject.dto.request.BannerRequest;
+import com.datn.shopobject.dto.response.BannerResponse;
+import com.datn.shopdatabase.repository.BannerRepository;
+import com.datn.shopdatabase.exception.AppException;
+import com.datn.shopdatabase.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,10 +16,10 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class BannerService {
 
-    private final BannerRepository bannerRepository;
+    private BannerRepository bannerRepository;
 
     public BannerResponse create(BannerRequest req) {
-        Banner banner = Banner.builder()
+        BannerEntity banner = BannerEntity.builder()
                 .imageUrl(req.imageUrl())
                 .link(req.link())
                 .position(req.position())
@@ -27,12 +27,12 @@ public class BannerService {
                 .active(req.active() != null ? req.active() : true)
                 .build();
 
-        Banner saved = bannerRepository.save(banner);
+        BannerEntity saved = bannerRepository.save(banner);
         return map(saved);
     }
 
     public BannerResponse update(Long id, BannerRequest req) {
-        Banner banner = bannerRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+        BannerEntity banner = bannerRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
         banner.setImageUrl(req.imageUrl());
         banner.setLink(req.link());
         banner.setPosition(req.position());
@@ -43,7 +43,7 @@ public class BannerService {
     }
 
     public void delete(Long id) {
-        Banner banner = bannerRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+        BannerEntity banner = bannerRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
         bannerRepository.delete(banner);
     }
 
@@ -52,7 +52,7 @@ public class BannerService {
                 .stream().map(this::map).collect(Collectors.toList());
     }
 
-    private BannerResponse map(Banner b) {
+    private BannerResponse map(BannerEntity b) {
         return new BannerResponse(b.getId(), b.getImageUrl(), b.getLink(), b.getPosition(), b.getSortOrder(), b.getActive(), b.getCreatedAt(), b.getUpdatedAt());
     }
 }

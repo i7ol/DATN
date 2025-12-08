@@ -2,8 +2,6 @@ package com.datn.shopdatabase.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
 
@@ -13,7 +11,7 @@ import java.time.Instant;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Post {
+public class PostEntity extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -32,7 +30,7 @@ public class Post {
 
     @ManyToOne
     @JoinColumn(name = "category_id")
-    private PostCategory category;
+    private PostCategoryEntity category;
 
     private String author;
 
@@ -40,10 +38,4 @@ public class Post {
 
     private Boolean active = true;
 
-    @CreationTimestamp
-    @Column(updatable=false)
-    private Instant createdAt;
-
-    @UpdateTimestamp
-    private Instant updatedAt;
 }

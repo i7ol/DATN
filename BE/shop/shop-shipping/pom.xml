@@ -18,12 +18,12 @@
         <!-- Dùng chung cho tất cả module -->
         <dependency>
             <groupId>com.datn</groupId>
-            <artifactId>shop-core</artifactId>
+            <artifactId>shop-database</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.datn</groupId>
-            <artifactId>shop-order</artifactId>
+            <artifactId>shop-object</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
@@ -44,6 +44,16 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
         </dependency>
 
     </dependencies>

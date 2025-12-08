@@ -1,9 +1,9 @@
 package com.datn.shopcms.service;
 
-import com.datn.shopcms.dto.request.MediaRequest;
-import com.datn.shopcms.dto.response.MediaResponse;
-import com.datn.shopcms.entity.Media;
-import com.datn.shopcms.repository.MediaRepository;
+import com.datn.shopobject.dto.request.MediaRequest;
+import com.datn.shopobject.dto.response.MediaResponse;
+import com.datn.shopdatabase.entity.MediaEntity;
+import com.datn.shopdatabase.repository.MediaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class MediaService {
 
-    private final MediaRepository mediaRepository;
+    private  MediaRepository mediaRepository;
 
     @Value("${app.media.upload-dir}")
     private String uploadDir;
@@ -59,7 +59,7 @@ public class MediaService {
                     "Không thể lưu file '" + originalName + "' vào '" + filePath + "': " + e.getMessage());
         }
 
-        Media media = Media.builder()
+        MediaEntity media = MediaEntity.builder()
                 .fileName(fileName)
                 .url("/media/" + fileName)
                 .contentType(file.getContentType())
@@ -79,7 +79,7 @@ public class MediaService {
     // CRUD bằng JSON request
     public MediaResponse create(MediaRequest req) {
         try {
-            Media media = Media.builder()
+            MediaEntity media = MediaEntity.builder()
                     .fileName(req.fileName())
                     .url(req.url())
                     .contentType(req.contentType())
@@ -94,7 +94,7 @@ public class MediaService {
     }
 
     public MediaResponse update(Long id, MediaRequest req) {
-        Media media = mediaRepository.findById(id)
+        MediaEntity media = mediaRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "Media không tồn tại với id=" + id));
 
@@ -114,7 +114,7 @@ public class MediaService {
     }
 
     public void delete(Long id) {
-        Media media = mediaRepository.findById(id)
+        MediaEntity media = mediaRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "Không tìm thấy media với id=" + id));
         try {
@@ -136,7 +136,7 @@ public class MediaService {
         }
     }
 
-    private MediaResponse map(Media m) {
+    private MediaResponse map(MediaEntity m) {
         return new MediaResponse(
                 m.getId(),
                 m.getFileName(),

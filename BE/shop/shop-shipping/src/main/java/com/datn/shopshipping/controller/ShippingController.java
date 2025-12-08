@@ -1,8 +1,8 @@
 package com.datn.shopshipping.controller;
 
-import com.datn.shopshipping.dto.request.ShippingRequest;
-import com.datn.shopshipping.dto.response.ShippingResponse;
-import com.datn.shopshipping.entity.ShippingOrder;
+import com.datn.shopobject.dto.request.ShippingRequest;
+import com.datn.shopobject.dto.response.ShippingResponse;
+import com.datn.shopdatabase.entity.ShippingOrderEntity;
 import com.datn.shopshipping.service.ShippingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -16,17 +16,17 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ShippingController {
 
-    private final ShippingService shippingService;
+    private  ShippingService shippingService;
 
     @PostMapping
     public ShippingResponse create(@RequestBody ShippingRequest request) {
-        ShippingOrder shippingOrder = shippingService.create(request);
+        ShippingOrderEntity shippingOrder = shippingService.create(request);
         return toResponse(shippingOrder);
     }
 
     @PutMapping("/update-status/{id}")
-    public ShippingResponse updateStatus(@PathVariable("id") Long id, @RequestParam(name = "status") ShippingOrder.Status status) {
-        ShippingOrder shippingOrder = shippingService.updateStatus(id, status);
+    public ShippingResponse updateStatus(@PathVariable("id") Long id, @RequestParam(name = "status") ShippingOrderEntity.Status status) {
+        ShippingOrderEntity shippingOrder = shippingService.updateStatus(id, status);
         return toResponse(shippingOrder);
     }
 
@@ -42,7 +42,7 @@ public class ShippingController {
                 .collect(Collectors.toList());
     }
 
-    private ShippingResponse toResponse(ShippingOrder order) {
+    private ShippingResponse toResponse(ShippingOrderEntity order) {
         return ShippingResponse.builder()
                 .id(order.getId())
                 .orderId(order.getOrderId())

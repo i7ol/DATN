@@ -1,13 +1,9 @@
 package com.datn.shopdatabase.entity;
 
-import com.datn.shopnotification.enums.NotificationChannel;
-import com.datn.shopnotification.enums.NotificationStatus;
+import com.datn.shopdatabase.enums.NotificationChannel;
+import com.datn.shopdatabase.enums.NotificationStatus;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-
-import java.time.Instant;
 
 @Entity
 @Table(name = "notifications")
@@ -16,7 +12,7 @@ import java.time.Instant;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Notification {
+public class NotificationEntity extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,7 +25,7 @@ public class Notification {
 
     private String title;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(name = "MESSAGE", columnDefinition = "CLOB")
     private String message;
 
     @Column(name = "read_flag", nullable = false, columnDefinition = "NUMBER(1,0) DEFAULT 0")
@@ -45,10 +41,5 @@ public class Notification {
     @Column(name = "broadcast", nullable = false, columnDefinition = "NUMBER(1,0) DEFAULT 0")
     private boolean broadcast = false;
 
-    @CreationTimestamp
-    @Column(updatable = false)
-    private Instant createdAt;
 
-    @UpdateTimestamp
-    private Instant updatedAt;
 }

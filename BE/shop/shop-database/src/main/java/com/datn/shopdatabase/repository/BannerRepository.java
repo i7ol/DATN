@@ -1,9 +1,12 @@
-package com.datn.shopcms.repository;
+package com.datn.shopdatabase.repository;
 
-import com.datn.shopdatabase.entity.Banner;
+
+import com.datn.shopdatabase.entity.BannerEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
-import java.util.List;
+import org.springframework.stereotype.Repository;
 
-public interface BannerRepository extends JpaRepository<Banner, Long> {
-    List<Banner> findByPositionAndActiveTrueOrderBySortOrderAsc(String position);
+import java.util.List;
+@Repository
+public interface BannerRepository extends JpaRepository<BannerEntity, Long> {
+    List<BannerEntity> findByPositionAndActiveTrueOrderBySortOrderAsc(String position);
 }

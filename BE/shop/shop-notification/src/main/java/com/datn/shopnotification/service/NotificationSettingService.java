@@ -1,8 +1,9 @@
 package com.datn.shopnotification.service;
 
-import com.datn.shopnotification.entity.NotificationSetting;
+
+import com.datn.shopdatabase.entity.NotificationSettingEntity;
 
 public interface NotificationSettingService {
-    NotificationSetting getByUser(Long userId);
-    NotificationSetting update(Long userId, NotificationSetting setting);
+    NotificationSettingEntity getByUser(Long userId);
+    NotificationSettingEntity update(Long userId, NotificationSettingEntity setting);
 }

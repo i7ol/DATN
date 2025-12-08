@@ -1,9 +1,10 @@
-package com.datn.shopcms.repository;
+package com.datn.shopdatabase.repository;
 
-import com.datn.shopdatabase.entity.PostCategory;
+
+import com.datn.shopdatabase.entity.PostCategoryEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
-public interface PostCategoryRepository extends JpaRepository<PostCategory, Long> {
-    Optional<PostCategory> findBySlug(String slug);
+public interface PostCategoryRepository extends JpaRepository<PostCategoryEntity, Long> {
+    Optional<PostCategoryEntity> findBySlug(String slug);
 }
