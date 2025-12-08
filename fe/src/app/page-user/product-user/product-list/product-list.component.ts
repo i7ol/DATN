@@ -1,195 +1,135 @@
-// import { Component, OnInit } from '@angular/core';
-// import { ProductControllerService, ProductResponse } from 'src/app/api';
-// import { CategoryControllerService } from 'src/app/api';
+import { Component, OnInit, Inject } from '@angular/core';
+import {
+  ProductResponse,
+  PageProductResponse,
+  ProductUserControllerService,
+} from 'src/app/api/user';
+import { Router } from '@angular/router';
 
-// @Component({
-//   selector: 'product-list',
-//   templateUrl: './product-list.component.html',
-//   styleUrls: ['./product-list.component.scss'],
-// })
-// export class ProductListComponent implements OnInit {
-//   products: ProductResponse[] = [];
-//   categories: { id: number; name: string }[] = [];
-//   loading = false;
+@Component({
+  selector: 'product-list',
+  templateUrl: './product-list.component.html',
+  styleUrls: ['./product-list.component.scss'],
+})
+export class ProductListComponent implements OnInit {
+  products: ProductResponse[] = [];
+  loading = false;
 
-//   showForm = false;
-//   editingProduct: ProductResponse | null = null;
-//   selectedFiles: File[] = [];
-//   previewUrls: string[] = []; // preview tạm khi chọn file
+  selectedProduct: ProductResponse | null = null;
+  showModal = false;
 
-//   form: any = {
-//     name: '',
-//     sku: '',
-//     price: 0,
-//     importPrice: 0,
-//     categoryId: null,
-//     imageUrl: '',
-//   };
+  // Pagination
+  currentPage = 0;
+  pageSize = 20;
+  totalItems = 0;
 
-//   constructor(
-//     private productApi: ProductControllerService,
-//     private categoryApi: CategoryControllerService
-//   ) {}
+  private MINIO_URL = 'http://localhost:9000/shop'; // URL MinIO của bạn
 
-//   ngOnInit(): void {
-//     this.loadProducts();
-//     this.loadCategories();
-//   }
+  constructor(
+    private productApi: ProductUserControllerService,
+    private router: Router
+  ) {}
 
-//   // ================= LOAD PRODUCTS =================
-//   loadProducts() {
-//     this.loading = true;
-//     this.productApi.getAllProducts('response').subscribe({
-//       next: (resp: any) => {
-//         const body = resp.body;
-//         if (body instanceof Blob) {
-//           body.text().then((text) => {
-//             try {
-//               const json = JSON.parse(text);
-//               this.products = Array.isArray(json) ? json : json.data || [];
-//             } catch (e) {
-//               console.error('Parse products JSON failed', e);
-//               this.products = [];
-//             } finally {
-//               this.loading = false;
-//             }
-//           });
-//         } else {
-//           this.products = Array.isArray(body) ? body : body.data || [];
-//           this.loading = false;
-//         }
-//       },
-//       error: (err) => {
-//         console.error(err);
-//         this.loading = false;
-//       },
-//     });
-//   }
+  ngOnInit(): void {
+    this.loadProducts();
+  }
 
-//   // ================= LOAD CATEGORIES =================
-//   loadCategories() {
-//     this.categoryApi.getAllCate('response').subscribe({
-//       next: (resp: any) => {
-//         const body = resp.body;
-//         let arr: any[] = [];
-//         if (body instanceof Blob) {
-//           body.text().then((text) => {
-//             try {
-//               const json = JSON.parse(text);
-//               arr = Array.isArray(json) ? json : json.data || [];
-//               this.categories = arr
-//                 .filter((c: any) => c.id != null && c.name != null)
-//                 .map((c: any) => ({ id: c.id, name: c.name }));
-//             } catch (e) {
-//               console.error('Parse categories JSON failed', e);
-//               this.categories = [];
-//             }
-//           });
-//         } else {
-//           arr = Array.isArray(body) ? body : body.data || [];
-//           this.categories = arr
-//             .filter((c: any) => c.id != null && c.name != null)
-//             .map((c: any) => ({ id: c.id, name: c.name }));
-//         }
-//       },
-//       error: (err) => console.error(err),
-//     });
-//   }
+  /** ---------------------------
+   * Chuẩn hóa URL ảnh
+   * --------------------------- */
+  private mapImageUrls(product: ProductResponse): ProductResponse {
+    if (product.images) {
+      product.images = product.images.map((img: any) => ({
+        ...img,
+        url: img.url
+          ? img.url // API trả full URL
+          : img.path
+          ? `${this.MINIO_URL}/${img.path}` // API chỉ trả path → build URL
+          : '',
+      }));
+    }
+    return product;
+  }
 
-//   getCategoryName(categoryId: number | null): string {
-//     if (!categoryId) return 'Chưa chọn';
-//     const cat = this.categories.find((c) => c.id === categoryId);
-//     return cat ? cat.name : 'Chưa chọn';
-//   }
+  /** ---------------------------
+   * Load danh sách sản phẩm
+   * --------------------------- */
+  loadProducts(page: number = 0, size: number = this.pageSize) {
+    this.loading = true;
 
-//   // ================= FORM HANDLERS =================
-//   openAddForm() {
-//     this.editingProduct = null;
-//     this.showForm = true;
-//     this.form = {
-//       name: '',
-//       sku: '',
-//       price: 0,
-//       importPrice: 0,
-//       categoryId: null,
-//       imageUrl: '',
-//     };
-//     this.selectedFiles = [];
-//     this.previewUrls = [];
-//   }
+    this.productApi.getAllProducts(page, size, 'response').subscribe({
+      next: (resp: any) => {
+        const onBody = (body: any) => {
+          const data: PageProductResponse = body;
 
-//   editProduct(product: ProductResponse) {
-//     this.editingProduct = product;
-//     this.showForm = true;
-//     this.form = {
-//       name: product.name,
-//       sku: product.sku,
-//       price: product.price,
-//       importPrice: product.importPrice,
-//       categoryId: product.categoryId || null,
-//       imageUrl: product.images?.[0]?.url || '',
-//     };
-//     this.selectedFiles = [];
-//     this.previewUrls = [];
-//   }
+          this.products = (data.content || []).map((p) => this.mapImageUrls(p));
 
-//   cancelForm() {
-//     this.showForm = false;
-//     this.editingProduct = null;
-//     this.selectedFiles = [];
-//     this.previewUrls = [];
-//   }
+          this.totalItems = data.totalElements || this.products.length;
+          this.currentPage = data.number || 0;
+          this.pageSize = data.size || this.pageSize;
+          this.loading = false;
+        };
 
-//   onFilesSelected(event: any) {
-//     this.selectedFiles = Array.from(event.target.files);
-//     this.previewUrls = this.selectedFiles.map((file) =>
-//       URL.createObjectURL(file)
-//     );
-//   }
+        // Trường hợp backend trả Blob
+        if (resp.body instanceof Blob) {
+          resp.body.text().then((text: string) => {
+            try {
+              const json = JSON.parse(text);
+              onBody(json);
+            } catch (e) {
+              console.error('Parse JSON failed:', e);
+              this.loading = false;
+            }
+          });
+        } else {
+          onBody(resp.body);
+        }
+      },
 
-//   // ================= SAVE PRODUCT =================
-//   saveProduct() {
-//     // object JSON đúng kiểu generator yêu cầu
-//     const productData = {
-//       name: this.form.name,
-//       sku: this.form.sku,
-//       price: this.form.price,
-//       importPrice: this.form.importPrice,
-//       categoryId: this.form.categoryId ? Number(this.form.categoryId) : null,
-//     };
+      error: (err) => {
+        console.error('Load products error:', err);
+        this.loading = false;
+      },
+    });
+  }
 
-//     // files là mảng Blob[]
-//     const files: Blob[] = this.selectedFiles;
+  /** ---------------------------
+   * Pagination
+   * --------------------------- */
+  get totalPages(): number {
+    return Math.ceil(this.totalItems / this.pageSize);
+  }
 
-//     if (this.editingProduct) {
-//       // update
-//       this.productApi
-//         .updateProduct(this.editingProduct.id!, productData, files, 'body')
-//         .subscribe({
-//           next: () => {
-//             this.loadProducts();
-//             this.cancelForm();
-//           },
-//           error: (err) => console.error(err),
-//         });
-//     } else {
-//       // create
-//       this.productApi.createProduct(productData, files, 'body').subscribe({
-//         next: () => {
-//           this.loadProducts();
-//           this.cancelForm();
-//         },
-//         error: (err) => console.error(err),
-//       });
-//     }
-//   }
+  get totalPagesArray(): number[] {
+    return Array(this.totalPages);
+  }
 
-//   // ================= DELETE PRODUCT =================
-//   deleteProduct(id: number) {
-//     if (!confirm('Bạn có chắc muốn xóa sản phẩm này?')) return;
-//     this.productApi.deleteProduct(id).subscribe({
-//       next: () => this.loadProducts(),
-//       error: (err) => console.error(err),
-//     });
-//   }
-// }
+  prevPage() {
+    if (this.currentPage > 0) this.loadProducts(this.currentPage - 1);
+  }
+
+  nextPage() {
+    if (this.currentPage < this.totalPages - 1)
+      this.loadProducts(this.currentPage + 1);
+  }
+
+  goToPage(page: number) {
+    if (page >= 0 && page < this.totalPages) this.loadProducts(page);
+  }
+
+  /** ---------------------------
+   * Xem chi tiết sản phẩm
+   * --------------------------- */
+  viewProductDetail(product: ProductResponse) {
+    this.router.navigate(['/product', product.id]);
+  }
+
+  closeModal() {
+    this.showModal = false;
+    this.selectedProduct = null;
+  }
+
+  addToCart(product: ProductResponse) {
+    console.log('Thêm vào giỏ hàng:', product);
+  }
+}

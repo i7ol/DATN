@@ -1,0 +1,42 @@
+.size-btn {
+  width: 72px;
+  height: 40px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: white;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: 0.2s;
+}
+
+.size-btn:hover {
+  transform: scale(1.03);
+}
+
+.size-btn.active {
+  border: 2px solid #000;
+}
+
+/* Góc tam giác + dấu check */
+.corner-check {
+  width: 0;
+  height: 0;
+  border-bottom: 18px solid #d90429; /* màu đỏ */
+  border-left: 18px solid transparent;
+  position: absolute;
+  bottom: 0;
+  right: 0;
+}
+
+/* Dấu check trắng */
+.corner-check::after {
+  content: "✓";
+  position: absolute;
+  bottom: -15px;
+  right: 2px;
+  font-size: 10px;
+  color: white;
+}

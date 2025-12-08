@@ -5,7 +5,7 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
-    "api-docs": "npx openapi-generator-cli generate -i ./api-docs.yaml -g typescript-angular -o ./src/app/api --additional-properties=ngVersion=12,supportsES6=true",
+    "api-docs": "npx openapi-generator-cli generate -i ./api-docs-admin.yaml -g typescript-angular -o ./src/app/api/admin --additional-properties=ngVersion=12,supportsES6=true",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },

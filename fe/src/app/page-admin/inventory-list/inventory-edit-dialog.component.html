@@ -1,0 +1,30 @@
+<h2 mat-dialog-title>
+  {{ data ? "Chỉnh sửa tồn kho" : "Thêm tồn kho" }}
+</h2>
+
+<mat-dialog-content [formGroup]="form">
+  <mat-form-field appearance="outline" class="full">
+    <mat-label>Variant ID</mat-label>
+    <input matInput formControlName="variantId" />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full">
+    <mat-label>Tồn kho</mat-label>
+    <input type="number" matInput formControlName="stock" />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full">
+    <mat-label>Giá bán</mat-label>
+    <input type="number" matInput formControlName="sellingPrice" />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full">
+    <mat-label>Giá nhập</mat-label>
+    <input type="number" matInput formControlName="importPrice" />
+  </mat-form-field>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="close()">Hủy</button>
+  <button mat-raised-button color="primary" (click)="save()">Lưu</button>
+</mat-dialog-actions>
