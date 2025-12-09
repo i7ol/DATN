@@ -14,5 +14,12 @@ services:
     volumes:
       - minio_data:/data
 
+  redis:
+    image: redis:6.2.7
+    container_name: redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
 volumes:
   minio_data:

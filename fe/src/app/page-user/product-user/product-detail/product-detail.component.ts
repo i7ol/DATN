@@ -6,7 +6,7 @@ import {
   ProductResponse,
   VariantResponse,
 } from 'src/app/api/user';
-
+import { CartService } from '../../cart/cart.service';
 @Component({
   selector: 'product-detail',
   templateUrl: './product-detail.component.html',
@@ -25,7 +25,8 @@ export class ProductDetailComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private productApi: ProductUserControllerService,
-    private sanitizer: DomSanitizer
+    private sanitizer: DomSanitizer,
+    private cartService: CartService
   ) {}
 
   safeUrl(url: string): SafeUrl {
@@ -51,6 +52,13 @@ export class ProductDetailComponent implements OnInit {
         error: (err) => console.error('Lỗi load product:', err),
       });
     }
+  }
+  addToCart() {
+    if (!this.product) return;
+
+    this.cartService.addItem(this.product.id!, 1).subscribe(() => {
+      alert('Đã thêm vào giỏ hàng');
+    });
   }
 
   private mapProduct(data: ProductResponse) {
@@ -97,9 +105,5 @@ export class ProductDetailComponent implements OnInit {
 
   selectImage(url: string) {
     this.selectedImage = url;
-  }
-
-  addToCart(product: ProductResponse) {
-    console.log('Thêm vào giỏ hàng:', product);
   }
 }

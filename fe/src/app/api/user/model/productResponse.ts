@@ -21,6 +21,8 @@ export interface ProductResponse {
     categoryId?: number;
     categoryName?: string;
     images?: Array<ImageDTO>;
+    colors?: Array<string>;
+    sizes?: Array<string>;
     variants?: Array<VariantResponse>;
 }
 

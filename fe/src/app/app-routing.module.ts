@@ -4,6 +4,7 @@ import { ProductListAdminComponent } from './page-admin/product-admin/product-li
 import { ProductListComponent } from './page-user/product-user/product-list/product-list.component';
 import { ProductDetailComponent } from './page-user/product-user/product-detail/product-detail.component';
 import { InventoryListComponent } from './page-admin/inventory-list/inventory-list.component';
+import { CartComponent } from './page-user/cart/cart.component';
 
 const routes: Routes = [
   {
@@ -22,6 +23,10 @@ const routes: Routes = [
   {
     path: 'inventory',
     component: InventoryListComponent,
+  },
+  {
+    path: 'cart',
+    component: CartComponent,
   },
 ];
 

@@ -1,59 +1,181 @@
-<div class="bg-white px-6 lg:px-20 py-4 shadow-md poppins-medium">
-  <!-- TOP BAR -->
-  <div class="flex items-center justify-between border-b border-gray-100 pb-3">
-    <!-- Left -->
-    <div class="flex items-center gap-6 text-sm text-gray-600">
-      <div class="flex items-center gap-2">
-        <img src="./assets/img/location.png" class="w-4 h-4 opacity-70" />
-        <span>Việt Nam</span>
+<header
+  class="sticky top-0 z-50 bg-white transition-shadow duration-300"
+  [class.shadow-md]="isScrolled"
+>
+  <div class="max-w-screen-xl mx-auto px-6 lg:px-20 py-4 poppins-medium">
+    <!-- TOP BAR -->
+    <div
+      class="flex items-center justify-between border-b border-gray-100 pb-3"
+    >
+      <!-- LEFT -->
+      <div class="flex items-center gap-6 text-sm text-gray-600">
+        <div class="flex items-center gap-2">
+          <img src="./assets/img/location.png" class="w-4 h-4 opacity-70" />
+          <span>Việt Nam</span>
+        </div>
+        <span class="text-gray-300">|</span>
+        <div class="flex items-center gap-2">
+          <img src="./assets/img/phone-call.png" class="w-4 h-4 opacity-70" />
+          <span>0398 287 981</span>
+        </div>
       </div>
 
-      <span class="text-gray-300">|</span>
+      <!-- CENTER -->
+      <div class="text-xl font-semibold tracking-widest text-gray-900">
+        WUKONG
+      </div>
 
-      <div class="flex items-center gap-2">
-        <img src="./assets/img/phone-call.png" class="w-4 h-4 opacity-70" />
-        <span>0398 287 981</span>
+      <!-- RIGHT -->
+      <div class="flex items-center gap-6 text-sm text-gray-600">
+        <!-- SEARCH -->
+        <div class="cursor-pointer hover:text-black transition">
+          <img src="./assets/img/search.png" class="w-4 h-4 opacity-70" />
+        </div>
+
+        <!-- ACCOUNT -->
+        <div
+          class="flex items-center gap-2 cursor-pointer hover:text-black transition"
+        >
+          <img src="./assets/img/user.png" class="w-4 h-4 opacity-70" />
+          <span>Tài khoản</span>
+        </div>
+
+        <span class="text-gray-300">|</span>
+
+        <!-- CART - ĐÃ SỬA -->
+        <div
+          class="relative"
+          (mouseenter)="onCartMouseEnter()"
+          (mouseleave)="onCartMouseLeave()"
+        >
+          <!-- TRIGGER -->
+          <div
+            class="flex items-center gap-2 cursor-pointer font-medium hover:text-black"
+          >
+            <a routerLink="/cart" class="text-sm font-medium">Giỏ hàng</a>
+            <div class="relative">
+              <img src="./assets/img/cart.png" class="w-4 h-4 opacity-70" />
+              <span
+                *ngIf="cartCount$ | async as count"
+                class="absolute -top-1 -right-2 w-4 h-4 flex items-center justify-center text-[10px] bg-red-500 text-white rounded-full"
+              >
+                {{ count }}
+              </span>
+            </div>
+          </div>
+
+          <!-- DROPDOWN - ĐÃ SỬA -->
+          <div
+            *ngIf="isCartHover"
+            class="absolute right-0 top-full mt-3 w-96 bg-white shadow-xl rounded-xl border z-50 transition-all duration-200"
+            (mouseenter)="onDropdownMouseEnter()"
+            (mouseleave)="onDropdownMouseLeave()"
+          >
+            <ng-container *ngIf="cartItems$ | async as items">
+              <!-- EMPTY -->
+              <div
+                *ngIf="items.length === 0"
+                class="py-10 flex flex-col items-center gap-4 text-gray-500"
+              >
+                <img
+                  src="./assets/img/empty-cart.webp"
+                  class="w-32 opacity-80"
+                />
+                <button
+                  routerLink="/products"
+                  class="px-6 py-2 bg-black text-white rounded hover:bg-gray-800 transition"
+                >
+                  Tiếp tục mua sắm
+                </button>
+              </div>
+
+              <!-- ITEMS -->
+              <div
+                *ngIf="items.length > 0"
+                class="max-h-[360px] overflow-y-auto px-4 py-3"
+              >
+                <div
+                  *ngFor="let item of items"
+                  class="flex gap-3 py-3 border-b last:border-0"
+                >
+                  <img
+                    [src]="item.images?.[0]?.url || '/assets/no-image.png'"
+                    class="w-14 h-14 object-cover rounded border"
+                  />
+                  <div class="flex-1">
+                    <div class="text-sm font-medium line-clamp-2">
+                      {{ item.productName }}
+                    </div>
+                    <div class="text-xs text-gray-500 mt-1">
+                      {{ item.quantity }} × {{ item.price | number }} đ
+                    </div>
+                  </div>
+                  <div class="text-sm font-semibold whitespace-nowrap">
+                    {{ item.quantity * item.price | number }} đ
+                  </div>
+                </div>
+              </div>
+
+              <!-- FOOTER -->
+              <div class="border-t px-4 py-3">
+                <div class="flex justify-between text-sm font-semibold mb-3">
+                  <span>Tổng cộng</span>
+                  <span>{{ totalPrice$ | async | number }} đ</span>
+                </div>
+                <div class="flex gap-2">
+                  <button
+                    routerLink="/cart"
+                    class="flex-1 py-2 bg-black text-white rounded hover:bg-gray-800"
+                  >
+                    Xem giỏ hàng
+                  </button>
+                  <button
+                    routerLink="/#"
+                    class="flex-1 py-2 border rounded hover:bg-gray-100"
+                  >
+                    Thanh toán
+                  </button>
+                </div>
+              </div>
+            </ng-container>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- Center -->
-    <div class="text-xl font-semibold tracking-widest text-gray-900">
-      WUKONG
-    </div>
-
-    <!-- Right -->
-    <div class="flex items-center gap-6 text-sm text-gray-600">
-      <div
-        class="flex items-center gap-2 cursor-pointer hover:text-gray-900 transition"
+    <!-- MENU -->
+    <div
+      class="flex items-center justify-center gap-10 pt-3 text-sm tracking-wide text-gray-600"
+    >
+      <a
+        routerLink="/"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+        class="menu-item relative cursor-pointer"
       >
-        <img src="./assets/img/user.png" class="w-4 h-4 opacity-70" />
-        <span>Tài khoản</span>
-      </div>
-
-      <span class="text-gray-300">|</span>
-
-      <div
-        class="flex items-center gap-2 cursor-pointer hover:text-gray-900 transition"
+        Trang chủ <span class="menu-line"></span>
+      </a>
+      <a
+        routerLink="/products"
+        routerLinkActive="active"
+        class="menu-item relative cursor-pointer"
       >
-        <span>Giỏ hàng</span>
-        <img src="./assets/img/cart.png" class="w-4 h-4 opacity-70" />
-      </div>
+        Sản phẩm <span class="menu-line"></span>
+      </a>
+      <a
+        routerLink="/blog"
+        routerLinkActive="active"
+        class="menu-item relative cursor-pointer"
+      >
+        Blog <span class="menu-line"></span>
+      </a>
+      <a
+        routerLink="/contact"
+        routerLinkActive="active"
+        class="menu-item relative cursor-pointer"
+      >
+        Liên hệ <span class="menu-line"></span>
+      </a>
     </div>
   </div>
-
-  <!-- MENU -->
-  <div
-    class="flex items-center justify-center gap-10 pt-3 text-sm tracking-wide text-gray-600"
-  >
-    <div class="relative cursor-pointer hover:text-gray-900 transition">
-      Trang chủ
-      <span class="absolute -bottom-1 left-0 w-full h-0.5 bg-gray-900"></span>
-    </div>
-
-    <div class="cursor-pointer hover:text-gray-900 transition">Sản phẩm</div>
-
-    <div class="cursor-pointer hover:text-gray-900 transition">Blog</div>
-
-    <div class="cursor-pointer hover:text-gray-900 transition">Liên hệ</div>
-  </div>
-</div>
+</header>

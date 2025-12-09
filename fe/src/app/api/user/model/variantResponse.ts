@@ -18,5 +18,6 @@ export interface VariantResponse {
     availableQuantity?: number;
     importPrice?: number;
     sellingPrice?: number;
+    thumbnail?: string;
 }
 

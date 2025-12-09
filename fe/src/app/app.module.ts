@@ -29,6 +29,7 @@ import { MatSelectModule } from '@angular/material/select'; // nếu có select
 
 import { InventoryEditDialogComponent } from './page-admin/inventory-list/inventory-edit-dialog.component';
 import { HeaderComponent } from './shared/header/header.component';
+import { CartComponent } from './page-user/cart/cart.component';
 @NgModule({
   declarations: [
     AppComponent,
@@ -38,6 +39,7 @@ import { HeaderComponent } from './shared/header/header.component';
     InventoryListComponent,
     InventoryEditDialogComponent,
     HeaderComponent,
+    CartComponent,
   ],
   imports: [
     BrowserModule,

@@ -4,6 +4,7 @@ import {
   PageProductResponse,
   ProductUserControllerService,
 } from 'src/app/api/user';
+import { CartService } from '../../cart/cart.service';
 import { Router } from '@angular/router';
 
 @Component({
@@ -27,11 +28,17 @@ export class ProductListComponent implements OnInit {
 
   constructor(
     private productApi: ProductUserControllerService,
-    private router: Router
+    private router: Router,
+    private cartService: CartService
   ) {}
 
   ngOnInit(): void {
     this.loadProducts();
+  }
+  addToCart(product: ProductResponse) {
+    this.cartService.addItem(product.id!, 1).subscribe(() => {
+      alert('Đã thêm vào giỏ hàng');
+    });
   }
 
   /** ---------------------------
@@ -127,9 +134,5 @@ export class ProductListComponent implements OnInit {
   closeModal() {
     this.showModal = false;
     this.selectedProduct = null;
-  }
-
-  addToCart(product: ProductResponse) {
-    console.log('Thêm vào giỏ hàng:', product);
   }
 }

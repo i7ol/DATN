@@ -49,8 +49,13 @@ public class SecurityConfig {
 //            "/api/orders",
 //            "/api/orders/**",
 //
-//            "/api/carts",
-//            "/api/carts/**",
+            "/api/user/cart",
+            "/api/user/cart/add",
+            "/api/user/cart/total",
+            "/api/user/cart/update",
+            "/api/user/cart/remove",
+            "/api/user/cart/merge",
+            "/api/user/cart/**",
 //
 //            "/api/inventory",
 //            "/api/inventory/**",

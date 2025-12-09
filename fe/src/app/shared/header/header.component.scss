@@ -1,4 +1,85 @@
+/* Logo image */
 .img-logo {
   width: 18px;
   height: 18px;
+}
+
+/* Menu item styles */
+.menu-item {
+  color: #6b7280;
+  transition: color 0.3s;
+
+  &:hover {
+    color: #111827;
+  }
+}
+
+.menu-line {
+  position: absolute;
+  left: 0;
+  bottom: -4px;
+  height: 2px;
+  width: 0;
+  background-color: #111827;
+  transition: width 0.3s ease;
+}
+
+.menu-item:hover .menu-line {
+  width: 100%;
+}
+
+.menu-item.active {
+  color: #111827;
+
+  .menu-line {
+    width: 100%;
+  }
+}
+
+/* Text clamp for product names */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Optional: Add smooth transition for cart dropdown */
+:host ::ng-deep .cart-dropdown {
+  animation: fadeInDown 0.2s ease-out;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Optional: Improve hover states */
+.cursor-pointer {
+  &:hover {
+    img {
+      opacity: 1;
+    }
+  }
+
+  img {
+    transition: opacity 0.2s ease;
+  }
+}
+
+/* Ensure dropdown is above everything */
+.z-50 {
+  z-index: 50;
+}
+
+/* Shadow on scroll */
+.shadow-md {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
