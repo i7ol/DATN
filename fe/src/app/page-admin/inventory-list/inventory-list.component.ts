@@ -1,6 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Inject } from '@angular/core';
+import { InventoryControllerService } from 'src/app/api/admin';
 import {
-  InventoryControllerService,
   InventoryResponse,
   InventoryRequest,
   ImportRequest,
@@ -9,7 +9,7 @@ import {
 } from 'src/app/api/admin';
 
 @Component({
-  selector: 'inventory-list',
+  selector: 'app-inventory-list',
   templateUrl: './inventory-list.component.html',
   styleUrls: ['./inventory-list.component.scss'],
 })
@@ -35,7 +35,10 @@ export class InventoryListComponent implements OnInit {
   showDelete = false;
   deleteData: InventoryResponse | null = null;
 
-  constructor(private api: InventoryControllerService) {}
+  constructor(
+    @Inject(InventoryControllerService)
+    private api: InventoryControllerService
+  ) {}
 
   ngOnInit(): void {
     this.loadData();

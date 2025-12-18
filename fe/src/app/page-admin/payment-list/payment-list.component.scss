@@ -1,0 +1,40 @@
+/* Custom table styles */
+table {
+  min-width: 100%;
+}
+
+th.mat-header-cell {
+  font-weight: 600;
+  color: #374151;
+  background-color: #f9fafb;
+}
+
+td.mat-cell {
+  vertical-align: middle;
+}
+
+tr.mat-row:hover {
+  background-color: #f3f4f6;
+}
+
+/* Status badge styling */
+.status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+/* Responsive table */
+@media (max-width: 768px) {
+  .mobile-hidden {
+    display: none;
+  }
+
+  .mat-table {
+    font-size: 0.875rem;
+  }
+}

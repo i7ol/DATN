@@ -19,9 +19,9 @@ public class OrderItemEntity extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long productId;         // snapshot product id
-    private String productName;     // snapshot product name
-    private BigDecimal price;       // price * quantity
+    private Long productId;
+    private String productName;
+    private BigDecimal price;
     private int quantity;
 
     @ManyToOne(fetch = FetchType.LAZY)

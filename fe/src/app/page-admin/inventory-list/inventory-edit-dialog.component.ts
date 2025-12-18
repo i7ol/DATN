@@ -4,7 +4,7 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { InventoryResponse } from 'src/app/api/admin';
 
 @Component({
-  selector: 'inventory-edit-dialog',
+  selector: 'app-inventory-edit-dialog',
   templateUrl: './inventory-edit-dialog.component.html',
   styleUrls: ['./inventory-edit-dialog.component.scss'],
 })

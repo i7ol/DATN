@@ -13,10 +13,11 @@ public class WebConfig {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/**")
-                        .allowCredentials(true)
-                        .allowedOrigins("http://localhost:8080", "http://localhost:8081")
-                        .allowedMethods("GET", "POST", "PUT", "DELETE");
+                // Đã config trong SecurityConfig, có thể bỏ hoặc thêm path cụ thể
+                registry.addMapping("/api/**")
+                        .allowedOrigins("http://localhost:4200")
+                        .allowedMethods("GET", "POST", "PUT", "DELETE")
+                        .allowCredentials(true);
             }
         };
     }

@@ -1,45 +1,86 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-// import { ProductListComponent } from './page-user/product-user/product-list/product-list.component';
-import { HttpClientModule } from '@angular/common/http';
-import { ApiAdminModule } from './api/admin';
-import { ApiUserModule } from './api/user';
-import { MatPaginatorModule } from '@angular/material/paginator';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { FormsModule } from '@angular/forms';
-import { ProductListComponent } from './page-user/product-user/product-list/product-list.component';
-import { ProductListAdminComponent } from './page-admin/product-admin/product-list-admin/product-list-admin.component';
-import { ProductDetailComponent } from './page-user/product-user/product-detail/product-detail.component';
-import { InventoryListComponent } from './page-admin/inventory-list/inventory-list.component';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { RouterModule, Routes } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule } from '@angular/forms';
+import { ToastrModule } from 'ngx-toastr';
 
-// Angular Material
+// Material Modules
+import { MatIconModule } from '@angular/material/icon';
+import { MatTabsModule } from '@angular/material/tabs';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatTableModule } from '@angular/material/table';
-import { MatIconModule } from '@angular/material/icon'; // nếu có icon
-import { MatSortModule } from '@angular/material/sort'; // nếu muốn sort
-import { MatSelectModule } from '@angular/material/select'; // nếu có select
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatSortModule } from '@angular/material/sort';
+import { MatSelectModule } from '@angular/material/select';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatCardModule } from '@angular/material/card';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatBadgeModule } from '@angular/material/badge';
+import { MatStepperModule } from '@angular/material/stepper';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatRadioModule } from '@angular/material/radio';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
-import { InventoryEditDialogComponent } from './page-admin/inventory-list/inventory-edit-dialog.component';
+// Components-admin
 import { HeaderComponent } from './shared/header/header.component';
+import { AdminDashboardComponent } from './page-admin/admin-dashboard/admin-dashboard.component';
+import { OrderListComponent } from './page-admin/order-admin/order-list/order-list.component';
+import { OrderDetailComponent } from './page-admin/order-admin/order-detail/order-detail.component';
+import { OrderAdminControllerService } from './api/admin/api/orderAdminController.service';
+import { ShippingListComponent } from './page-admin/shipping-list/shipping-list.component';
+import { ShippingManagementComponent } from './page-admin/shipping-management/shipping-management.component';
+import { SimpleDialogComponent } from './shared/components/simple-dialog/simple-dialog.component';
+import { ShippingAdminControllerService } from './api/admin/api/shippingAdminController.service';
+import { StatusUpdateDialogComponent } from './shared/components/status-update-dialog/status-update-dialog.component';
+import { PaymentUpdateDialogComponent } from './shared/components/payment-update-dialog/payment-update-dialog.component';
+import { PaymentListComponent } from './page-admin/payment-list/payment-list.component';
+import { ProductListAdminComponent } from './page-admin/product-admin/product-list-admin/product-list-admin.component';
+import { InventoryListComponent } from './page-admin/inventory-list/inventory-list.component';
+
+// Components-user
 import { CartComponent } from './page-user/cart/cart.component';
+import { CheckoutComponent } from './page-user/checkout/checkout.component';
+import { ProductListComponent } from './page-user/product-user/product-list/product-list.component';
+import { ProductDetailComponent } from './page-user/product-user/product-detail/product-detail.component';
+
+// Guards & Interceptors
+import { AuthInterceptor } from './core/interceptors/auth.interceptor';
+import { AdminGuard } from './core/guards/admin.guard';
+import { AuthGuard } from './core/guards/auth.guard';
+import { AuthModalComponent } from './shared/components/auth-modal/auth-modal.component';
+
 @NgModule({
   declarations: [
     AppComponent,
+    AuthModalComponent,
+    HeaderComponent,
+    AdminDashboardComponent,
+    OrderListComponent,
+    OrderDetailComponent,
+    PaymentListComponent,
+    ShippingListComponent,
+    ShippingManagementComponent,
+    StatusUpdateDialogComponent,
+    PaymentUpdateDialogComponent,
+    CartComponent,
+    CheckoutComponent,
+    SimpleDialogComponent,
     ProductListAdminComponent,
+    InventoryListComponent,
     ProductListComponent,
     ProductDetailComponent,
-    InventoryListComponent,
-    InventoryEditDialogComponent,
-    HeaderComponent,
-    CartComponent,
   ],
   imports: [
     BrowserModule,
@@ -48,19 +89,46 @@ import { CartComponent } from './page-user/cart/cart.component';
     BrowserAnimationsModule,
     FormsModule,
     ReactiveFormsModule,
+    RouterModule,
     CommonModule,
+    // Material Modules
+    MatTableModule,
     MatPaginatorModule,
+    MatSortModule,
     MatFormFieldModule,
     MatInputModule,
+    MatSelectModule,
     MatButtonModule,
     MatDialogModule,
-    MatTableModule,
     MatIconModule,
-    MatSortModule,
-    MatSelectModule,
+    MatProgressSpinnerModule,
+    MatSnackBarModule,
+    MatTabsModule,
+    MatCardModule,
+    MatToolbarModule,
+    MatMenuModule,
+    MatBadgeModule,
+    MatStepperModule,
+    MatCheckboxModule,
+    MatRadioModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatTooltipModule,
+    ToastrModule.forRoot({
+      positionClass: 'toast-top-right',
+      timeOut: 3000,
+      closeButton: true,
+      progressBar: true,
+      preventDuplicates: true,
+    }),
   ],
-
-  providers: [],
+  providers: [
+    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
+    AuthGuard,
+    AdminGuard,
+    OrderAdminControllerService,
+    ShippingAdminControllerService,
+  ],
   bootstrap: [AppComponent],
 })
 export class AppModule {}

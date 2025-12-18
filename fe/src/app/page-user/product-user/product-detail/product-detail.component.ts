@@ -1,12 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import {
   ProductUserControllerService,
   ProductResponse,
   VariantResponse,
 } from 'src/app/api/user';
 import { CartService } from '../../cart/cart.service';
+
 @Component({
   selector: 'product-detail',
   templateUrl: './product-detail.component.html',
@@ -14,7 +14,7 @@ import { CartService } from '../../cart/cart.service';
 })
 export class ProductDetailComponent implements OnInit {
   product: ProductResponse | null = null;
-  selectedImage: string = '';
+  selectedImage = '';
 
   colors: string[] = [];
   sizes: string[] = [];
@@ -25,25 +25,18 @@ export class ProductDetailComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private productApi: ProductUserControllerService,
-    private sanitizer: DomSanitizer,
     private cartService: CartService
   ) {}
 
-  safeUrl(url: string): SafeUrl {
-    return this.sanitizer.bypassSecurityTrustUrl(url);
-  }
-
   ngOnInit(): void {
-    const idParam = this.route.snapshot.paramMap.get('id');
-    const id = idParam ? Number(idParam) : null;
+    const id = Number(this.route.snapshot.paramMap.get('id'));
 
-    if (id !== null) {
+    if (id) {
       this.productApi.getProduct(id, 'response').subscribe({
         next: (resp) => {
           if (resp.body instanceof Blob) {
             resp.body.text().then((text) => {
-              const data: ProductResponse = JSON.parse(text);
-              this.mapProduct(data);
+              this.mapProduct(JSON.parse(text));
             });
           } else {
             this.mapProduct(resp.body as ProductResponse);
@@ -53,6 +46,7 @@ export class ProductDetailComponent implements OnInit {
       });
     }
   }
+
   addToCart() {
     if (!this.product) return;
 
@@ -68,26 +62,21 @@ export class ProductDetailComponent implements OnInit {
       variants: data.variants || [],
     };
 
+    // ✅ image.url đã là full URL
     this.selectedImage =
-      this.product.images && this.product.images.length > 0
-        ? this.product.images[0].url
-        : '';
+      this.product.images.length > 0 ? this.product.images[0].url : '';
 
-    // Lấy list màu
     this.colors = Array.from(
-      new Set(this.product.variants?.map((v: VariantResponse) => v.color))
+      new Set(this.product.variants.map((v) => v.color))
     );
 
-    // Lấy list size ALL (ban đầu)
     this.sizes = Array.from(
-      new Set(this.product.variants?.map((v: VariantResponse) => v.sizeName))
+      new Set(this.product.variants.map((v) => v.sizeName))
     );
   }
 
   selectColor(color: string) {
     this.selectedColor = color;
-
-    // Lọc size theo màu
     this.sizes = Array.from(
       new Set(
         this.product?.variants
@@ -95,8 +84,7 @@ export class ProductDetailComponent implements OnInit {
           .map((v) => v.sizeName)
       )
     );
-
-    this.selectedSize = null; // Reset size
+    this.selectedSize = null;
   }
 
   selectSize(size: string) {

@@ -19,7 +19,7 @@ import { Observable }                                        from 'rxjs';
 // @ts-ignore
 import { CreateOrderRequest } from '../model/createOrderRequest';
 // @ts-ignore
-import { OrderEntity } from '../model/orderEntity';
+import { OrderResponse } from '../model/orderResponse';
 // @ts-ignore
 import { PaymentUpdateRequest } from '../model/paymentUpdateRequest';
 // @ts-ignore
@@ -47,9 +47,9 @@ export class OrderAdminControllerService extends BaseService {
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public createOrder(createOrderRequest: CreateOrderRequest, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<OrderEntity>;
-    public createOrder(createOrderRequest: CreateOrderRequest, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpResponse<OrderEntity>>;
-    public createOrder(createOrderRequest: CreateOrderRequest, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpEvent<OrderEntity>>;
+    public createOrder(createOrderRequest: CreateOrderRequest, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<OrderResponse>;
+    public createOrder(createOrderRequest: CreateOrderRequest, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpResponse<OrderResponse>>;
+    public createOrder(createOrderRequest: CreateOrderRequest, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpEvent<OrderResponse>>;
     public createOrder(createOrderRequest: CreateOrderRequest, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<any> {
         if (createOrderRequest === null || createOrderRequest === undefined) {
             throw new Error('Required parameter createOrderRequest was null or undefined when calling createOrder.');
@@ -89,7 +89,7 @@ export class OrderAdminControllerService extends BaseService {
 
         let localVarPath = `/api/admin/orders`;
         const { basePath, withCredentials } = this.configuration;
-        return this.httpClient.request<OrderEntity>('post', `${basePath}${localVarPath}`,
+        return this.httpClient.request<OrderResponse>('post', `${basePath}${localVarPath}`,
             {
                 context: localVarHttpContext,
                 body: createOrderRequest,
@@ -107,9 +107,9 @@ export class OrderAdminControllerService extends BaseService {
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public getAllOrders(observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<Array<OrderEntity>>;
-    public getAllOrders(observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpResponse<Array<OrderEntity>>>;
-    public getAllOrders(observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpEvent<Array<OrderEntity>>>;
+    public getAllOrders(observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<Array<OrderResponse>>;
+    public getAllOrders(observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpResponse<Array<OrderResponse>>>;
+    public getAllOrders(observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpEvent<Array<OrderResponse>>>;
     public getAllOrders(observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<any> {
 
         let localVarHeaders = this.defaultHeaders;
@@ -137,7 +137,7 @@ export class OrderAdminControllerService extends BaseService {
 
         let localVarPath = `/api/admin/orders`;
         const { basePath, withCredentials } = this.configuration;
-        return this.httpClient.request<Array<OrderEntity>>('get', `${basePath}${localVarPath}`,
+        return this.httpClient.request<Array<OrderResponse>>('get', `${basePath}${localVarPath}`,
             {
                 context: localVarHttpContext,
                 responseType: <any>responseType_,
@@ -154,9 +154,9 @@ export class OrderAdminControllerService extends BaseService {
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public getGuestOrders(observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<Array<OrderEntity>>;
-    public getGuestOrders(observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpResponse<Array<OrderEntity>>>;
-    public getGuestOrders(observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpEvent<Array<OrderEntity>>>;
+    public getGuestOrders(observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<Array<OrderResponse>>;
+    public getGuestOrders(observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpResponse<Array<OrderResponse>>>;
+    public getGuestOrders(observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpEvent<Array<OrderResponse>>>;
     public getGuestOrders(observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<any> {
 
         let localVarHeaders = this.defaultHeaders;
@@ -184,7 +184,7 @@ export class OrderAdminControllerService extends BaseService {
 
         let localVarPath = `/api/admin/orders/guests`;
         const { basePath, withCredentials } = this.configuration;
-        return this.httpClient.request<Array<OrderEntity>>('get', `${basePath}${localVarPath}`,
+        return this.httpClient.request<Array<OrderResponse>>('get', `${basePath}${localVarPath}`,
             {
                 context: localVarHttpContext,
                 responseType: <any>responseType_,
@@ -202,9 +202,9 @@ export class OrderAdminControllerService extends BaseService {
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public getOrder(orderId: number, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<OrderEntity>;
-    public getOrder(orderId: number, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpResponse<OrderEntity>>;
-    public getOrder(orderId: number, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpEvent<OrderEntity>>;
+    public getOrder(orderId: number, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<OrderResponse>;
+    public getOrder(orderId: number, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpResponse<OrderResponse>>;
+    public getOrder(orderId: number, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpEvent<OrderResponse>>;
     public getOrder(orderId: number, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<any> {
         if (orderId === null || orderId === undefined) {
             throw new Error('Required parameter orderId was null or undefined when calling getOrder.');
@@ -235,7 +235,109 @@ export class OrderAdminControllerService extends BaseService {
 
         let localVarPath = `/api/admin/orders/${this.configuration.encodeParam({name: "orderId", value: orderId, in: "path", style: "simple", explode: false, dataType: "number", dataFormat: "int64"})}`;
         const { basePath, withCredentials } = this.configuration;
-        return this.httpClient.request<OrderEntity>('get', `${basePath}${localVarPath}`,
+        return this.httpClient.request<OrderResponse>('get', `${basePath}${localVarPath}`,
+            {
+                context: localVarHttpContext,
+                responseType: <any>responseType_,
+                ...(withCredentials ? { withCredentials } : {}),
+                headers: localVarHeaders,
+                observe: observe,
+                reportProgress: reportProgress
+            }
+        );
+    }
+
+    /**
+     * @endpoint get /api/admin/orders/payment-status/{paymentStatus}
+     * @param paymentStatus 
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public getOrdersByPaymentStatus(paymentStatus: string, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<Array<OrderResponse>>;
+    public getOrdersByPaymentStatus(paymentStatus: string, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpResponse<Array<OrderResponse>>>;
+    public getOrdersByPaymentStatus(paymentStatus: string, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpEvent<Array<OrderResponse>>>;
+    public getOrdersByPaymentStatus(paymentStatus: string, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<any> {
+        if (paymentStatus === null || paymentStatus === undefined) {
+            throw new Error('Required parameter paymentStatus was null or undefined when calling getOrdersByPaymentStatus.');
+        }
+
+        let localVarHeaders = this.defaultHeaders;
+
+        const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
+            '*/*'
+        ]);
+        if (localVarHttpHeaderAcceptSelected !== undefined) {
+            localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+        }
+
+        const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+
+        let responseType_: 'text' | 'json' | 'blob' = 'json';
+        if (localVarHttpHeaderAcceptSelected) {
+            if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+                responseType_ = 'text';
+            } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+                responseType_ = 'json';
+            } else {
+                responseType_ = 'blob';
+            }
+        }
+
+        let localVarPath = `/api/admin/orders/payment-status/${this.configuration.encodeParam({name: "paymentStatus", value: paymentStatus, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}`;
+        const { basePath, withCredentials } = this.configuration;
+        return this.httpClient.request<Array<OrderResponse>>('get', `${basePath}${localVarPath}`,
+            {
+                context: localVarHttpContext,
+                responseType: <any>responseType_,
+                ...(withCredentials ? { withCredentials } : {}),
+                headers: localVarHeaders,
+                observe: observe,
+                reportProgress: reportProgress
+            }
+        );
+    }
+
+    /**
+     * @endpoint get /api/admin/orders/status/{status}
+     * @param status 
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public getOrdersByStatus(status: string, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<Array<OrderResponse>>;
+    public getOrdersByStatus(status: string, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpResponse<Array<OrderResponse>>>;
+    public getOrdersByStatus(status: string, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpEvent<Array<OrderResponse>>>;
+    public getOrdersByStatus(status: string, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<any> {
+        if (status === null || status === undefined) {
+            throw new Error('Required parameter status was null or undefined when calling getOrdersByStatus.');
+        }
+
+        let localVarHeaders = this.defaultHeaders;
+
+        const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
+            '*/*'
+        ]);
+        if (localVarHttpHeaderAcceptSelected !== undefined) {
+            localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+        }
+
+        const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+
+        let responseType_: 'text' | 'json' | 'blob' = 'json';
+        if (localVarHttpHeaderAcceptSelected) {
+            if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+                responseType_ = 'text';
+            } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+                responseType_ = 'json';
+            } else {
+                responseType_ = 'blob';
+            }
+        }
+
+        let localVarPath = `/api/admin/orders/status/${this.configuration.encodeParam({name: "status", value: status, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}`;
+        const { basePath, withCredentials } = this.configuration;
+        return this.httpClient.request<Array<OrderResponse>>('get', `${basePath}${localVarPath}`,
             {
                 context: localVarHttpContext,
                 responseType: <any>responseType_,
@@ -253,9 +355,9 @@ export class OrderAdminControllerService extends BaseService {
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public getOrdersByUser(userId: number, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<Array<OrderEntity>>;
-    public getOrdersByUser(userId: number, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpResponse<Array<OrderEntity>>>;
-    public getOrdersByUser(userId: number, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpEvent<Array<OrderEntity>>>;
+    public getOrdersByUser(userId: number, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<Array<OrderResponse>>;
+    public getOrdersByUser(userId: number, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpResponse<Array<OrderResponse>>>;
+    public getOrdersByUser(userId: number, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpEvent<Array<OrderResponse>>>;
     public getOrdersByUser(userId: number, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<any> {
         if (userId === null || userId === undefined) {
             throw new Error('Required parameter userId was null or undefined when calling getOrdersByUser.');
@@ -286,7 +388,7 @@ export class OrderAdminControllerService extends BaseService {
 
         let localVarPath = `/api/admin/orders/user/${this.configuration.encodeParam({name: "userId", value: userId, in: "path", style: "simple", explode: false, dataType: "number", dataFormat: "int64"})}`;
         const { basePath, withCredentials } = this.configuration;
-        return this.httpClient.request<Array<OrderEntity>>('get', `${basePath}${localVarPath}`,
+        return this.httpClient.request<Array<OrderResponse>>('get', `${basePath}${localVarPath}`,
             {
                 context: localVarHttpContext,
                 responseType: <any>responseType_,
@@ -299,18 +401,18 @@ export class OrderAdminControllerService extends BaseService {
     }
 
     /**
-     * @endpoint put /api/admin/orders/{id}/status
-     * @param id 
+     * @endpoint put /api/admin/orders/{orderId}/status
+     * @param orderId 
      * @param statusUpdateRequest 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public updateOrderStatus(id: number, statusUpdateRequest: StatusUpdateRequest, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<OrderEntity>;
-    public updateOrderStatus(id: number, statusUpdateRequest: StatusUpdateRequest, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpResponse<OrderEntity>>;
-    public updateOrderStatus(id: number, statusUpdateRequest: StatusUpdateRequest, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpEvent<OrderEntity>>;
-    public updateOrderStatus(id: number, statusUpdateRequest: StatusUpdateRequest, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<any> {
-        if (id === null || id === undefined) {
-            throw new Error('Required parameter id was null or undefined when calling updateOrderStatus.');
+    public updateOrderStatus(orderId: number, statusUpdateRequest: StatusUpdateRequest, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<OrderResponse>;
+    public updateOrderStatus(orderId: number, statusUpdateRequest: StatusUpdateRequest, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpResponse<OrderResponse>>;
+    public updateOrderStatus(orderId: number, statusUpdateRequest: StatusUpdateRequest, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpEvent<OrderResponse>>;
+    public updateOrderStatus(orderId: number, statusUpdateRequest: StatusUpdateRequest, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<any> {
+        if (orderId === null || orderId === undefined) {
+            throw new Error('Required parameter orderId was null or undefined when calling updateOrderStatus.');
         }
         if (statusUpdateRequest === null || statusUpdateRequest === undefined) {
             throw new Error('Required parameter statusUpdateRequest was null or undefined when calling updateOrderStatus.');
@@ -348,9 +450,9 @@ export class OrderAdminControllerService extends BaseService {
             }
         }
 
-        let localVarPath = `/api/admin/orders/${this.configuration.encodeParam({name: "id", value: id, in: "path", style: "simple", explode: false, dataType: "number", dataFormat: "int64"})}/status`;
+        let localVarPath = `/api/admin/orders/${this.configuration.encodeParam({name: "orderId", value: orderId, in: "path", style: "simple", explode: false, dataType: "number", dataFormat: "int64"})}/status`;
         const { basePath, withCredentials } = this.configuration;
-        return this.httpClient.request<OrderEntity>('put', `${basePath}${localVarPath}`,
+        return this.httpClient.request<OrderResponse>('put', `${basePath}${localVarPath}`,
             {
                 context: localVarHttpContext,
                 body: statusUpdateRequest,
@@ -364,21 +466,21 @@ export class OrderAdminControllerService extends BaseService {
     }
 
     /**
-     * @endpoint put /api/admin/orders/{id}/payment
-     * @param id 
+     * @endpoint put /api/admin/orders/{orderId}/payment-status
+     * @param orderId 
      * @param paymentUpdateRequest 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public updatePayment(id: number, paymentUpdateRequest: PaymentUpdateRequest, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<OrderEntity>;
-    public updatePayment(id: number, paymentUpdateRequest: PaymentUpdateRequest, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpResponse<OrderEntity>>;
-    public updatePayment(id: number, paymentUpdateRequest: PaymentUpdateRequest, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpEvent<OrderEntity>>;
-    public updatePayment(id: number, paymentUpdateRequest: PaymentUpdateRequest, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<any> {
-        if (id === null || id === undefined) {
-            throw new Error('Required parameter id was null or undefined when calling updatePayment.');
+    public updatePaymentStatus(orderId: number, paymentUpdateRequest: PaymentUpdateRequest, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<OrderResponse>;
+    public updatePaymentStatus(orderId: number, paymentUpdateRequest: PaymentUpdateRequest, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpResponse<OrderResponse>>;
+    public updatePaymentStatus(orderId: number, paymentUpdateRequest: PaymentUpdateRequest, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpEvent<OrderResponse>>;
+    public updatePaymentStatus(orderId: number, paymentUpdateRequest: PaymentUpdateRequest, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<any> {
+        if (orderId === null || orderId === undefined) {
+            throw new Error('Required parameter orderId was null or undefined when calling updatePaymentStatus.');
         }
         if (paymentUpdateRequest === null || paymentUpdateRequest === undefined) {
-            throw new Error('Required parameter paymentUpdateRequest was null or undefined when calling updatePayment.');
+            throw new Error('Required parameter paymentUpdateRequest was null or undefined when calling updatePaymentStatus.');
         }
 
         let localVarHeaders = this.defaultHeaders;
@@ -413,9 +515,9 @@ export class OrderAdminControllerService extends BaseService {
             }
         }
 
-        let localVarPath = `/api/admin/orders/${this.configuration.encodeParam({name: "id", value: id, in: "path", style: "simple", explode: false, dataType: "number", dataFormat: "int64"})}/payment`;
+        let localVarPath = `/api/admin/orders/${this.configuration.encodeParam({name: "orderId", value: orderId, in: "path", style: "simple", explode: false, dataType: "number", dataFormat: "int64"})}/payment-status`;
         const { basePath, withCredentials } = this.configuration;
-        return this.httpClient.request<OrderEntity>('put', `${basePath}${localVarPath}`,
+        return this.httpClient.request<OrderResponse>('put', `${basePath}${localVarPath}`,
             {
                 context: localVarHttpContext,
                 body: paymentUpdateRequest,

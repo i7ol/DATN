@@ -24,11 +24,8 @@ public class ProductUpdateRequest {
 
     Long categoryId;
 
-    // danh sách URL ảnh hoặc ImageDTO nếu cần
     List<String> images;
     List<Long> deletedImageIds;
 
-
-    // danh sách variants dùng cho update
     List<VariantUpdateRequest> variants;
 }

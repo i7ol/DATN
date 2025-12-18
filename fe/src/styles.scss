@@ -110,5 +110,20 @@
   font-style: italic;
 }
 
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+html,
+body {
+  height: 100%;
+}
+body {
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+.auth-modal-backdrop {
+  background-color: rgba(0, 0, 0, 0.5) !important;
+}
+
+// Make sure dialog is above other elements
+.cdk-overlay-container {
+  z-index: 10000 !important;
+}

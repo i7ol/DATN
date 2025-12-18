@@ -1,0 +1,51 @@
+<p>payment-update-dialog works!</p>
+ <h2 mat-dialog-title>
+      {{ getDialogTitle() }}
+    </h2>
+    <div mat-dialog-content>
+      <form [formGroup]="paymentForm">
+        <div class="space-y-4">
+          <div *ngIf="shouldShowAmount()">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Số tiền *</label>
+            <input
+              type="number"
+              formControlName="amount"
+              class="w-full border border-gray-300 rounded-lg px-3 py-2"
+              placeholder="Nhập số tiền"
+            />
+            <div *ngIf="paymentForm.get('amount')?.invalid && paymentForm.get('amount')?.touched" 
+                 class="text-red-600 text-sm mt-1">
+              Vui lòng nhập số tiền hợp lệ
+            </div>
+          </div>
+          
+          <div *ngIf="shouldShowTransactionId()">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Mã giao dịch *</label>
+            <input
+              type="text"
+              formControlName="transactionId"
+              class="w-full border border-gray-300 rounded-lg px-3 py-2"
+              placeholder="Nhập mã giao dịch"
+            />
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Ghi chú</label>
+            <textarea
+              formControlName="note"
+              rows="3"
+              class="w-full border border-gray-300 rounded-lg px-3 py-2"
+              placeholder="Nhập ghi chú (tùy chọn)..."
+            ></textarea>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div mat-dialog-actions align="end">
+      <button mat-button (click)="onCancel()">Hủy</button>
+      <button mat-button color="primary" 
+              [disabled]="paymentForm.invalid"
+              (click)="onSubmit()">
+        {{ getSubmitButtonText() }}
+      </button>
+    </div>

@@ -5,7 +5,7 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
-    "api-docs": "npx openapi-generator-cli generate -i ./api-docs-user.yaml -g typescript-angular -o ./src/app/api/user --additional-properties=ngVersion=12,supportsES6=true",
+    "api-docs": "npx openapi-generator-cli generate -i ./api-docs-user.yaml -g typescript-angular -o ./src/app/api/user --additional-properties=ngVersion=12.0.0,supportsES6=true,stringEnums=true,enumPropertyNaming=UPPERCASE",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },
@@ -21,7 +21,9 @@
     "@angular/platform-browser": "~12.2.0",
     "@angular/platform-browser-dynamic": "~12.2.0",
     "@angular/router": "~12.2.0",
+    "ngx-toastr": "^14.3.0",
     "rxjs": "~6.6.0",
+    "sweetalert2": "^11.26.4",
     "tslib": "^2.3.0",
     "zone.js": "~0.11.4"
   },

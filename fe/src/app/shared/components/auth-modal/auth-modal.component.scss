@@ -1,0 +1,86 @@
+// app/shared/components/auth-modal/auth-modal.component.scss
+:host {
+  display: block;
+}
+
+.auth-modal-container {
+  position: relative;
+  max-width: 400px;
+}
+
+.close-button {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 10;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 50%;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.9);
+  }
+}
+
+// Custom dialog styles
+::ng-deep .auth-modal-dialog {
+  .mat-mdc-dialog-container {
+    padding: 0 !important;
+    border-radius: 12px !important;
+    overflow: hidden !important;
+  }
+
+  .mat-mdc-tab-group {
+    overflow: visible;
+  }
+
+  .mat-mdc-tab-header {
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .mat-mdc-tab {
+    flex: 1;
+    min-width: 50%;
+  }
+
+  .mat-mdc-tab.mdc-tab--active {
+    font-weight: 500;
+  }
+
+  .mat-mdc-tab:not(.mdc-tab--active) {
+    color: #6b7280;
+  }
+
+  .mat-mdc-form-field {
+    width: 100%;
+  }
+
+  .mat-mdc-form-field-appearance-outline .mat-mdc-text-field-wrapper {
+    padding: 0 !important;
+  }
+
+  .mat-mdc-form-field-subscript-wrapper {
+    display: none;
+  }
+}
+
+// Password strength indicator
+.text-red-500 {
+  color: #ef4444;
+}
+
+.text-yellow-500 {
+  color: #f59e0b;
+}
+
+.text-green-500 {
+  color: #10b981;
+}
+
+// Custom styles for form
+mat-form-field {
+  margin-bottom: 1rem;
+}
+
+mat-spinner {
+  display: inline-block;
+}

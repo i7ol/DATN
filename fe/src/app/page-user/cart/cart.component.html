@@ -97,7 +97,9 @@
         </div>
 
         <button
+          routerLink="/checkout"
           class="w-full mt-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition"
+          [disabled]="(items$ | async)?.length === 0"
         >
           Thanh toán
         </button>

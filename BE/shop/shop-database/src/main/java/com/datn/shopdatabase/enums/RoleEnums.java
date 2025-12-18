@@ -2,6 +2,7 @@ package com.datn.shopdatabase.enums;
 
 public enum RoleEnums {
     ADMIN,
-    USER
+    USER,
+    MODERATOR
 
 }

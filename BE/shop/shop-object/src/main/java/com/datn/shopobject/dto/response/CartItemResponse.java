@@ -20,4 +20,3 @@ public class CartItemResponse {
     private BigDecimal price;
     private List<ImageDTO> images;
 }
-

@@ -18,7 +18,7 @@ export interface PageInventoryResponse {
     size?: number;
     content?: Array<InventoryResponse>;
     number?: number;
-    sort?: SortObject;
+    sort?: Array<SortObject>;
     first?: boolean;
     last?: boolean;
     numberOfElements?: number;

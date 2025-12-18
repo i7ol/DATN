@@ -1,5 +1,13 @@
 export * from './cartUserController.service';
 import { CartUserControllerService } from './cartUserController.service';
+export * from './orderUserController.service';
+import { OrderUserControllerService } from './orderUserController.service';
+export * from './paymentUserController.service';
+import { PaymentUserControllerService } from './paymentUserController.service';
+export * from './paymentWebhookController.service';
+import { PaymentWebhookControllerService } from './paymentWebhookController.service';
 export * from './productUserController.service';
 import { ProductUserControllerService } from './productUserController.service';
-export const APIS = [CartUserControllerService, ProductUserControllerService];
+export * from './shippingUserController.service';
+import { ShippingUserControllerService } from './shippingUserController.service';
+export const APIS = [CartUserControllerService, OrderUserControllerService, PaymentUserControllerService, PaymentWebhookControllerService, ProductUserControllerService, ShippingUserControllerService];

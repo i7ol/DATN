@@ -1,0 +1,220 @@
+<div class="min-h-screen bg-gray-50 p-6">
+  <div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
+      <p class="text-gray-600 mt-2">Tổng quan hệ thống</p>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <!-- Orders Card -->
+      <div class="bg-white rounded-xl shadow p-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm text-gray-500">Tổng đơn hàng</p>
+            <p class="text-2xl font-bold">{{ stats.totalOrders }}</p>
+            <p class="text-sm text-yellow-600 mt-1">
+              {{ stats.pendingOrders }} đang chờ xử lý
+            </p>
+          </div>
+          <div class="p-3 rounded-full bg-blue-100 text-blue-600">
+            <i class="fas fa-shopping-cart text-xl"></i>
+          </div>
+        </div>
+        <a
+          [routerLink]="['/admin/orders']"
+          class="mt-4 inline-block text-blue-600 hover:text-blue-800 text-sm font-medium"
+        >
+          Xem tất cả →
+        </a>
+      </div>
+
+      <!-- Payments Card -->
+      <div class="bg-white rounded-xl shadow p-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm text-gray-500">Tổng thanh toán</p>
+            <p class="text-2xl font-bold">{{ stats.totalPayments }}</p>
+            <p class="text-sm text-yellow-600 mt-1">
+              {{ stats.pendingPayments }} đang chờ
+            </p>
+          </div>
+          <div class="p-3 rounded-full bg-green-100 text-green-600">
+            <i class="fas fa-credit-card text-xl"></i>
+          </div>
+        </div>
+        <a
+          [routerLink]="['/admin/payments']"
+          class="mt-4 inline-block text-blue-600 hover:text-blue-800 text-sm font-medium"
+        >
+          Xem tất cả →
+        </a>
+      </div>
+
+      <!-- Shipping Card -->
+      <div class="bg-white rounded-xl shadow p-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm text-gray-500">Đang vận chuyển</p>
+            <p class="text-2xl font-bold">{{ stats.totalShippings }}</p>
+            <p class="text-sm text-yellow-600 mt-1">
+              {{ stats.processingShippings }} đang xử lý
+            </p>
+          </div>
+          <div class="p-3 rounded-full bg-purple-100 text-purple-600">
+            <i class="fas fa-shipping-fast text-xl"></i>
+          </div>
+        </div>
+        <a
+          [routerLink]="['/admin/shippings']"
+          class="mt-4 inline-block text-blue-600 hover:text-blue-800 text-sm font-medium"
+        >
+          Xem tất cả →
+        </a>
+      </div>
+
+      <!-- Revenue Card -->
+      <div class="bg-white rounded-xl shadow p-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm text-gray-500">Doanh thu</p>
+            <p class="text-2xl font-bold">
+              {{ stats.revenue | currency : "VND" }}
+            </p>
+            <p class="text-sm text-green-600 mt-1">Tháng này</p>
+          </div>
+          <div class="p-3 rounded-full bg-yellow-100 text-yellow-600">
+            <i class="fas fa-chart-line text-xl"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="bg-white rounded-xl shadow p-6 mb-8">
+      <h2 class="text-lg font-semibold mb-4">Thao tác nhanh</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <a
+          [routerLink]="['/admin/orders']"
+          class="p-4 border rounded-lg hover:bg-gray-50 transition-colors"
+        >
+          <div class="flex items-center gap-3">
+            <div class="p-2 rounded-full bg-blue-100">
+              <i class="fas fa-edit text-blue-600"></i>
+            </div>
+            <div>
+              <h3 class="font-medium">Xử lý đơn hàng</h3>
+              <p class="text-sm text-gray-500">Cập nhật trạng thái đơn hàng</p>
+            </div>
+          </div>
+        </a>
+        <a
+          [routerLink]="['/admin/payments']"
+          class="p-4 border rounded-lg hover:bg-gray-50 transition-colors"
+        >
+          <div class="flex items-center gap-3">
+            <div class="p-2 rounded-full bg-green-100">
+              <i class="fas fa-credit-card text-green-600"></i>
+            </div>
+            <div>
+              <h3 class="font-medium">Quản lý thanh toán</h3>
+              <p class="text-sm text-gray-500">
+                Xử lý hoàn tiền, xác nhận thanh toán
+              </p>
+            </div>
+          </div>
+        </a>
+        <a
+          [routerLink]="['/admin/shippings']"
+          class="p-4 border rounded-lg hover:bg-gray-50 transition-colors"
+        >
+          <div class="flex items-center gap-3">
+            <div class="p-2 rounded-full bg-purple-100">
+              <i class="fas fa-truck text-purple-600"></i>
+            </div>
+            <div>
+              <h3 class="font-medium">Quản lý vận chuyển</h3>
+              <p class="text-sm text-gray-500">
+                Tạo và theo dõi đơn vận chuyển
+              </p>
+            </div>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <!-- Recent Activities -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Recent Orders -->
+      <div class="bg-white rounded-xl shadow">
+        <div class="px-6 py-4 border-b">
+          <h2 class="text-lg font-semibold">Đơn hàng gần đây</h2>
+        </div>
+        <div class="p-6">
+          <div
+            *ngFor="let order of recentOrders"
+            class="border-b last:border-0 py-3"
+          >
+            <div class="flex justify-between items-center">
+              <div>
+                <a
+                  [routerLink]="['/admin/orders', order.id]"
+                  class="font-medium hover:text-blue-600"
+                >
+                  #{{ order.id }} - {{ order.guestName || "Khách" }}
+                </a>
+                <p class="text-sm text-gray-500">
+                  {{ order.totalPrice | currency : "VND" }}
+                </p>
+              </div>
+              <span
+                [class]="
+                  'px-2 py-1 text-xs rounded-full ' +
+                  getStatusClass(order.status)
+                "
+              >
+                {{ getOrderStatusLabel(order.status) }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Payments -->
+      <div class="bg-white rounded-xl shadow">
+        <div class="px-6 py-4 border-b">
+          <h2 class="text-lg font-semibold">Thanh toán gần đây</h2>
+        </div>
+        <div class="p-6">
+          <div
+            *ngFor="let payment of recentPayments"
+            class="border-b last:border-0 py-3"
+          >
+            <div class="flex justify-between items-center">
+              <div>
+                <a
+                  [routerLink]="['/admin/payments', payment.id]"
+                  class="font-medium hover:text-blue-600"
+                >
+                  #{{ payment.id }} - Đơn #{{ payment.orderId }}
+                </a>
+                <p class="text-sm text-gray-500">
+                  {{ payment.amount | currency : "VND" }}
+                </p>
+              </div>
+              <span
+                [class]="
+                  'px-2 py-1 text-xs rounded-full ' +
+                  getPaymentStatusClass(payment.status)
+                "
+              >
+                {{ getPaymentStatusLabel(payment.status) }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

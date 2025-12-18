@@ -17,13 +17,17 @@ import { CustomHttpParameterCodec }                          from '../encoder';
 import { Observable }                                        from 'rxjs';
 
 // @ts-ignore
-import { CreateProductRequest } from '../model/createProductRequest';
-// @ts-ignore
 import { PageProductResponse } from '../model/pageProductResponse';
+// @ts-ignore
+import { ProductCreateRequest } from '../model/productCreateRequest';
 // @ts-ignore
 import { ProductResponse } from '../model/productResponse';
 // @ts-ignore
-import { UpdateProductRequest } from '../model/updateProductRequest';
+import { ProductUpdateRequest } from '../model/productUpdateRequest';
+// @ts-ignore
+import { VariantRequest } from '../model/variantRequest';
+// @ts-ignore
+import { VariantUpdateRequest } from '../model/variantUpdateRequest';
 
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables';
@@ -43,14 +47,19 @@ export class ProductAdminControllerService extends BaseService {
 
     /**
      * @endpoint post /api/admin/products
-     * @param createProductRequest 
+     * @param product 
+     * @param files 
+     * @param variants 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public createProduct(createProductRequest?: CreateProductRequest, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<ProductResponse>;
-    public createProduct(createProductRequest?: CreateProductRequest, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpResponse<ProductResponse>>;
-    public createProduct(createProductRequest?: CreateProductRequest, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpEvent<ProductResponse>>;
-    public createProduct(createProductRequest?: CreateProductRequest, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<any> {
+    public createProduct(product: ProductCreateRequest, files?: Array<Blob>, variants?: Array<VariantRequest>, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<ProductResponse>;
+    public createProduct(product: ProductCreateRequest, files?: Array<Blob>, variants?: Array<VariantRequest>, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpResponse<ProductResponse>>;
+    public createProduct(product: ProductCreateRequest, files?: Array<Blob>, variants?: Array<VariantRequest>, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpEvent<ProductResponse>>;
+    public createProduct(product: ProductCreateRequest, files?: Array<Blob>, variants?: Array<VariantRequest>, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<any> {
+        if (product === null || product === undefined) {
+            throw new Error('Required parameter product was null or undefined when calling createProduct.');
+        }
 
         let localVarHeaders = this.defaultHeaders;
 
@@ -63,14 +72,45 @@ export class ProductAdminControllerService extends BaseService {
 
         const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
 
-
         // to determine the Content-Type header
         const consumes: string[] = [
-            'application/json'
+            'multipart/form-data'
         ];
-        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType(consumes);
-        if (httpContentTypeSelected !== undefined) {
-            localVarHeaders = localVarHeaders.set('Content-Type', httpContentTypeSelected);
+
+        const canConsumeForm = this.canConsumeForm(consumes);
+
+        let localVarFormParams: { append(param: string, value: any): any; };
+        let localVarUseForm = false;
+        let localVarConvertFormParamsToString = false;
+        // use FormData to transmit files using content-type "multipart/form-data"
+        // see https://stackoverflow.com/questions/4007969/application-x-www-form-urlencoded-or-multipart-form-data
+        localVarUseForm = canConsumeForm;
+        if (localVarUseForm) {
+            localVarFormParams = new FormData();
+        } else {
+            localVarFormParams = new HttpParams({encoder: this.encoder});
+        }
+
+        if (product !== undefined) {
+            localVarFormParams = localVarFormParams.append('product', localVarUseForm ? new Blob([JSON.stringify(product)], {type: 'application/json'}) : <any>product) as any || localVarFormParams;
+        }
+        if (files) {
+            if (localVarUseForm) {
+                files.forEach((element) => {
+                    localVarFormParams = localVarFormParams.append('files', <any>element) as any || localVarFormParams;
+            })
+            } else {
+                localVarFormParams = localVarFormParams.append('files', [...files].join(COLLECTION_FORMATS['csv'])) as any || localVarFormParams;
+            }
+        }
+        if (variants) {
+            if (localVarUseForm) {
+                variants.forEach((element) => {
+                    localVarFormParams = localVarFormParams.append('variants', <any>element) as any || localVarFormParams;
+            })
+            } else {
+                localVarFormParams = localVarFormParams.append('variants', [...variants].join(COLLECTION_FORMATS['csv'])) as any || localVarFormParams;
+            }
         }
 
         let responseType_: 'text' | 'json' | 'blob' = 'json';
@@ -89,7 +129,7 @@ export class ProductAdminControllerService extends BaseService {
         return this.httpClient.request<ProductResponse>('post', `${basePath}${localVarPath}`,
             {
                 context: localVarHttpContext,
-                body: createProductRequest,
+                body: localVarConvertFormParamsToString ? localVarFormParams.toString() : localVarFormParams,
                 responseType: <any>responseType_,
                 ...(withCredentials ? { withCredentials } : {}),
                 headers: localVarHeaders,
@@ -259,16 +299,21 @@ export class ProductAdminControllerService extends BaseService {
     /**
      * @endpoint put /api/admin/products/{id}
      * @param id 
-     * @param updateProductRequest 
+     * @param product 
+     * @param files 
+     * @param variants 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public updateProduct(id: number, updateProductRequest?: UpdateProductRequest, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<ProductResponse>;
-    public updateProduct(id: number, updateProductRequest?: UpdateProductRequest, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpResponse<ProductResponse>>;
-    public updateProduct(id: number, updateProductRequest?: UpdateProductRequest, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpEvent<ProductResponse>>;
-    public updateProduct(id: number, updateProductRequest?: UpdateProductRequest, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<any> {
+    public updateProduct(id: number, product: ProductUpdateRequest, files?: Array<Blob>, variants?: Array<VariantUpdateRequest>, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<ProductResponse>;
+    public updateProduct(id: number, product: ProductUpdateRequest, files?: Array<Blob>, variants?: Array<VariantUpdateRequest>, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpResponse<ProductResponse>>;
+    public updateProduct(id: number, product: ProductUpdateRequest, files?: Array<Blob>, variants?: Array<VariantUpdateRequest>, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpEvent<ProductResponse>>;
+    public updateProduct(id: number, product: ProductUpdateRequest, files?: Array<Blob>, variants?: Array<VariantUpdateRequest>, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<any> {
         if (id === null || id === undefined) {
             throw new Error('Required parameter id was null or undefined when calling updateProduct.');
+        }
+        if (product === null || product === undefined) {
+            throw new Error('Required parameter product was null or undefined when calling updateProduct.');
         }
 
         let localVarHeaders = this.defaultHeaders;
@@ -282,14 +327,45 @@ export class ProductAdminControllerService extends BaseService {
 
         const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
 
-
         // to determine the Content-Type header
         const consumes: string[] = [
-            'application/json'
+            'multipart/form-data'
         ];
-        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType(consumes);
-        if (httpContentTypeSelected !== undefined) {
-            localVarHeaders = localVarHeaders.set('Content-Type', httpContentTypeSelected);
+
+        const canConsumeForm = this.canConsumeForm(consumes);
+
+        let localVarFormParams: { append(param: string, value: any): any; };
+        let localVarUseForm = false;
+        let localVarConvertFormParamsToString = false;
+        // use FormData to transmit files using content-type "multipart/form-data"
+        // see https://stackoverflow.com/questions/4007969/application-x-www-form-urlencoded-or-multipart-form-data
+        localVarUseForm = canConsumeForm;
+        if (localVarUseForm) {
+            localVarFormParams = new FormData();
+        } else {
+            localVarFormParams = new HttpParams({encoder: this.encoder});
+        }
+
+        if (product !== undefined) {
+            localVarFormParams = localVarFormParams.append('product', localVarUseForm ? new Blob([JSON.stringify(product)], {type: 'application/json'}) : <any>product) as any || localVarFormParams;
+        }
+        if (files) {
+            if (localVarUseForm) {
+                files.forEach((element) => {
+                    localVarFormParams = localVarFormParams.append('files', <any>element) as any || localVarFormParams;
+            })
+            } else {
+                localVarFormParams = localVarFormParams.append('files', [...files].join(COLLECTION_FORMATS['csv'])) as any || localVarFormParams;
+            }
+        }
+        if (variants) {
+            if (localVarUseForm) {
+                variants.forEach((element) => {
+                    localVarFormParams = localVarFormParams.append('variants', <any>element) as any || localVarFormParams;
+            })
+            } else {
+                localVarFormParams = localVarFormParams.append('variants', [...variants].join(COLLECTION_FORMATS['csv'])) as any || localVarFormParams;
+            }
         }
 
         let responseType_: 'text' | 'json' | 'blob' = 'json';
@@ -308,7 +384,7 @@ export class ProductAdminControllerService extends BaseService {
         return this.httpClient.request<ProductResponse>('put', `${basePath}${localVarPath}`,
             {
                 context: localVarHttpContext,
-                body: updateProductRequest,
+                body: localVarConvertFormParamsToString ? localVarFormParams.toString() : localVarFormParams,
                 responseType: <any>responseType_,
                 ...(withCredentials ? { withCredentials } : {}),
                 headers: localVarHeaders,

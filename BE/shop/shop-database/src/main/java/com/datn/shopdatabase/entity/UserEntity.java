@@ -5,7 +5,7 @@ package com.datn.shopdatabase.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
+import java.time.LocalDateTime;
 import java.util.Set;
 
 @Entity
@@ -35,6 +35,20 @@ public class UserEntity extends BaseEntity {
     @Column(name = "address")
     String address;
 
+    String fullName;
+
+    String firstName;
+
+    String lastName;
+
+    String province;
+
+    String district;
+
+    String ward;
+
+
+    LocalDateTime lastLoginAt;
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "users_roles",

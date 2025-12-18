@@ -1,18 +1,18 @@
+
 package com.datn.shopobject.dto.request;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class ShippingRequest {
+    @NotNull
     private Long orderId;
+
     private String shippingCompany;
     private String shippingMethod;
     private String trackingNumber;
     private Double shippingFee;
+    private Integer estimatedDeliveryDays;
+    private String notes;
 }

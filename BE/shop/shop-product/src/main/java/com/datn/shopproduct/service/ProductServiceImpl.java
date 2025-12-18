@@ -4,8 +4,8 @@ package com.datn.shopproduct.service;
 import com.datn.shopdatabase.entity.*;
 import com.datn.shopdatabase.exception.AppException;
 import com.datn.shopdatabase.exception.ErrorCode;
-import com.datn.shopdatabase.minio.MinioChannel;
 import com.datn.shopdatabase.repository.*;
+import com.datn.shopdatabase.storage.FileStorageService;
 import com.datn.shopobject.dto.ImageDTO;
 import com.datn.shopobject.dto.request.ProductCreateRequest;
 import com.datn.shopobject.dto.request.ProductUpdateRequest;
@@ -33,7 +33,8 @@ public class ProductServiceImpl implements ProductService {
     private final ProductVariantRepository variantRepository;
     private final ProductImageRepository productImageRepository;
     private final InventoryRepository inventoryRepository;
-    private final MinioChannel minioChannel;
+    private final FileStorageService fileStorageService;
+
 
     // ================== CREATE PRODUCT ==================
     @Override
@@ -75,13 +76,12 @@ public class ProductServiceImpl implements ProductService {
         // Xóa các ảnh cũ nếu có
         if (request.getDeletedImageIds() != null) {
             for (Long imgId : request.getDeletedImageIds()) {
-                // Xóa khỏi collection ProductEntity
                 product.getImages().removeIf(img -> img.getId().equals(imgId));
-                // Xóa khỏi DB + MinIO
                 productImageRepository.findById(imgId).ifPresent(img -> {
-                    minioChannel.delete(img.getUrl()); // xóa file trong MinIO
+                    fileStorageService.delete(img.getUrl());
                     productImageRepository.delete(img);
                 });
+
             }
         }
 
@@ -128,17 +128,23 @@ public class ProductServiceImpl implements ProductService {
     }
 
     private void uploadImages(ProductEntity product, List<MultipartFile> files) {
-        if (files != null && !files.isEmpty()) {
-            if (product.getImages() == null) product.setImages(new ArrayList<>());
-            for (MultipartFile file : files) {
-                String url = minioChannel.upload(file);
-                ProductImageEntity img = new ProductImageEntity();
-                img.setUrl(url);
-                img.setProduct(product);
-                product.getImages().add(img);
-            }
+        if (files == null || files.isEmpty()) return;
+
+        if (product.getImages() == null) {
+            product.setImages(new ArrayList<>());
+        }
+
+        for (MultipartFile file : files) {
+            String url = fileStorageService.store(file);
+
+            ProductImageEntity image = new ProductImageEntity();
+            image.setUrl(url);
+            image.setProduct(product);
+
+            product.getImages().add(image);
         }
     }
+
 
     private ProductVariantEntity createVariant(ProductEntity product, String sizeName, String color) {
         ProductVariantEntity variant = new ProductVariantEntity();

@@ -6,14 +6,15 @@
         class="w-full md:w-[720px] bg-white rounded overflow-hidden flex items-center justify-center"
         style="min-height: 480px; max-height: 720px"
       >
+        <!-- MAIN IMAGE -->
         <img
-          [src]="safeUrl(selectedImage)"
+          [src]="selectedImage"
           alt="product"
           class="max-w-full max-h-full object-contain"
         />
       </div>
 
-      <!-- thumbnails ngang -->
+      <!-- THUMBNAILS -->
       <div class="w-full md:w-[720px] mt-4">
         <div class="flex gap-3 overflow-x-auto py-2 px-1">
           <button
@@ -27,7 +28,7 @@
             "
           >
             <img
-              [src]="safeUrl(img.url)"
+              [src]="img.url"
               alt="thumb-{{ i }}"
               class="w-20 h-20 object-cover rounded-lg border"
             />
@@ -39,16 +40,18 @@
     <!-- RIGHT: product info -->
     <aside class="w-full lg:w-96 bg-white rounded p-6">
       <span
-        class="text-2xl .poppins-regular flex justify-center items-center mb-2"
+        class="text-2xl poppins-regular flex justify-center items-center mb-2"
       >
         {{ product.name }}
       </span>
+
       <p
         class="text-xl text-black flex justify-center poppins-regular items-center mb-4"
       >
         {{ product.price | number : "1.0-0" }}đ
       </p>
 
+      <!-- COLORS -->
       <div class="mb-4">
         <p class="poppins-regular mb-2">Màu</p>
         <div class="flex flex-wrap gap-2">
@@ -62,9 +65,10 @@
           </button>
         </div>
       </div>
+
+      <!-- SIZES -->
       <div class="mb-4">
         <p class="poppins-regular mb-2">Kích thước</p>
-
         <div class="flex flex-wrap gap-3">
           <button
             *ngFor="let s of sizes"
@@ -78,6 +82,7 @@
         </div>
       </div>
 
+      <!-- ACTIONS -->
       <div class="mt-6 flex flex-col gap-3">
         <button
           class="w-full py-3 poppins-regular bg-white text-black border rounded-lg hover:bg-black hover:text-white transition-all duration-300 ease-out transform hover:-translate-y-1 hover:shadow-lg"
@@ -93,10 +98,11 @@
         </button>
       </div>
 
+      <!-- SIZE CHART -->
       <img
         class="w-full py-3 border rounded-lg mt-3"
-        src="assets\img\SizeChart.webp"
-        alt=""
+        src="assets/img/SizeChart.webp"
+        alt="Size chart"
       />
     </aside>
   </div>

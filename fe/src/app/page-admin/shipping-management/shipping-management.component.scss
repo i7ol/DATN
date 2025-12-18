@@ -1,0 +1,19 @@
+/* CSS cho shipping management */
+.shipping-management-container {
+  padding: 20px;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* Responsive table */
+@media (max-width: 768px) {
+  .responsive-table {
+    overflow-x: auto;
+  }
+}

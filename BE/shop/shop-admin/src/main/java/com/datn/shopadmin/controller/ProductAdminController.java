@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -23,7 +24,7 @@ public class ProductAdminController {
 
     private final ProductService productService;
 
-    @PostMapping
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ProductResponse createProduct(
             @RequestPart("product") ProductCreateRequest req,
             @RequestPart(value = "files", required = false) List<MultipartFile> files,
@@ -33,23 +34,22 @@ public class ProductAdminController {
         return productService.createProduct(req, files);
     }
 
-
-
-    @PutMapping("/{id}")
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ProductResponse> updateProduct(
             @PathVariable("id") Long id,
             @RequestPart("product") ProductUpdateRequest request,
             @RequestPart(value = "files", required = false) List<MultipartFile> files,
             @RequestPart(value = "variants", required = false) List<VariantUpdateRequest> variants
     ) {
-        request.setVariants(variants); // set variants vào request
+        request.setVariants(variants);
         return ResponseEntity.ok(productService.updateProduct(id, request, files));
     }
 
-
     @GetMapping
-    public Page<ProductResponse> getAllProducts(@RequestParam(value = "page",defaultValue = "0") int page,
-                                                @RequestParam(value = "size",defaultValue = "10") int size) {
+    public Page<ProductResponse> getAllProducts(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size
+    ) {
         Pageable p = PageRequest.of(page, size);
         return productService.getAllProducts(p);
     }

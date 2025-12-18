@@ -1,0 +1,93 @@
+<!-- app/shared/components/navbar/navbar.component.html -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container">
+    <a class="navbar-brand" routerLink="/">Shop System</a>
+
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-toggle="collapse"
+      data-target="#navbarNav"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/" routerLinkActive="active">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/products" routerLinkActive="active"
+            >Products</a
+          >
+        </li>
+
+        <!-- Admin Menu -->
+        <li *ngIf="isAdmin" class="nav-item dropdown">
+          <a
+            class="nav-link dropdown-toggle"
+            href="#"
+            id="adminDropdown"
+            role="button"
+            data-toggle="dropdown"
+          >
+            Admin
+          </a>
+          <div class="dropdown-menu">
+            <a class="dropdown-item" routerLink="/admin/dashboard">Dashboard</a>
+            <a class="dropdown-item" routerLink="/admin/products"
+              >Products Management</a
+            >
+            <a class="dropdown-item" routerLink="/admin/orders"
+              >Orders Management</a
+            >
+            <a class="dropdown-item" routerLink="/admin/users"
+              >User Management</a
+            >
+            <a class="dropdown-item" routerLink="/admin/categories"
+              >Categories</a
+            >
+          </div>
+        </li>
+      </ul>
+
+      <!-- User Menu -->
+      <ul class="navbar-nav ml-auto">
+        <li *ngIf="!currentUser" class="nav-item">
+          <a class="nav-link" routerLink="/login">Login</a>
+        </li>
+
+        <li *ngIf="currentUser" class="nav-item dropdown">
+          <a
+            class="nav-link dropdown-toggle"
+            href="#"
+            id="userDropdown"
+            role="button"
+            data-toggle="dropdown"
+          >
+            <span class="mr-2">{{ currentUser.username }}</span>
+            <span *ngIf="isAdmin" class="badge badge-warning">ADMIN</span>
+            <span *ngIf="!isAdmin" class="badge badge-info">USER</span>
+          </a>
+          <div class="dropdown-menu dropdown-menu-right">
+            <span class="dropdown-item-text">
+              <small>Roles: {{ currentUser.roles.join(", ") }}</small>
+            </span>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" routerLink="/profile">
+              <i class="fas fa-user mr-2"></i>Profile
+            </a>
+            <a class="dropdown-item" routerLink="/orders">
+              <i class="fas fa-shopping-cart mr-2"></i>My Orders
+            </a>
+            <div class="dropdown-divider"></div>
+            <button class="dropdown-item text-danger" (click)="logout()">
+              <i class="fas fa-sign-out-alt mr-2"></i>Logout
+            </button>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>

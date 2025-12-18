@@ -23,12 +23,12 @@ import java.util.List;
 @Slf4j
 public class NotificationServiceImpl implements NotificationService {
 
-    private  NotificationRepository repository;
-    private  MailService mailService;
-    private  SmsService smsService;
-    private  FirebaseService firebaseService;
-    private  UserService userService; // Dùng service từ shop-user
-    private  NotificationSettingService settingService;
+    private final  NotificationRepository repository;
+    private final MailService mailService;
+    private final SmsService smsService;
+    private final FirebaseService firebaseService;
+    private final UserService userService; // Dùng service từ shop-user
+    private final NotificationSettingService settingService;
 
     @Override
     @Transactional

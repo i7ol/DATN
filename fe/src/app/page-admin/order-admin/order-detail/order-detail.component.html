@@ -1,0 +1,173 @@
+<div class="order-detail-container">
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-spinner">
+    <mat-spinner diameter="50"></mat-spinner>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error" class="error-message">
+    <p>{{ error }}</p>
+    <button mat-raised-button color="primary" (click)="loadOrder()">
+      Thử lại
+    </button>
+  </div>
+
+  <!-- Order Content -->
+  <div *ngIf="order && !loading">
+    <!-- Order Header -->
+    <div class="order-header">
+      <div class="flex justify-between items-start mb-4">
+        <div>
+          <h1 class="text-2xl font-bold">Đơn hàng #{{ order.id }}</h1>
+          <p class="text-gray-600">
+            Ngày tạo: {{ order.createdAt | date : "dd/MM/yyyy HH:mm" }}
+          </p>
+        </div>
+        <div class="flex gap-2">
+          <button
+            mat-raised-button
+            color="primary"
+            (click)="openStatusDialog()"
+          >
+            Cập nhật trạng thái
+          </button>
+          <button
+            mat-raised-button
+            color="accent"
+            (click)="openPaymentDialog()"
+          >
+            Cập nhật thanh toán
+          </button>
+          <a
+            mat-raised-button
+            color="primary"
+            [routerLink]="['/orders', order.id, 'shipping']"
+          >
+            Quản lý vận chuyển
+          </a>
+        </div>
+      </div>
+
+      <!-- Order Info Grid -->
+      <div class="order-info-grid">
+        <div class="order-info-item">
+          <h3 class="font-semibold mb-2">Thông tin khách hàng</h3>
+          <p>
+            <strong>Tên:</strong>
+            {{ order.userId ? "User #" + order.userId : order.guestName }}
+          </p>
+          <p *ngIf="order.guestEmail">
+            <strong>Email:</strong> {{ order.guestEmail }}
+          </p>
+          <p *ngIf="order.guestPhone">
+            <strong>Điện thoại:</strong> {{ order.guestPhone }}
+          </p>
+        </div>
+
+        <div class="order-info-item">
+          <h3 class="font-semibold mb-2">Trạng thái</h3>
+          <span class="status-badge status-{{ order.status?.toLowerCase() }}">
+            {{ getStatusLabel(order.status) }}
+          </span>
+          <h3 class="font-semibold mb-2 mt-4">Thanh toán</h3>
+          <span
+            class="payment-badge payment-{{
+              order.paymentStatus?.toLowerCase()
+            }}"
+          >
+            {{ getPaymentStatusLabel(order.paymentStatus) }}
+          </span>
+        </div>
+
+        <div class="order-info-item">
+          <h3 class="font-semibold mb-2">Tổng thanh toán</h3>
+          <p class="text-2xl font-bold text-blue-600">
+            {{ order.totalPrice | number }} ₫
+          </p>
+        </div>
+
+        <div class="order-info-item">
+          <h3 class="font-semibold mb-2">Thông tin giao hàng</h3>
+          <p *ngIf="order.shippingAddress">
+            <strong>Địa chỉ:</strong> {{ order.shippingAddress }}
+          </p>
+          <p *ngIf="order.shippingNote">
+            <strong>Ghi chú:</strong> {{ order.shippingNote }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Products Section -->
+    <div class="products-section">
+      <h2 class="text-xl font-semibold mb-4">Sản phẩm</h2>
+      <div class="table-content">
+        <table class="products-table">
+          <thead>
+            <tr>
+              <th>Sản phẩm</th>
+              <th>Đơn giá</th>
+              <th>Số lượng</th>
+              <th>Thành tiền</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of order.items">
+              <td>
+                <div class="flex items-center gap-3">
+                  <div class="font-medium">{{ item.productName }}</div>
+                </div>
+              </td>
+              <td>{{ item.price | number }} ₫</td>
+              <td>{{ item.quantity }}</td>
+              <td>{{ item.price * item.quantity | number }} ₫</td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="3" class="text-right font-semibold">Tổng cộng:</td>
+              <td class="font-bold text-blue-600">
+                {{ order.totalPrice | number }} ₫
+              </td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+
+    <!-- Shipping Info Section -->
+    <div *ngIf="shippingInfo.length > 0" class="shipping-section">
+      <h2 class="text-xl font-semibold mb-4">Thông tin vận chuyển</h2>
+      <div class="table-content">
+        <table class="products-table">
+          <thead>
+            <tr>
+              <th>Mã vận chuyển</th>
+              <th>Đơn vị vận chuyển</th>
+              <th>Mã theo dõi</th>
+              <th>Trạng thái</th>
+              <th>Ngày tạo</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let shipping of shippingInfo">
+              <td>#{{ shipping.id }}</td>
+              <td>{{ shipping.carrier }}</td>
+              <td>{{ shipping.trackingNumber }}</td>
+              <td>
+                <span
+                  class="status-badge status-{{
+                    shipping.status?.toLowerCase()
+                  }}"
+                >
+                  {{ getShippingStatusLabel(shipping.status) }}
+                </span>
+              </td>
+              <td>{{ shipping.createdAt | date : "dd/MM/yyyy HH:mm" }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

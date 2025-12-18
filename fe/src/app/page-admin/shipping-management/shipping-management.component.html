@@ -1,0 +1,204 @@
+<div class="container mx-auto p-4">
+  <!-- Header -->
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold mb-2">
+      Quản lý vận chuyển - Đơn hàng #{{ orderId }}
+    </h1>
+    <p class="text-gray-600">Quản lý thông tin vận chuyển cho đơn hàng</p>
+  </div>
+
+  <!-- Tạo vận chuyển -->
+  <div class="bg-white rounded-lg shadow p-6 mb-6">
+    <h2 class="text-lg font-semibold mb-4">Tạo thông tin vận chuyển</h2>
+
+    <form [formGroup]="shippingForm" (ngSubmit)="createShipping()">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Đơn vị vận chuyển</mat-label>
+          <input
+            matInput
+            formControlName="shippingCompany"
+            placeholder="VD: Giao hàng nhanh, Viettel Post"
+          />
+          <mat-error
+            *ngIf="shippingForm.get('shippingCompany')?.hasError('required')"
+          >
+            Vui lòng nhập đơn vị vận chuyển
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Mã vận đơn</mat-label>
+          <input matInput formControlName="trackingNumber" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Phương thức vận chuyển</mat-label>
+          <mat-select formControlName="shippingMethod">
+            <mat-option value="STANDARD">Tiêu chuẩn</mat-option>
+            <mat-option value="EXPRESS">Nhanh</mat-option>
+            <mat-option value="ECONOMY">Tiết kiệm</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Phí vận chuyển</mat-label>
+          <input matInput type="number" formControlName="shippingFee" min="0" />
+          <span matPrefix>₫&nbsp;</span>
+          <mat-error
+            *ngIf="shippingForm.get('shippingFee')?.hasError('required')"
+          >
+            Vui lòng nhập phí vận chuyển
+          </mat-error>
+          <mat-error *ngIf="shippingForm.get('shippingFee')?.hasError('min')">
+            Phí vận chuyển phải lớn hơn hoặc bằng 0
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Số ngày dự kiến</mat-label>
+          <input
+            matInput
+            type="number"
+            formControlName="estimatedDeliveryDays"
+            min="1"
+          />
+          <span matSuffix>ngày</span>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-full md:col-span-2">
+          <mat-label>Ghi chú</mat-label>
+          <textarea matInput formControlName="notes" rows="2"></textarea>
+        </mat-form-field>
+      </div>
+
+      <div class="mt-4">
+        <button
+          mat-raised-button
+          color="primary"
+          type="submit"
+          [disabled]="!shippingForm.valid || loading"
+        >
+          <span *ngIf="loading" class="flex items-center">
+            <mat-spinner diameter="20" class="mr-2"></mat-spinner>
+            Đang xử lý...
+          </span>
+          <span *ngIf="!loading">Tạo vận chuyển</span>
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Danh sách vận chuyển -->
+  <div class="bg-white rounded-lg shadow">
+    <div class="p-4 border-b">
+      <h2 class="text-lg font-semibold">Danh sách vận chuyển</h2>
+    </div>
+
+    <div *ngIf="loading" class="p-8 text-center">
+      <mat-spinner diameter="40" class="mx-auto"></mat-spinner>
+      <p class="mt-2 text-gray-600">Đang tải dữ liệu...</p>
+    </div>
+
+    <div
+      *ngIf="!loading && dataSource.data.length === 0"
+      class="p-8 text-center"
+    >
+      <p class="text-gray-500">Chưa có thông tin vận chuyển nào</p>
+    </div>
+
+    <div *ngIf="!loading && dataSource.data.length > 0" class="overflow-x-auto">
+      <table mat-table [dataSource]="dataSource" class="w-full">
+        <!-- ID Column -->
+        <ng-container matColumnDef="id">
+          <th mat-header-cell *matHeaderCellDef>Mã</th>
+          <td mat-cell *matCellDef="let shipping" class="font-medium">
+            {{ shipping.id }}
+          </td>
+        </ng-container>
+
+        <!-- Tracking Number Column -->
+        <ng-container matColumnDef="trackingNumber">
+          <th mat-header-cell *matHeaderCellDef>Mã theo dõi</th>
+          <td mat-cell *matCellDef="let shipping" class="font-mono">
+            {{ shipping.trackingNumber || "Chưa có" }}
+          </td>
+        </ng-container>
+
+        <!-- Shipping Company Column -->
+        <ng-container matColumnDef="shippingCompany">
+          <th mat-header-cell *matHeaderCellDef>Đơn vị VC</th>
+          <td mat-cell *matCellDef="let shipping">
+            {{ shipping.shippingCompany }}
+          </td>
+        </ng-container>
+
+        <!-- Recipient Name Column -->
+        <ng-container matColumnDef="recipientName">
+          <th mat-header-cell *matHeaderCellDef>Người nhận</th>
+          <td mat-cell *matCellDef="let shipping">
+            {{ shipping.recipientName }}
+          </td>
+        </ng-container>
+
+        <!-- Status Column -->
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Trạng thái</th>
+          <td mat-cell *matCellDef="let shipping">
+            <span
+              class="px-3 py-1 rounded-full text-sm font-medium"
+              [ngClass]="getStatusColor(shipping.status || '')"
+            >
+              {{ getStatusLabel(shipping.status || "") }}
+            </span>
+          </td>
+        </ng-container>
+
+        <!-- Created At Column -->
+        <ng-container matColumnDef="createdAt">
+          <th mat-header-cell *matHeaderCellDef>Ngày tạo</th>
+          <td mat-cell *matCellDef="let shipping">
+            {{ formatDate(shipping.createdAt) }}
+          </td>
+        </ng-container>
+
+        <!-- Actions Column -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Thao tác</th>
+          <td mat-cell *matCellDef="let shipping" class="space-x-2">
+            <button
+              mat-icon-button
+              color="primary"
+              (click)="updateStatus(shipping.id!, shipping.status || '')"
+              matTooltip="Cập nhật trạng thái"
+            >
+              <mat-icon>update</mat-icon>
+            </button>
+
+            <button
+              mat-icon-button
+              color="accent"
+              (click)="syncWithProvider(shipping.id!)"
+              matTooltip="Đồng bộ với đơn vị vận chuyển"
+              [disabled]="!shipping.trackingNumber"
+            >
+              <mat-icon>sync</mat-icon>
+            </button>
+
+            <button
+              mat-icon-button
+              color="warn"
+              (click)="editShipping(shipping)"
+              matTooltip="Chỉnh sửa"
+            >
+              <mat-icon>edit</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+    </div>
+  </div>
+</div>

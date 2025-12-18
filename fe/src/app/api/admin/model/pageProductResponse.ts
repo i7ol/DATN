@@ -18,7 +18,7 @@ export interface PageProductResponse {
     size?: number;
     content?: Array<ProductResponse>;
     number?: number;
-    sort?: SortObject;
+    sort?: Array<SortObject>;
     first?: boolean;
     last?: boolean;
     numberOfElements?: number;

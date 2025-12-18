@@ -1,0 +1,25 @@
+<h2 mat-dialog-title>{{ data.title || "Thông báo" }}</h2>
+<div mat-dialog-content>
+  {{ data.message || "Nội dung thông báo" }}
+</div>
+<div mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()">
+    {{ data.cancelText || "Hủy" }}
+  </button>
+  <button
+    *ngIf="data.showConfirm"
+    mat-button
+    color="primary"
+    (click)="onConfirm()"
+  >
+    {{ data.confirmText || "Xác nhận" }}
+  </button>
+  <button
+    *ngIf="data.type === 'info'"
+    mat-button
+    color="primary"
+    (click)="onOk()"
+  >
+    OK
+  </button>
+</div>

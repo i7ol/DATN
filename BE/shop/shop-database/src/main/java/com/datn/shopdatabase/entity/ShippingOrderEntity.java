@@ -1,10 +1,14 @@
 package com.datn.shopdatabase.entity;
 
+import com.datn.shopdatabase.enums.StatusEnum;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
+@Table(name = "shipping_orders")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -15,20 +19,40 @@ public class ShippingOrderEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long orderId; // liên kết đến shop-order
+    private Long orderId;
+    private Long userId;
 
-    private String shippingCompany; // tên công ty vận chuyển
-    private String shippingMethod;  // standard, express, ...
-
-    private String trackingNumber;  // số vận đơn nếu có
+    private String shippingCompany;
+    private String shippingMethod;
+    private String trackingNumber;
     private Double shippingFee;
+    private Integer estimatedDeliveryDays;
+    private LocalDate estimatedDeliveryDate;
 
+    // Thông tin người nhận
     private String recipientName;
     private String recipientPhone;
+    private String recipientEmail;
     private String recipientAddress;
+    private String recipientProvince;
+    private String recipientDistrict;
+    private String recipientWard;
 
+    // Trạng thái
     @Enumerated(EnumType.STRING)
-    private Status status;
+    private StatusEnum status;
+
+    // Thời gian các sự kiện
+    private LocalDateTime shippedAt;
+    private LocalDateTime deliveredAt;
+    private LocalDateTime cancelledAt;
+    private LocalDateTime lastSyncAt;
+
+    // Ghi chú
+    private String notes;
+
+    // Vị trí hiện tại (từ tracking)
+    private String currentLocation;
 
     @Column(updatable = false)
     @org.hibernate.annotations.CreationTimestamp
@@ -37,7 +61,4 @@ public class ShippingOrderEntity {
     @org.hibernate.annotations.UpdateTimestamp
     private Instant updatedAt;
 
-    public enum Status {
-        PENDING, SHIPPED, DELIVERED, CANCELLED
-    }
 }

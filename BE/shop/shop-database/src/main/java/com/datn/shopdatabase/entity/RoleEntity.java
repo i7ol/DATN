@@ -1,14 +1,13 @@
+
 package com.datn.shopdatabase.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import java.util.Set;
 
 @Entity
-@Table(name = "ROLES") // đổi tên bảng để tránh từ khóa trùng
+@Table(name = "ROLES")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -21,4 +20,13 @@ public class RoleEntity extends BaseEntity {
 
     @Column(name = "DESCRIPTION", length = 255)
     String description;
+
+    // Thêm quan hệ với permissions
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "ROLE_PERMISSIONS",
+            joinColumns = @JoinColumn(name = "role_name"),
+            inverseJoinColumns = @JoinColumn(name = "permission_name")
+    )
+    Set<PermissionEntity> permissions;
 }

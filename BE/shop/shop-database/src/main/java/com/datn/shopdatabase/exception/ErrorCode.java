@@ -28,6 +28,9 @@ public enum ErrorCode {
     FILE_UPLOAD_FAILED(1020,"Input invalid",HttpStatus.BAD_REQUEST),
     MEDIA_NOT_FOUND(1021,"Media not found",HttpStatus.NOT_FOUND),
     UNABLE_UPLOAD_FILE(1022,"Unable to upload file",HttpStatus.BAD_REQUEST),
+    CART_EMPTY(1023,"Cart hasn't any thing",HttpStatus.BAD_REQUEST),
+    CANNOT_CANCEL_ORDER(1024, "Không thể hủy đơn hàng ở trạng thái hiện tại",HttpStatus.NOT_FOUND),
+    FORBIDDEN(1025, "Không đủ quyền truy cập",HttpStatus.FORBIDDEN),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

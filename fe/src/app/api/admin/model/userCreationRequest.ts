@@ -15,5 +15,6 @@ export interface UserCreationRequest {
     email: string;
     phone?: string;
     address?: string;
+    active?: boolean;
 }
 

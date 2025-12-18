@@ -1,25 +1,75 @@
 version: '3.8'
 
 services:
-  minio:
-    image: quay.io/minio/minio:latest
-    container_name: minio
-    ports:
-      - "9000:9000"
-      - "9001:9001"
-    environment:
-      MINIO_ROOT_USER: admin
-      MINIO_ROOT_PASSWORD: admin123
-    command: server /data --console-address ":9001"
-    volumes:
-      - minio_data:/data
-
   redis:
-    image: redis:6.2.7
-    container_name: redis
+    image: redis:6.2-alpine
+    container_name: shop-redis
     ports:
       - "6379:6379"
-    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes --requirepass ""
+    networks:
+      - shop-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  shop-auth:
+    build:
+      context: ./BE/shop/shop-auth
+      dockerfile: Dockerfile
+    container_name: shop-auth
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:oracle:thin:@host.docker.internal:1521/root
+      SPRING_REDIS_HOST: redis
+      SPRING_REDIS_PORT: 6379
+    depends_on:
+      - redis
+    networks:
+      - shop-network
+
+  shop-admin:
+    build:
+      context: ./BE/shop/shop-admin
+      dockerfile: Dockerfile
+    container_name: shop-admin
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:oracle:thin:@host.docker.internal:1521/root
+      FEIGN_AUTH_SERVICE_URL: http://shop-auth:8082
+    depends_on:
+      - shop-auth
+    networks:
+      - shop-network
+
+  shop-app:
+    build:
+      context: ./BE/shop/shop-app
+      dockerfile: Dockerfile
+    container_name: shop-app
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:oracle:thin:@host.docker.internal:1521/root
+      FEIGN_AUTH_SERVICE_URL: http://shop-auth:8082
+    depends_on:
+      - shop-auth
+    networks:
+      - shop-network
 
 volumes:
   minio_data:
+  redis_data:
+
+networks:
+  shop-network:
+    driver: bridge

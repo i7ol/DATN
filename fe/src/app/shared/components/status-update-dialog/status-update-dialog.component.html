@@ -1,0 +1,41 @@
+<h2 mat-dialog-title>Cập nhật trạng thái</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="statusForm">
+    <div class="mb-4">
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Trạng thái</mat-label>
+        <mat-select formControlName="status">
+          <mat-option
+            *ngFor="let option of statusOptions"
+            [value]="option.value"
+          >
+            {{ option.label }}
+          </mat-option>
+        </mat-select>
+        <mat-error *ngIf="statusForm.get('status')?.hasError('required')">
+          Vui lòng chọn trạng thái
+        </mat-error>
+      </mat-form-field>
+    </div>
+
+    <div class="mb-4">
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Ghi chú</mat-label>
+        <textarea matInput formControlName="notes" rows="3"></textarea>
+      </mat-form-field>
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()">Hủy</button>
+  <button
+    mat-raised-button
+    color="primary"
+    (click)="onSubmit()"
+    [disabled]="!statusForm.valid"
+  >
+    Cập nhật
+  </button>
+</mat-dialog-actions>

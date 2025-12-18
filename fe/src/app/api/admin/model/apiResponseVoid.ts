@@ -12,6 +12,6 @@
 export interface ApiResponseVoid { 
     code?: number;
     message?: string;
-    result?: any | null;
+    result?: object;
 }
 

@@ -1,4 +1,5 @@
-import { Component, OnInit, Inject } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+
 import {
   ProductResponse,
   PageProductResponse,
@@ -16,15 +17,10 @@ export class ProductListComponent implements OnInit {
   products: ProductResponse[] = [];
   loading = false;
 
-  selectedProduct: ProductResponse | null = null;
-  showModal = false;
-
   // Pagination
   currentPage = 0;
   pageSize = 20;
   totalItems = 0;
-
-  private MINIO_URL = 'http://localhost:9000/shop'; // URL MinIO của bạn
 
   constructor(
     private productApi: ProductUserControllerService,
@@ -35,27 +31,11 @@ export class ProductListComponent implements OnInit {
   ngOnInit(): void {
     this.loadProducts();
   }
+
   addToCart(product: ProductResponse) {
     this.cartService.addItem(product.id!, 1).subscribe(() => {
       alert('Đã thêm vào giỏ hàng');
     });
-  }
-
-  /** ---------------------------
-   * Chuẩn hóa URL ảnh
-   * --------------------------- */
-  private mapImageUrls(product: ProductResponse): ProductResponse {
-    if (product.images) {
-      product.images = product.images.map((img: any) => ({
-        ...img,
-        url: img.url
-          ? img.url // API trả full URL
-          : img.path
-          ? `${this.MINIO_URL}/${img.path}` // API chỉ trả path → build URL
-          : '',
-      }));
-    }
-    return product;
   }
 
   /** ---------------------------
@@ -69,7 +49,7 @@ export class ProductListComponent implements OnInit {
         const onBody = (body: any) => {
           const data: PageProductResponse = body;
 
-          this.products = (data.content || []).map((p) => this.mapImageUrls(p));
+          this.products = data.content || [];
 
           this.totalItems = data.totalElements || this.products.length;
           this.currentPage = data.number || 0;
@@ -77,22 +57,12 @@ export class ProductListComponent implements OnInit {
           this.loading = false;
         };
 
-        // Trường hợp backend trả Blob
         if (resp.body instanceof Blob) {
-          resp.body.text().then((text: string) => {
-            try {
-              const json = JSON.parse(text);
-              onBody(json);
-            } catch (e) {
-              console.error('Parse JSON failed:', e);
-              this.loading = false;
-            }
-          });
+          resp.body.text().then((text: string) => onBody(JSON.parse(text)));
         } else {
           onBody(resp.body);
         }
       },
-
       error: (err) => {
         console.error('Load products error:', err);
         this.loading = false;
@@ -105,10 +75,6 @@ export class ProductListComponent implements OnInit {
    * --------------------------- */
   get totalPages(): number {
     return Math.ceil(this.totalItems / this.pageSize);
-  }
-
-  get totalPagesArray(): number[] {
-    return Array(this.totalPages);
   }
 
   prevPage() {
@@ -124,15 +90,7 @@ export class ProductListComponent implements OnInit {
     if (page >= 0 && page < this.totalPages) this.loadProducts(page);
   }
 
-  /** ---------------------------
-   * Xem chi tiết sản phẩm
-   * --------------------------- */
   viewProductDetail(product: ProductResponse) {
     this.router.navigate(['/product', product.id]);
-  }
-
-  closeModal() {
-    this.showModal = false;
-    this.selectedProduct = null;
   }
 }
