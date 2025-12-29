@@ -72,43 +72,45 @@ export class AuthModalComponent implements OnInit, OnDestroy {
 
     this.authService.login(this.loginForm.value).subscribe({
       next: () => {
-        this.dialogRef.close();
-        this.router.navigate(['/']);
+        this.loginLoading = false;
+        this.dialogRef.close(true); // báo login thành công
       },
-      error: () => {
-        this.loginError = 'Đăng nhập thất bại';
+      error: (err) => {
+        this.loginError = err?.message || 'Đăng nhập thất bại';
         this.loginLoading = false;
       },
     });
   }
 
   onRegisterSubmit(): void {
-    if (this.registerForm.invalid) return;
+  if (this.registerForm.invalid) return;
 
-    const v = this.registerForm.value;
-    const payload = {
-      username: v.username,
-      email: v.email,
-      password: v.password,
-      confirmPassword: v.confirmPassword,
-      phone: v.phone,
-      address: v.addressDetail,
-    };
+  const v = this.registerForm.value;
 
-    this.registerLoading = true;
-    this.registerError = '';
+  const payload = {
+    username: v.username,
+    email: v.email,
+    password: v.password,
+    phone: v.phone,
+    address: v.addressDetail,
+  };
 
-    this.authService.register(payload).subscribe({
-      next: () => {
-        this.dialogRef.close();
-        this.router.navigate(['/']);
-      },
-      error: () => {
-        this.registerError = 'Đăng ký thất bại';
-        this.registerLoading = false;
-      },
-    });
-  }
+  this.registerLoading = true;
+  this.registerError = '';
+
+  this.authService.register(payload).subscribe({
+    next: () => {
+      this.registerLoading = false;
+      this.dialogRef.close(true);
+    },
+    error: () => {
+      this.registerError = 'Đăng ký thất bại';
+      this.registerLoading = false;
+    },
+  });
+}
+
+  
 
   onTabChange(e: any) {
     this.isLoginMode = e.index === 0;

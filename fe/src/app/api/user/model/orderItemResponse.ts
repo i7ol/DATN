@@ -13,9 +13,12 @@ export interface OrderItemResponse {
     id?: number;
     productId?: number;
     productName?: string;
-    quantity?: number;
-    price?: number;
+    variantId?: number;
+    size?: string;
+    color?: string;
     unitPrice?: number;
+    quantity?: number;
+    totalPrice?: number;
     createdAt?: string;
     updatedAt?: string;
 }

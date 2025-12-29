@@ -4,8 +4,12 @@ public class CartCacheKey {
 
     public static String of(Long userId, String guestId) {
         if (userId != null) {
-            return "CART::USER::" + userId;
+            return "USER_" + userId;
         }
-        return "CART::GUEST::" + guestId;
+        if (guestId != null && !guestId.isBlank()) {
+            return "GUEST_" + guestId;
+        }
+        // Thêm trường hợp cả hai đều null
+        return "EMPTY_CART";
     }
 }

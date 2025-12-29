@@ -35,6 +35,7 @@ export interface OrderResponse {
 }
 export enum OrderResponseStatusEnum {
     NEW = 'NEW',
+    PENDING_PAYMENT = 'PENDING_PAYMENT',
     CONFIRMED = 'CONFIRMED',
     PROCESSING = 'PROCESSING',
     PACKING = 'PACKING',

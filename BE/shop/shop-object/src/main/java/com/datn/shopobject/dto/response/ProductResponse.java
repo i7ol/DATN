@@ -3,6 +3,7 @@ package com.datn.shopobject.dto.response;
 import com.datn.shopobject.dto.ImageDTO;
 import lombok.*;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -21,7 +22,7 @@ public class ProductResponse {
     private Long categoryId;
     private String categoryName;
 
-    private List<ImageDTO> images;
+    private List<ImageDTO> images = new ArrayList<>();
     private List<String> colors;
     private List<String> sizes;
     private List<VariantResponse> variants;

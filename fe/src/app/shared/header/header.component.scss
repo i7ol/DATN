@@ -1,124 +1,77 @@
-/* Logo image */
-.img-logo {
-  width: 18px;
-  height: 18px;
-}
+/* Custom scrollbar cho cart dropdown */
+.cart-scrollbar {
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
 
-/* Menu item styles */
-.menu-item {
-  color: #6b7280;
-  transition: color 0.3s;
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 2px;
+  }
 
-  &:hover {
-    color: #111827;
+  &::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 2px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: #555;
   }
 }
 
-.menu-line {
-  position: absolute;
-  left: 0;
-  bottom: -4px;
-  height: 2px;
-  width: 0;
-  background-color: #111827;
-  transition: width 0.3s ease;
+/* Animation cho cart dropdown */
+.cart-dropdown {
+  animation: slideDown 0.2s ease-out;
+  transform-origin: top right;
 }
 
-.menu-item:hover .menu-line {
-  width: 100%;
-}
-
-.menu-item.active {
-  color: #111827;
-
-  .menu-line {
-    width: 100%;
-  }
-}
-
-/* Text clamp for product names */
-.line-clamp-2 {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-/* Optional: Add smooth transition for cart dropdown */
-:host ::ng-deep .cart-dropdown {
-  animation: fadeInDown 0.2s ease-out;
-}
-
-@keyframes fadeInDown {
+@keyframes slideDown {
   from {
     opacity: 0;
-    transform: translateY(-8px);
+    transform: translateY(-10px) scale(0.95);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
   }
 }
 
-/* Optional: Improve hover states */
-.cursor-pointer {
+/* Hiệu ứng hover cho cart items */
+.cart-item-hover {
   &:hover {
-    img {
-      opacity: 1;
-    }
-  }
-
-  img {
-    transition: opacity 0.2s ease;
+    background-color: #f9fafb;
+    transform: translateX(2px);
+    transition: all 0.2s ease;
   }
 }
 
-/* Ensure dropdown is above everything */
-.z-50 {
-  z-index: 50;
-}
-
-/* Shadow on scroll */
-.shadow-md {
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
-    0 2px 4px -1px rgba(0, 0, 0, 0.06);
-}
-/* Admin Panel Dropdown */
-.admin-panel-item {
-  @apply transition-colors duration-200;
-
-  &:hover {
-    @apply bg-gray-50;
-
-    .admin-icon {
-      @apply opacity-100;
-      transform: scale(1.1);
-    }
+/* Responsive cho cart dropdown */
+@media (max-width: 640px) {
+  .cart-dropdown {
+    position: fixed;
+    top: 80px;
+    right: 16px;
+    left: 16px;
+    width: auto !important;
+    max-width: 100%;
   }
 }
 
-.admin-icon {
-  @apply transition-all duration-200;
+/* Loading spinner */
+.spinner {
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid #3498db;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  animation: spin 1s linear infinite;
 }
 
-/* Active state for admin links */
-a.active {
-  @apply bg-blue-50 border-l-2 border-blue-500;
-
-  .admin-icon {
-    @apply opacity-100;
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
   }
-
-  .font-medium {
-    @apply text-blue-600;
+  100% {
+    transform: rotate(360deg);
   }
-}
-
-/* Badge for admin */
-.admin-badge {
-  @apply text-xs bg-red-100 text-red-800 px-2 py-1 rounded font-medium;
-}
-
-.user-badge {
-  @apply text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded font-medium;
 }

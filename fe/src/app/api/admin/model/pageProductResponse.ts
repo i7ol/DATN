@@ -13,8 +13,8 @@ import { ProductResponse } from './productResponse';
 
 
 export interface PageProductResponse { 
-    totalElements?: number;
     totalPages?: number;
+    totalElements?: number;
     size?: number;
     content?: Array<ProductResponse>;
     number?: number;

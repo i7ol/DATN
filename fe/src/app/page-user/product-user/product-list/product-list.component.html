@@ -10,10 +10,13 @@
     <div
       *ngFor="let product of products"
       class="product-card"
-      (click)="viewProductDetail(product)"
+      (click)="product.variants?.length > 1 ? viewProductDetail(product) : null"
     >
       <!-- IMAGE -->
-      <div class="product-image">
+      <div
+        class="product-image"
+        (click)="viewProductDetail(product); $event.stopPropagation()"
+      >
         <img [src]="product.images?.[0]?.url" class="main-image" />
         <img
           *ngIf="product.images?.[1]"
@@ -27,12 +30,33 @@
         <h2 class="product-name">{{ product.name }}</h2>
         <p class="product-price">{{ product.price | number : "1.0-0" }}đ</p>
 
-        <button
-          (click)="addToCart(product); $event.stopPropagation()"
-          class="add-to-cart"
+        <!-- Button hiển thị theo số lượng biến thể -->
+        <ng-container *ngIf="product.variants?.length === 1">
+          <button
+            (click)="addToCart(product); $event.stopPropagation()"
+            class="slide-up-button add-to-cart"
+          >
+            Thêm vào giỏ hàng
+          </button>
+        </ng-container>
+
+        <ng-container *ngIf="product.variants?.length > 1">
+          <button
+            (click)="viewProductDetail(product); $event.stopPropagation()"
+            class="slide-up-button detail-button"
+          >
+            Chi tiết
+          </button>
+        </ng-container>
+
+        <!-- Trường hợp không có biến thể nào -->
+        <ng-container
+          *ngIf="!product.variants || product.variants.length === 0"
         >
-          Thêm vào giỏ hàng
-        </button>
+          <button class="slide-up-button disabled-button" disabled>
+            Tạm hết hàng
+          </button>
+        </ng-container>
       </div>
     </div>
   </div>

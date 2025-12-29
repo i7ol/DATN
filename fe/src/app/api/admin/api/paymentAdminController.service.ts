@@ -17,15 +17,7 @@ import { CustomHttpParameterCodec }                          from '../encoder';
 import { Observable }                                        from 'rxjs';
 
 // @ts-ignore
-import { PagePaymentResponse } from '../model/pagePaymentResponse';
-// @ts-ignore
 import { Pageable } from '../model/pageable';
-// @ts-ignore
-import { PaymentResponse } from '../model/paymentResponse';
-// @ts-ignore
-import { PaymentSearchRequest } from '../model/paymentSearchRequest';
-// @ts-ignore
-import { PaymentSummaryResponse } from '../model/paymentSummaryResponse';
 
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables';
@@ -44,26 +36,89 @@ export class PaymentAdminControllerService extends BaseService {
     }
 
     /**
-     * @endpoint get /api/admin/payments
-     * @param filter 
-     * @param pageable 
+     * @endpoint put /api/admin/payments/{paymentId}/cancel
+     * @param paymentId 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public getAllPayments(filter: PaymentSearchRequest, pageable: Pageable, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<PagePaymentResponse>;
-    public getAllPayments(filter: PaymentSearchRequest, pageable: Pageable, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpResponse<PagePaymentResponse>>;
-    public getAllPayments(filter: PaymentSearchRequest, pageable: Pageable, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpEvent<PagePaymentResponse>>;
-    public getAllPayments(filter: PaymentSearchRequest, pageable: Pageable, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<any> {
-        if (filter === null || filter === undefined) {
-            throw new Error('Required parameter filter was null or undefined when calling getAllPayments.');
+    public cancelPayment(paymentId: number, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<object>;
+    public cancelPayment(paymentId: number, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpResponse<object>>;
+    public cancelPayment(paymentId: number, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpEvent<object>>;
+    public cancelPayment(paymentId: number, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<any> {
+        if (paymentId === null || paymentId === undefined) {
+            throw new Error('Required parameter paymentId was null or undefined when calling cancelPayment.');
         }
+
+        let localVarHeaders = this.defaultHeaders;
+
+        const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
+            '*/*'
+        ]);
+        if (localVarHttpHeaderAcceptSelected !== undefined) {
+            localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+        }
+
+        const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+
+        let responseType_: 'text' | 'json' | 'blob' = 'json';
+        if (localVarHttpHeaderAcceptSelected) {
+            if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+                responseType_ = 'text';
+            } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+                responseType_ = 'json';
+            } else {
+                responseType_ = 'blob';
+            }
+        }
+
+        let localVarPath = `/api/admin/payments/${this.configuration.encodeParam({name: "paymentId", value: paymentId, in: "path", style: "simple", explode: false, dataType: "number", dataFormat: "int64"})}/cancel`;
+        const { basePath, withCredentials } = this.configuration;
+        return this.httpClient.request<object>('put', `${basePath}${localVarPath}`,
+            {
+                context: localVarHttpContext,
+                responseType: <any>responseType_,
+                ...(withCredentials ? { withCredentials } : {}),
+                headers: localVarHeaders,
+                observe: observe,
+                reportProgress: reportProgress
+            }
+        );
+    }
+
+    /**
+     * @endpoint get /api/admin/payments
+     * @param pageable 
+     * @param status 
+     * @param method 
+     * @param fromDate 
+     * @param toDate 
+     * @param minAmount 
+     * @param maxAmount 
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public getAllPayments(pageable: Pageable, status?: string, method?: string, fromDate?: string, toDate?: string, minAmount?: number, maxAmount?: number, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<object>;
+    public getAllPayments(pageable: Pageable, status?: string, method?: string, fromDate?: string, toDate?: string, minAmount?: number, maxAmount?: number, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpResponse<object>>;
+    public getAllPayments(pageable: Pageable, status?: string, method?: string, fromDate?: string, toDate?: string, minAmount?: number, maxAmount?: number, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpEvent<object>>;
+    public getAllPayments(pageable: Pageable, status?: string, method?: string, fromDate?: string, toDate?: string, minAmount?: number, maxAmount?: number, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<any> {
         if (pageable === null || pageable === undefined) {
             throw new Error('Required parameter pageable was null or undefined when calling getAllPayments.');
         }
 
         let localVarQueryParameters = new HttpParams({encoder: this.encoder});
         localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
-          <any>filter, 'filter');
+          <any>status, 'status');
+        localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
+          <any>method, 'method');
+        localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
+          <any>fromDate, 'fromDate');
+        localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
+          <any>toDate, 'toDate');
+        localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
+          <any>minAmount, 'minAmount');
+        localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
+          <any>maxAmount, 'maxAmount');
         localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
           <any>pageable, 'pageable');
 
@@ -92,7 +147,7 @@ export class PaymentAdminControllerService extends BaseService {
 
         let localVarPath = `/api/admin/payments`;
         const { basePath, withCredentials } = this.configuration;
-        return this.httpClient.request<PagePaymentResponse>('get', `${basePath}${localVarPath}`,
+        return this.httpClient.request<object>('get', `${basePath}${localVarPath}`,
             {
                 context: localVarHttpContext,
                 params: localVarQueryParameters,
@@ -106,17 +161,17 @@ export class PaymentAdminControllerService extends BaseService {
     }
 
     /**
-     * @endpoint get /api/admin/payments/{id}
-     * @param id 
+     * @endpoint get /api/admin/payments/{paymentId}
+     * @param paymentId 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public getPaymentById(id: number, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<PaymentResponse>;
-    public getPaymentById(id: number, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpResponse<PaymentResponse>>;
-    public getPaymentById(id: number, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpEvent<PaymentResponse>>;
-    public getPaymentById(id: number, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<any> {
-        if (id === null || id === undefined) {
-            throw new Error('Required parameter id was null or undefined when calling getPaymentById.');
+    public getPaymentById(paymentId: number, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<object>;
+    public getPaymentById(paymentId: number, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpResponse<object>>;
+    public getPaymentById(paymentId: number, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpEvent<object>>;
+    public getPaymentById(paymentId: number, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<any> {
+        if (paymentId === null || paymentId === undefined) {
+            throw new Error('Required parameter paymentId was null or undefined when calling getPaymentById.');
         }
 
         let localVarHeaders = this.defaultHeaders;
@@ -142,60 +197,9 @@ export class PaymentAdminControllerService extends BaseService {
             }
         }
 
-        let localVarPath = `/api/admin/payments/${this.configuration.encodeParam({name: "id", value: id, in: "path", style: "simple", explode: false, dataType: "number", dataFormat: "int64"})}`;
+        let localVarPath = `/api/admin/payments/${this.configuration.encodeParam({name: "paymentId", value: paymentId, in: "path", style: "simple", explode: false, dataType: "number", dataFormat: "int64"})}`;
         const { basePath, withCredentials } = this.configuration;
-        return this.httpClient.request<PaymentResponse>('get', `${basePath}${localVarPath}`,
-            {
-                context: localVarHttpContext,
-                responseType: <any>responseType_,
-                ...(withCredentials ? { withCredentials } : {}),
-                headers: localVarHeaders,
-                observe: observe,
-                reportProgress: reportProgress
-            }
-        );
-    }
-
-    /**
-     * @endpoint get /api/admin/payments/order/{orderId}
-     * @param orderId 
-     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
-     * @param reportProgress flag to report request and response progress.
-     */
-    public getPaymentByOrderId(orderId: number, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<PaymentResponse>;
-    public getPaymentByOrderId(orderId: number, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpResponse<PaymentResponse>>;
-    public getPaymentByOrderId(orderId: number, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpEvent<PaymentResponse>>;
-    public getPaymentByOrderId(orderId: number, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<any> {
-        if (orderId === null || orderId === undefined) {
-            throw new Error('Required parameter orderId was null or undefined when calling getPaymentByOrderId.');
-        }
-
-        let localVarHeaders = this.defaultHeaders;
-
-        const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
-            '*/*'
-        ]);
-        if (localVarHttpHeaderAcceptSelected !== undefined) {
-            localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
-        }
-
-        const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
-
-
-        let responseType_: 'text' | 'json' | 'blob' = 'json';
-        if (localVarHttpHeaderAcceptSelected) {
-            if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
-                responseType_ = 'text';
-            } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
-                responseType_ = 'json';
-            } else {
-                responseType_ = 'blob';
-            }
-        }
-
-        let localVarPath = `/api/admin/payments/order/${this.configuration.encodeParam({name: "orderId", value: orderId, in: "path", style: "simple", explode: false, dataType: "number", dataFormat: "int64"})}`;
-        const { basePath, withCredentials } = this.configuration;
-        return this.httpClient.request<PaymentResponse>('get', `${basePath}${localVarPath}`,
+        return this.httpClient.request<object>('get', `${basePath}${localVarPath}`,
             {
                 context: localVarHttpContext,
                 responseType: <any>responseType_,
@@ -214,9 +218,9 @@ export class PaymentAdminControllerService extends BaseService {
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public getPaymentSummary(fromDate?: string, toDate?: string, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<PaymentSummaryResponse>;
-    public getPaymentSummary(fromDate?: string, toDate?: string, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpResponse<PaymentSummaryResponse>>;
-    public getPaymentSummary(fromDate?: string, toDate?: string, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpEvent<PaymentSummaryResponse>>;
+    public getPaymentSummary(fromDate?: string, toDate?: string, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<object>;
+    public getPaymentSummary(fromDate?: string, toDate?: string, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpResponse<object>>;
+    public getPaymentSummary(fromDate?: string, toDate?: string, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpEvent<object>>;
     public getPaymentSummary(fromDate?: string, toDate?: string, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<any> {
 
         let localVarQueryParameters = new HttpParams({encoder: this.encoder});
@@ -250,7 +254,7 @@ export class PaymentAdminControllerService extends BaseService {
 
         let localVarPath = `/api/admin/payments/summary`;
         const { basePath, withCredentials } = this.configuration;
-        return this.httpClient.request<PaymentSummaryResponse>('get', `${basePath}${localVarPath}`,
+        return this.httpClient.request<object>('get', `${basePath}${localVarPath}`,
             {
                 context: localVarHttpContext,
                 params: localVarQueryParameters,
@@ -264,22 +268,26 @@ export class PaymentAdminControllerService extends BaseService {
     }
 
     /**
-     * @endpoint put /api/admin/payments/{id}/mark-paid
-     * @param id 
-     * @param requestBody 
+     * @endpoint put /api/admin/payments/{paymentId}/mark-paid
+     * @param paymentId 
+     * @param transactionId 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public markPaid(id: number, requestBody: { [key: string]: string; }, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<PaymentResponse>;
-    public markPaid(id: number, requestBody: { [key: string]: string; }, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpResponse<PaymentResponse>>;
-    public markPaid(id: number, requestBody: { [key: string]: string; }, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpEvent<PaymentResponse>>;
-    public markPaid(id: number, requestBody: { [key: string]: string; }, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<any> {
-        if (id === null || id === undefined) {
-            throw new Error('Required parameter id was null or undefined when calling markPaid.');
+    public markPaid(paymentId: number, transactionId: string, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<object>;
+    public markPaid(paymentId: number, transactionId: string, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpResponse<object>>;
+    public markPaid(paymentId: number, transactionId: string, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpEvent<object>>;
+    public markPaid(paymentId: number, transactionId: string, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<any> {
+        if (paymentId === null || paymentId === undefined) {
+            throw new Error('Required parameter paymentId was null or undefined when calling markPaid.');
         }
-        if (requestBody === null || requestBody === undefined) {
-            throw new Error('Required parameter requestBody was null or undefined when calling markPaid.');
+        if (transactionId === null || transactionId === undefined) {
+            throw new Error('Required parameter transactionId was null or undefined when calling markPaid.');
         }
+
+        let localVarQueryParameters = new HttpParams({encoder: this.encoder});
+        localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
+          <any>transactionId, 'transactionId');
 
         let localVarHeaders = this.defaultHeaders;
 
@@ -293,15 +301,6 @@ export class PaymentAdminControllerService extends BaseService {
         const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
 
 
-        // to determine the Content-Type header
-        const consumes: string[] = [
-            'application/json'
-        ];
-        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType(consumes);
-        if (httpContentTypeSelected !== undefined) {
-            localVarHeaders = localVarHeaders.set('Content-Type', httpContentTypeSelected);
-        }
-
         let responseType_: 'text' | 'json' | 'blob' = 'json';
         if (localVarHttpHeaderAcceptSelected) {
             if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
@@ -313,12 +312,12 @@ export class PaymentAdminControllerService extends BaseService {
             }
         }
 
-        let localVarPath = `/api/admin/payments/${this.configuration.encodeParam({name: "id", value: id, in: "path", style: "simple", explode: false, dataType: "number", dataFormat: "int64"})}/mark-paid`;
+        let localVarPath = `/api/admin/payments/${this.configuration.encodeParam({name: "paymentId", value: paymentId, in: "path", style: "simple", explode: false, dataType: "number", dataFormat: "int64"})}/mark-paid`;
         const { basePath, withCredentials } = this.configuration;
-        return this.httpClient.request<PaymentResponse>('put', `${basePath}${localVarPath}`,
+        return this.httpClient.request<object>('put', `${basePath}${localVarPath}`,
             {
                 context: localVarHttpContext,
-                body: requestBody,
+                params: localVarQueryParameters,
                 responseType: <any>responseType_,
                 ...(withCredentials ? { withCredentials } : {}),
                 headers: localVarHeaders,
@@ -329,18 +328,18 @@ export class PaymentAdminControllerService extends BaseService {
     }
 
     /**
-     * @endpoint put /api/admin/payments/{id}/refund
-     * @param id 
+     * @endpoint put /api/admin/payments/{paymentId}/refund
+     * @param paymentId 
      * @param requestBody 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public refund(id: number, requestBody: { [key: string]: string; }, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<PaymentResponse>;
-    public refund(id: number, requestBody: { [key: string]: string; }, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpResponse<PaymentResponse>>;
-    public refund(id: number, requestBody: { [key: string]: string; }, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpEvent<PaymentResponse>>;
-    public refund(id: number, requestBody: { [key: string]: string; }, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<any> {
-        if (id === null || id === undefined) {
-            throw new Error('Required parameter id was null or undefined when calling refund.');
+    public refund(paymentId: number, requestBody: { [key: string]: string; }, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<object>;
+    public refund(paymentId: number, requestBody: { [key: string]: string; }, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpResponse<object>>;
+    public refund(paymentId: number, requestBody: { [key: string]: string; }, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpEvent<object>>;
+    public refund(paymentId: number, requestBody: { [key: string]: string; }, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<any> {
+        if (paymentId === null || paymentId === undefined) {
+            throw new Error('Required parameter paymentId was null or undefined when calling refund.');
         }
         if (requestBody === null || requestBody === undefined) {
             throw new Error('Required parameter requestBody was null or undefined when calling refund.');
@@ -378,9 +377,9 @@ export class PaymentAdminControllerService extends BaseService {
             }
         }
 
-        let localVarPath = `/api/admin/payments/${this.configuration.encodeParam({name: "id", value: id, in: "path", style: "simple", explode: false, dataType: "number", dataFormat: "int64"})}/refund`;
+        let localVarPath = `/api/admin/payments/${this.configuration.encodeParam({name: "paymentId", value: paymentId, in: "path", style: "simple", explode: false, dataType: "number", dataFormat: "int64"})}/refund`;
         const { basePath, withCredentials } = this.configuration;
-        return this.httpClient.request<PaymentResponse>('put', `${basePath}${localVarPath}`,
+        return this.httpClient.request<object>('put', `${basePath}${localVarPath}`,
             {
                 context: localVarHttpContext,
                 body: requestBody,

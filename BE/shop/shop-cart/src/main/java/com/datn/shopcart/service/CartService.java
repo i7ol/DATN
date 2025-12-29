@@ -11,7 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
+import java.util.List;
 
 
 @Service
@@ -20,7 +20,9 @@ import java.math.BigDecimal;
 public class CartService {
 
     private final CartRepository cartRepository;
-    private final ProductRepository productRepository;
+    private final CartItemRepository cartItemRepository;
+    private final ProductVariantRepository variantRepository;
+    private final InventoryRepository inventoryRepository;
     private final UserRepository userRepository;
 
     /* ====================== CORE ====================== */
@@ -60,85 +62,114 @@ public class CartService {
             unless = "#result == null"
     )
     public CartResponse getCartResponse(Long userId, String guestId) {
+
         CartEntity cart = getCart(userId, guestId);
-        CartResponse response = CartMapper.toResponse(cart);
-        response.setTotalPrice(totalPrice(cart));
-        return response;
+
+        List<Long> variantIds = cart.getItems().stream()
+                .map(CartItemEntity::getVariant)
+                .filter(v -> v != null)
+                .map(ProductVariantEntity::getId)
+                .toList();
+
+
+        List<InventoryItemEntity> inventories =
+                variantIds.isEmpty()
+                        ? List.of()
+                        : inventoryRepository.findByVariantIdIn(variantIds);
+
+        return CartMapper.toResponse(cart, inventories);
     }
 
-    /* ====================== WRITE ====================== */
+    /* ====================== ADD ITEM ====================== */
 
     @CacheEvict(
             value = "cartCache",
             key = "T(com.datn.shopcart.cache.CartCacheKey).of(#userId,#guestId)"
     )
-    public CartResponse addItem(Long userId, String guestId, Long productId, int quantity) {
+    public CartResponse addItem(
+            Long userId,
+            String guestId,
+            Long variantId,
+            int quantity
+    ) {
 
         CartEntity cart = getCart(userId, guestId);
-        ProductEntity product = productRepository.findById(productId)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
 
-        cart.getItems().stream()
-                .filter(i -> i.getProduct().getId().equals(productId))
-                .findFirst()
-                .ifPresentOrElse(
-                        i -> i.setQuantity(i.getQuantity() + quantity),
-                        () -> {
-                            CartItemEntity item = new CartItemEntity();
-                            item.setCart(cart);
-                            item.setProduct(product);
-                            item.setQuantity(quantity);
-                            cart.getItems().add(item);
-                        }
-                );
+        ProductVariantEntity variant = variantRepository.findById(variantId)
+                .orElseThrow(() -> new RuntimeException("Variant not found"));
+
+        CartItemEntity item = cartItemRepository
+                .findByCartIdAndVariantId(cart.getId(), variantId)
+                .orElse(null);
+
+        if (item != null) {
+            item.setQuantity(item.getQuantity() + quantity);
+        } else {
+            CartItemEntity newItem = new CartItemEntity();
+            newItem.setCart(cart);
+            newItem.setVariant(variant);
+            newItem.setQuantity(quantity);
+            cart.getItems().add(newItem);
+        }
 
         cartRepository.save(cart);
-
-        // ✅ GỌI TRỰC TIẾP MAPPER (KHÔNG QUA CACHE)
-        CartResponse response = CartMapper.toResponse(cart);
-        response.setTotalPrice(totalPrice(cart));
-        return response;
+        return getCartResponse(userId, guestId);
     }
 
+    /* ====================== UPDATE ITEM ====================== */
 
     @CacheEvict(
             value = "cartCache",
             key = "T(com.datn.shopcart.cache.CartCacheKey).of(#userId,#guestId)"
     )
-    public CartResponse updateItem(Long userId, String guestId, Long productId, int quantity) {
+    public CartResponse updateItem(
+            Long userId,
+            String guestId,
+            Long variantId,
+            int quantity
+    ) {
 
         CartEntity cart = getCart(userId, guestId);
 
-        CartItemEntity item = cart.getItems().stream()
-                .filter(i -> i.getProduct().getId().equals(productId))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("Product not in cart"));
+        CartItemEntity item = cartItemRepository
+                .findByCartIdAndVariantId(cart.getId(), variantId)
+                .orElseThrow(() -> new RuntimeException("Item not found"));
 
-        item.setQuantity(quantity);
+        if (quantity < 1) {
+            cart.getItems().remove(item);
+        } else {
+            item.setQuantity(quantity);
+        }
+
         cartRepository.save(cart);
 
-        CartResponse response = CartMapper.toResponse(cart);
-        response.setTotalPrice(totalPrice(cart));
-        return response;
+        return getCartResponse(userId, guestId);
     }
+
+    /* ====================== REMOVE ITEM ====================== */
 
     @CacheEvict(
             value = "cartCache",
             key = "T(com.datn.shopcart.cache.CartCacheKey).of(#userId,#guestId)"
     )
-    public CartResponse removeItem(Long userId, String guestId, Long productId) {
+    public CartResponse removeItem(
+            Long userId,
+            String guestId,
+            Long variantId
+    ) {
 
         CartEntity cart = getCart(userId, guestId);
-        cart.getItems().removeIf(i -> i.getProduct().getId().equals(productId));
+        cart.getItems().removeIf(i ->
+                i.getVariant() != null &&
+                        i.getVariant().getId().equals(variantId)
+        );
+
         cartRepository.save(cart);
 
-        CartResponse response = CartMapper.toResponse(cart);
-        response.setTotalPrice(totalPrice(cart));
-        return response;
+        return getCartResponse(userId, guestId);
     }
 
-
-    /* ====================== MERGE ====================== */
+    /* ====================== MERGE GUEST → USER ====================== */
 
     @CacheEvict(
             value = "cartCache",
@@ -151,23 +182,54 @@ public class CartService {
 
         CartEntity userCart = getCart(userId, null);
 
-        for (CartItemEntity item : guestCart.getItems()) {
-            userCart.getItems().add(item);
-            item.setCart(userCart);
+        for (CartItemEntity guestItem : guestCart.getItems()) {
+
+            if (guestItem.getVariant() == null) continue;
+
+            Long variantId = guestItem.getVariant().getId();
+
+            CartItemEntity userItem = cartItemRepository
+                    .findByCartIdAndVariantId(userCart.getId(), variantId)
+                    .orElse(null);
+
+            if (userItem != null) {
+                userItem.setQuantity(
+                        userItem.getQuantity() + guestItem.getQuantity()
+                );
+            } else {
+                guestItem.setCart(userCart);
+                userCart.getItems().add(guestItem);
+            }
         }
+
 
         cartRepository.delete(guestCart);
         cartRepository.save(userCart);
     }
 
+    /* ====================== CLEAR ====================== */
 
-    /* ====================== PRICE ====================== */
+    @CacheEvict(
+            value = "cartCache",
+            key = "T(com.datn.shopcart.cache.CartCacheKey).of(#userId,#guestId)"
+    )
+    public CartResponse clearCart(Long userId, String guestId) {
 
-    private BigDecimal totalPrice(CartEntity cart) {
-        return cart.getItems().stream()
-                .map(i -> i.getProduct().getPrice()
-                        .multiply(BigDecimal.valueOf(i.getQuantity())))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        CartEntity cart = getCart(userId, guestId);
+        cart.getItems().clear();
+        cartRepository.save(cart);
+
+        return getCartResponse(userId, guestId);
     }
+
+
+    public void clearUserCart(Long userId) {
+        clearCart(userId, null);
+    }
+
+    public void clearGuestCart(String guestId) {
+        clearCart(null, guestId);
+    }
+
 }
 

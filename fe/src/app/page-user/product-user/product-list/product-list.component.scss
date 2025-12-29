@@ -2,40 +2,40 @@
 .product-card {
   position: relative;
   background-color: #fff;
-  // border-radius: 0.5rem;
   border-bottom: 1px solid #aaaaaa;
   overflow: hidden;
   cursor: pointer;
-  // box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  // transition: box-shadow 0.3s ease;
 }
-// .product-card:hover {
-//   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-// }
+
 .product-name {
   text-transform: uppercase;
 }
+
 .product-price {
   font-size: 1.25rem;
   color: black;
 }
+
 /* IMAGE */
 .product-image {
   position: relative;
   width: 100%;
-  height: 16rem; /* h-64 */
+  height: 16rem;
   overflow: hidden;
 }
+
 .product-image .main-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
   transition: transform 0.5s ease, opacity 0.5s ease;
 }
+
 .product-card:hover .main-image {
   transform: scale(1.1);
   opacity: 0;
 }
+
 .product-image .hover-image {
   position: absolute;
   top: 0;
@@ -47,6 +47,7 @@
   transform: scale(1);
   transition: transform 0.5s ease, opacity 0.5s ease;
 }
+
 .product-card:hover .hover-image {
   opacity: 1;
   transform: scale(1.1);
@@ -55,42 +56,75 @@
 /* TITLE + PRICE */
 .product-info {
   padding: 1rem;
-  padding-bottom: 4rem; /* khoảng trống cho nút */
+  padding-bottom: 4rem;
   text-align: center;
   position: relative;
 }
+
 .product-name,
 .product-price {
   transition: opacity 0.5s ease, transform 0.5s ease;
 }
+
 .product-card:hover .product-name,
 .product-card:hover .product-price {
   opacity: 0;
   transform: translateY(-0.75rem);
 }
 
-/* BUTTON TRƯỢT LÊN */
-.add-to-cart {
+/* CÁC NÚT TRƯỢT LÊN - STYLE CHUNG */
+.product-card .slide-up-button {
   position: absolute;
   left: 0;
-  bottom: -60px; /* bắt đầu dưới đáy card */
+  bottom: -60px;
   width: 100%;
   padding: 0.75rem;
   font-weight: 600;
-
   font-size: 1.125rem;
-  color: black;
-  background-color: white; /* blue-600 */
-  // border-radius: 0 0 0.5rem 0.5rem;
-  border: 1px solid black;
   cursor: pointer;
-  transition: bottom 0.7s ease, padding 0.3s ease;
+  transition: bottom 0.7s ease, padding 0.3s ease, background-color 0.3s ease,
+    color 0.3s ease;
 }
+
+.product-card:hover .slide-up-button {
+  bottom: 0;
+  padding: 1rem;
+}
+
+/* NÚT THÊM VÀO GIỎ HÀNG (1 biến thể) */
+.add-to-cart {
+  color: black;
+  background-color: white;
+  border: 1px solid black;
+}
+
 .add-to-cart:hover {
   background-color: black;
   color: white;
 }
-.product-card:hover .add-to-cart {
-  bottom: 0; /* trượt lên sát đáy card */
-  padding: 1rem;
+
+/* NÚT CHI TIẾT (nhiều biến thể) */
+.detail-button {
+  color: black;
+  background-color: white;
+  border: 1px solid black;
+}
+
+.detail-button:hover {
+  background-color: #059669;
+  border-color: #059669;
+  color: white;
+}
+
+/* NÚT TẠM HẾT HÀNG (không có biến thể) */
+.disabled-button {
+  color: #6b7280;
+  background-color: #d1d5db;
+  border: 1px solid #d1d5db;
+  cursor: not-allowed !important;
+}
+
+.disabled-button:hover {
+  background-color: #d1d5db;
+  color: #6b7280;
 }

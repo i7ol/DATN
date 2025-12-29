@@ -51,6 +51,44 @@
         {{ product.price | number : "1.0-0" }}đ
       </p>
 
+      <!-- Thông báo trạng thái chọn -->
+      <div class="mb-4">
+        <ng-container *ngIf="selectedVariant">
+          <div
+            class="text-sm text-green-600 bg-green-50 p-2 rounded-md mb-2 alert-message"
+          >
+            ✓ Đã chọn:
+            <span class="font-medium"
+              >{{ selectedColor }} - {{ selectedSize }}</span
+            >
+            <div class="text-xs mt-1 text-gray-600">
+              Còn {{ selectedVariant.stock }} sản phẩm
+            </div>
+          </div>
+        </ng-container>
+        <ng-container *ngIf="!selectedVariant && selectedColor && selectedSize">
+          <div
+            class="text-sm text-red-600 bg-red-50 p-2 rounded-md mb-2 alert-message"
+          >
+            ✗ Biến thể này đã hết hàng
+          </div>
+        </ng-container>
+        <ng-container *ngIf="selectedColor && !selectedSize">
+          <div
+            class="text-sm text-yellow-600 bg-yellow-50 p-2 rounded-md mb-2 alert-message"
+          >
+            ⚠ Vui lòng chọn kích thước
+          </div>
+        </ng-container>
+        <ng-container *ngIf="!selectedColor">
+          <div
+            class="text-sm text-yellow-600 bg-yellow-50 p-2 rounded-md mb-2 alert-message"
+          >
+            ⚠ Vui lòng chọn màu và kích thước
+          </div>
+        </ng-container>
+      </div>
+
       <!-- COLORS -->
       <div class="mb-4">
         <p class="poppins-regular mb-2">Màu</p>
@@ -58,8 +96,12 @@
           <button
             *ngFor="let c of colors"
             (click)="selectColor(c)"
-            class="px-3 py-2 border poppins-regular rounded-md text-sm"
-            [ngClass]="selectedColor === c ? 'bg-black text-white' : 'bg-white'"
+            class="px-3 py-2 border poppins-regular rounded-md text-sm transition-colors duration-200"
+            [ngClass]="
+              selectedColor === c
+                ? 'bg-black text-white border-black'
+                : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+            "
           >
             {{ c }}
           </button>
@@ -74,36 +116,69 @@
             *ngFor="let s of sizes"
             (click)="selectSize(s)"
             class="size-btn poppins-regular"
-            [ngClass]="{ active: selectedSize === s }"
+            [ngClass]="{
+              active: selectedSize === s,
+              'opacity-50 cursor-not-allowed':
+                !selectedColor || !isVariantAvailable(selectedColor, s)
+            }"
+            [disabled]="!selectedColor || !isVariantAvailable(selectedColor, s)"
           >
             {{ s }}
             <span class="corner-check" *ngIf="selectedSize === s"></span>
+            <!-- Hiển thị dấu hiệu hết hàng -->
+            <span
+              *ngIf="selectedColor && !isVariantAvailable(selectedColor, s)"
+              class="absolute top-0 right-0 text-xs text-red-500"
+            >
+              ✗
+            </span>
           </button>
+        </div>
+        <!-- Hiển thị thông báo nếu tất cả size đều hết hàng -->
+        <div
+          *ngIf="selectedColor && sizes.length === 0"
+          class="text-sm text-red-500 mt-2 alert-message"
+        >
+          Màu này đã hết tất cả các size
         </div>
       </div>
 
       <!-- ACTIONS -->
       <div class="mt-6 flex flex-col gap-3">
         <button
-          class="w-full py-3 poppins-regular bg-white text-black border rounded-lg hover:bg-black hover:text-white transition-all duration-300 ease-out transform hover:-translate-y-1 hover:shadow-lg"
+          class="w-full py-3 poppins-regular border rounded-lg transition-all duration-300 ease-out transform hover:-translate-y-1 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:transform-none disabled:hover:shadow-none"
+          [ngClass]="
+            selectedVariant
+              ? 'bg-white text-black border-gray-300 hover:bg-black hover:text-white'
+              : 'bg-gray-100 text-gray-400 border-gray-200'
+          "
           (click)="addToCart()"
+          [disabled]="!selectedVariant"
         >
           Thêm vào giỏ hàng
         </button>
 
         <button
-          class="w-full py-3 poppins-regular bg-black text-white border rounded-lg hover:bg-white hover:text-black transition-all duration-300 ease-out transform hover:-translate-y-1 hover:shadow-lg"
+          class="w-full py-3 poppins-regular border rounded-lg transition-all duration-300 ease-out transform hover:-translate-y-1 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:transform-none disabled:hover:shadow-none"
+          [ngClass]="
+            selectedVariant
+              ? 'bg-black text-white border-black hover:bg-white hover:text-black'
+              : 'bg-gray-100 text-gray-400 border-gray-200'
+          "
+          [disabled]="!selectedVariant"
         >
           Mua ngay
         </button>
       </div>
 
       <!-- SIZE CHART -->
-      <img
-        class="w-full py-3 border rounded-lg mt-3"
-        src="assets/img/SizeChart.webp"
-        alt="Size chart"
-      />
+      <div class="mt-6 border-t pt-4">
+        <img
+          class="w-full py-3 border rounded-lg"
+          src="assets/img/SizeChart.webp"
+          alt="Size chart"
+        />
+      </div>
     </aside>
   </div>
 </div>

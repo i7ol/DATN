@@ -1,32 +1,20 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, of } from 'rxjs';
-import { catchError, map, tap } from 'rxjs/operators';
+import { BehaviorSubject, Observable, throwError } from 'rxjs';
+import { catchError, tap } from 'rxjs/operators';
+import { Router } from '@angular/router';
+import { jwtDecode } from 'jwt-decode';
 import { environment } from 'src/environments/environment';
 
 export interface User {
-  id?: number;
+  id: number;
   username: string;
-  email?: string;
+  email: string;
+  fullName?: string;
   phone?: string;
   address?: string;
   roles: string[];
   permissions: string[];
-  isAuthenticated: boolean;
-}
-
-export interface LoginRequest {
-  username: string;
-  password: string;
-}
-
-export interface RegisterRequest {
-  username: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
-  phone?: string;
-  address?: string;
 }
 
 export interface AuthResponse {
@@ -38,236 +26,139 @@ export interface AuthResponse {
   permissions: string[];
 }
 
-export interface UserInfoResponse {
-  id?: number;
-  username: string;
-  email?: string;
-  phone?: string;
-  address?: string;
-  roles: string[];
-  permissions: string[];
-}
-
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable({ providedIn: 'root' })
 export class AuthService {
-  private authUrl = environment.apiUrl;
-
+  private baseUrl = environment.apiUrls.shopAuth;
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   currentUser$ = this.currentUserSubject.asObservable();
 
-
-  private _accessToken: string | null = null;
-  private _refreshToken: string | null = null;
-
-  constructor(private http: HttpClient) {
-    this.loadTokens();
-
+  constructor(private http: HttpClient, private router: Router) {
+    this.restoreUser();
   }
 
-  private loadTokens(): void {
-    this._accessToken = localStorage.getItem('accessToken');
-    this._refreshToken = localStorage.getItem('refreshToken');
-    if (this._accessToken) {
-      const user: User = {
-        username: '',
-        roles: [],
-        permissions: [],
-        isAuthenticated: true,
-      };
-      this.currentUserSubject.next(user);
+  /* ================= RESTORE ================= */
+  private restoreUser(): void {
+    const token = this.getAccessToken();
+    const userStr = localStorage.getItem('user');
+
+    if (token && userStr) {
+      try {
+        this.currentUserSubject.next(JSON.parse(userStr));
+      } catch {
+        this.clearStorage();
+      }
     }
   }
 
-  private saveTokens(accessToken: string, refreshToken: string): void {
-    this._accessToken = accessToken;
-    this._refreshToken = refreshToken;
-    localStorage.setItem('accessToken', accessToken);
-    localStorage.setItem('refreshToken', refreshToken);
+  /* ================= LOGIN ================= */
+  login(data: {
+    username: string;
+    password: string;
+  }): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.baseUrl}/login`, data).pipe(
+      tap((res) => {
+        localStorage.setItem('access_token', res.accessToken);
+        localStorage.setItem('refresh_token', res.refreshToken);
+      }),
+      tap(() => this.loadUserFromServer()),
+      catchError((err) => throwError(() => new Error('Đăng nhập thất bại')))
+    );
   }
 
-  private clearTokens(): void {
-    this._accessToken = null;
-    this._refreshToken = null;
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-    localStorage.removeItem('currentUser');
+  register(data: {
+    username: string;
+    email: string;
+    password: string;
+    phone?: string;
+    address?: string;
+  }): Observable<any> {
+    return this.http.post(`${this.baseUrl}/register`, data);
   }
 
-  login(credentials: LoginRequest): Observable<AuthResponse> {
+  private loadUserFromServer(): void {
+    this.http.get<User>(`${this.baseUrl}/me`).subscribe({
+      next: (user) => {
+        this.currentUserSubject.next(user);
+        localStorage.setItem('user', JSON.stringify(user));
+      },
+      error: () => this.logout(),
+    });
+  }
+
+  /* ================= REFRESH ================= */
+  refreshAccessToken(): Observable<AuthResponse> {
+    const refreshToken = this.getRefreshToken();
+    if (!refreshToken) return throwError(() => new Error('No refresh token'));
+
     return this.http
-      .post<AuthResponse>(`${this.authUrl}/auth/login`, credentials)
+      .post<AuthResponse>(`${this.baseUrl}/refresh-token`, { refreshToken })
       .pipe(
-        tap((response) => {
-          this.saveTokens(response.accessToken, response.refreshToken);
-          const user: User = {
-            username: response.username,
-            roles: response.roles,
-            permissions: response.permissions,
-            isAuthenticated: true,
-          };
-          localStorage.setItem('currentUser', JSON.stringify(user));
-          this.currentUserSubject.next(user);
-        }),
-        catchError((error) => {
-          console.error('Login error:', error);
-          return of({
-            accessToken: '',
-            refreshToken: '',
-            authenticated: false,
-            username: '',
-            roles: [],
-            permissions: [],
-          });
-        })
-      );
-  }
+        tap((res) => {
+          localStorage.setItem('access_token', res.accessToken);
+          if (res.refreshToken) {
+            localStorage.setItem('refresh_token', res.refreshToken);
+          }
 
-  register(userData: RegisterRequest): Observable<AuthResponse> {
-    return this.http
-      .post<AuthResponse>(`${this.authUrl}/auth/register`, userData)
-      .pipe(
-        tap((response) => {
-          if (response.authenticated) {
-            this.saveTokens(response.accessToken, response.refreshToken);
-            const user: User = {
-              username: response.username,
-              roles: response.roles,
-              permissions: response.permissions,
-              isAuthenticated: true,
-            };
-            localStorage.setItem('currentUser', JSON.stringify(user));
-            this.currentUserSubject.next(user);
+          const user = this.currentUserSubject.value;
+          if (user) {
+            this.currentUserSubject.next({
+              ...user,
+              roles: res.roles || [],
+              permissions: res.permissions || [],
+            });
           }
         }),
-        catchError((error) => {
-          console.error('Registration error:', error);
-          return of({
-            accessToken: '',
-            refreshToken: '',
-            authenticated: false,
-            username: '',
-            roles: [],
-            permissions: [],
-          });
+        catchError(() => {
+          this.logout();
+          return throwError(() => new Error('Refresh token failed'));
         })
       );
   }
 
-  checkUsernameAvailability(username: string): Observable<boolean> {
-    const takenUsernames = ['admin', 'user', 'test', 'demo'];
-    const isAvailable = !takenUsernames.includes(username.toLowerCase());
-
-    return of(isAvailable);
-  }
-
-  checkEmailAvailability(email: string): Observable<boolean> {
-    const takenEmails = ['admin@example.com', 'user@example.com'];
-    const isAvailable = !takenEmails.includes(email.toLowerCase());
-
-    return of(isAvailable);
-  }
-
-
+  /* ================= LOGOUT ================= */
   logout(): void {
-    this.clearTokens();
+    this.clearStorage();
     this.currentUserSubject.next(null);
+    this.router.navigate(['/']);
+  }
+
+  /* ================= TOKEN ================= */
+  getAccessToken(): string | null {
+    return localStorage.getItem('access_token');
+  }
+
+  getRefreshToken(): string | null {
+    return localStorage.getItem('refresh_token');
+  }
+
+  isAuthenticated(): boolean {
+    const token = this.getAccessToken();
+    if (!token) return false;
+
+    try {
+      const decoded: any = jwtDecode(token);
+      return decoded.exp && decoded.exp > Date.now() / 1000;
+    } catch {
+      return false;
+    }
+  }
+
+  /* ================= UTILS ================= */
+  private clearStorage(): void {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    localStorage.removeItem('user');
   }
 
   isAdmin(): boolean {
-    const user = this.currentUserSubject.value;
-    return (
-      user?.roles.includes('ADMIN') ||
-      user?.roles.includes('ROLE_ADMIN') ||
-      false
-    );
+    return this.currentUserSubject.value?.roles?.includes('ADMIN') ?? false;
+  }
+
+  hasPermission(p: string): boolean {
+    return this.currentUserSubject.value?.permissions?.includes(p) ?? false;
   }
 
   getCurrentUser(): User | null {
     return this.currentUserSubject.value;
-  }
-
-
-  isAuthenticated(): boolean {
-    return !!this._accessToken;
-  }
-
- 
-  getAccessToken(): string | null {
-    return this._accessToken;
-  }
-
- 
-  doRefreshToken(): Observable<AuthResponse> {
-    if (!this._refreshToken) {
-      return of({
-        accessToken: '',
-        refreshToken: '',
-        authenticated: false,
-        username: '',
-        roles: [],
-        permissions: [],
-      });
-    }
-
-    return this.http
-      .post<AuthResponse>(`${this.authUrl}/auth/refresh-token`, {
-        refreshToken: this._refreshToken,
-      })
-      .pipe(
-        tap((response) => {
-          if (response.authenticated) {
-            this.saveTokens(response.accessToken, response.refreshToken);
-          }
-        }),
-        catchError((error) => {
-          console.error('Refresh token error:', error);
-          this.logout();
-          return of({
-            accessToken: '',
-            refreshToken: '',
-            authenticated: false,
-            username: '',
-            roles: [],
-            permissions: [],
-          });
-        })
-      );
-  }
-
-  loadUserProfile(): Observable<UserInfoResponse> {
-    if (!this._accessToken) {
-      return of({
-        username: '',
-        roles: [],
-        permissions: [],
-      });
-    }
-
-    return this.http.get<UserInfoResponse>(`${this.authUrl}/user/profile`).pipe(
-      tap((user) => {
-        const currentUser: User = {
-          id: user.id,
-          username: user.username,
-          email: user.email,
-          phone: user.phone,
-          address: user.address,
-          roles: user.roles,
-          permissions: user.permissions,
-          isAuthenticated: true,
-        };
-        localStorage.setItem('currentUser', JSON.stringify(currentUser));
-        this.currentUserSubject.next(currentUser);
-      }),
-      catchError((error) => {
-        console.error('Load profile error:', error);
-        return of({
-          username: '',
-          roles: [],
-          permissions: [],
-        });
-      })
-    );
   }
 }

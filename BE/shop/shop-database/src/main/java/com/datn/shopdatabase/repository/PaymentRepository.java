@@ -23,9 +23,17 @@ public interface PaymentRepository extends JpaRepository<PaymentEntity, Long> {
 
     List<PaymentEntity> findByUserId(Long userId);
 
-    List<PaymentEntity> findByStatus(PaymentStatus status);
+    long countByStatusAndCreatedAtBetween(PaymentStatus status, LocalDateTime start, LocalDateTime end);
 
-    List<PaymentEntity> findByMethod(PaymentMethod method);
+    long countByCreatedAtBetween(LocalDateTime start, LocalDateTime end);
+
+    @Query("SELECT SUM(p.amount) FROM PaymentEntity p WHERE p.status = :status " +
+            "AND (:fromDate IS NULL OR DATE(p.createdAt) >= :fromDate) " +
+            "AND (:toDate IS NULL OR DATE(p.createdAt) <= :toDate)")
+    BigDecimal getTotalAmountByPeriodAndStatus(
+            @Param("fromDate") LocalDate fromDate,
+            @Param("toDate") LocalDate toDate,
+            @Param("status") PaymentStatus status);
 
     @Query("SELECT p FROM PaymentEntity p WHERE " +
             "(:status IS NULL OR p.status = :status) AND " +
@@ -42,17 +50,4 @@ public interface PaymentRepository extends JpaRepository<PaymentEntity, Long> {
             @Param("minAmount") BigDecimal minAmount,
             @Param("maxAmount") BigDecimal maxAmount,
             Pageable pageable);
-
-    @Query("SELECT COALESCE(SUM(p.amount), 0) FROM PaymentEntity p WHERE " +
-            "p.status = :status AND " +
-            "(:fromDate IS NULL OR DATE(p.createdAt) >= :fromDate) AND " +
-            "(:toDate IS NULL OR DATE(p.createdAt) <= :toDate)")
-    BigDecimal getTotalAmountByPeriodAndStatus(
-            @Param("fromDate") LocalDate fromDate,
-            @Param("toDate") LocalDate toDate,
-            @Param("status") PaymentStatus status);
-
-    long countByCreatedAtBetween(LocalDateTime start, LocalDateTime end);
-
-    long countByStatusAndCreatedAtBetween(PaymentStatus status, LocalDateTime start, LocalDateTime end);
 }

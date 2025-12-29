@@ -13,6 +13,9 @@ import { ImageDTO } from './imageDTO';
 export interface CartItemResponse { 
     productId?: number;
     productName?: string;
+    variantId?: number;
+    size?: string;
+    color?: string;
     quantity?: number;
     price?: number;
     images?: Array<ImageDTO>;

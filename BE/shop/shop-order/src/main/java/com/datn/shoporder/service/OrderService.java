@@ -78,15 +78,13 @@ public class OrderService {
         }
 
         // Set items
-        items.forEach(item -> {
-            item.setOrder(order);
-            order.addItem(item);
-        });
+        items.forEach(item -> item.setOrder(order));
+        order.setItems(items);
 
-        // Calculate prices
         BigDecimal total = items.stream()
-                .map(OrderItemEntity::getPrice)
+                .map(OrderItemEntity::getTotalPrice)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+
 
         order.setTotalPrice(total);
         order.setShippingFee(BigDecimal.ZERO);
@@ -125,14 +123,20 @@ public class OrderService {
             OrderItemEntity item = new OrderItemEntity();
             item.setProductId(product.getId());
             item.setProductName(product.getName());
+
+            item.setUnitPrice(product.getPrice());
             item.setQuantity(dto.getQuantity());
-            item.setPrice(product.getPrice().multiply(BigDecimal.valueOf(dto.getQuantity())));
+            item.setTotalPrice(
+                    product.getPrice().multiply(BigDecimal.valueOf(dto.getQuantity()))
+            );
+
             item.setOrder(order);
             return item;
         }).collect(Collectors.toList());
 
-        // Calculate prices
-        BigDecimal total = items.stream().map(OrderItemEntity::getPrice)
+
+        BigDecimal total = items.stream()
+                .map(OrderItemEntity::getTotalPrice)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         order.setItems(items);
@@ -140,6 +144,7 @@ public class OrderService {
         order.setShippingFee(BigDecimal.ZERO);
         order.setDiscountAmount(BigDecimal.ZERO);
         order.calculateFinalAmount();
+
 
         order.setStatus(OrderStatus.NEW);
         order.setPaymentStatus(PaymentStatus.PENDING);

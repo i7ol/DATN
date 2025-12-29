@@ -30,7 +30,7 @@ public class AppSecurityConfig {
             "/swagger-ui/**",
             "/swagger-ui.html",
             "/swagger-ui/index.html",
-
+            "/auth/login ",
             "/error",
 
             "/api/user/products/**",
@@ -38,7 +38,6 @@ public class AppSecurityConfig {
 
             "/api/user/cart",
             "/api/user/cart/add",
-            "/api/user/cart/total",
             "/api/user/cart/update",
             "/api/user/cart/remove",
             "/api/user/cart/merge",
@@ -49,8 +48,13 @@ public class AppSecurityConfig {
             "/api/orders/my-orders",
             "/api/orders/{orderId}/cancel",
 
-    };
+            "/api/payment/callback/**",
+            "/actuator/health",
+            "/api/user/payments/**",
+            "/api/payment/callback/**",
+            "https://sandbox.vnpayment.vn",
 
+    };
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http

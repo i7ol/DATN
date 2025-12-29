@@ -2,6 +2,7 @@ package com.datn.shopdatabase.enums;
 
 public enum OrderStatus {
     NEW("Mới đặt"),
+    PENDING_PAYMENT("Đang chờ thanh toán"),
     CONFIRMED("Đã xác nhận"),
     PROCESSING("Đang xử lý"),
     PACKING("Đang đóng gói"),

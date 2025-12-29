@@ -1,13 +1,19 @@
-
 package com.datn.shopobject.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-public record PaymentRequest(
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class PaymentRequest {
+
         @NotNull(message = "Order ID is required")
-        Long orderId,
+        private Long orderId;
 
         @NotBlank(message = "Payment method is required")
-        String method
-) {}
+        private String method;
+}

@@ -10,8 +10,9 @@
 
 
 export interface CheckoutRequest { 
+    userId?: number;
     guestId?: string;
-    guestName: string;
+    guestName?: string;
     guestEmail?: string;
     guestPhone?: string;
     shippingAddress: string;

@@ -1,4 +1,3 @@
-
 package com.datn.shopobject.dto.response;
 
 import lombok.Builder;
@@ -11,6 +10,10 @@ import java.math.BigDecimal;
 public class PaymentSummaryResponse {
     private BigDecimal totalAmount;
     private BigDecimal pendingAmount;
+    private BigDecimal refundedAmount;
     private long totalTransactions;
     private long successfulTransactions;
+    private long pendingTransactions;
+    private long failedTransactions;
+    private long refundedTransactions;
 }

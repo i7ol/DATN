@@ -54,13 +54,14 @@ import { CartComponent } from './page-user/cart/cart.component';
 import { CheckoutComponent } from './page-user/checkout/checkout.component';
 import { ProductListComponent } from './page-user/product-user/product-list/product-list.component';
 import { ProductDetailComponent } from './page-user/product-user/product-detail/product-detail.component';
-
+import { CartService } from './page-user/cart/cart.service';
 // Guards & Interceptors
 import { AuthInterceptor } from './core/interceptors/auth.interceptor';
 import { AdminGuard } from './core/guards/admin.guard';
 import { AuthGuard } from './core/guards/auth.guard';
 import { AuthModalComponent } from './shared/components/auth-modal/auth-modal.component';
-
+import { PaymentResultComponent } from './page-user/payment-result/payment-result.component';
+import { ConfirmDialogComponent } from './shared/confirm-dialog/confirm-dialog.component';
 @NgModule({
   declarations: [
     AppComponent,
@@ -81,6 +82,8 @@ import { AuthModalComponent } from './shared/components/auth-modal/auth-modal.co
     InventoryListComponent,
     ProductListComponent,
     ProductDetailComponent,
+    PaymentResultComponent,
+    ConfirmDialogComponent,
   ],
   imports: [
     BrowserModule,
@@ -125,6 +128,11 @@ import { AuthModalComponent } from './shared/components/auth-modal/auth-modal.co
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
     AuthGuard,
+    CartService,
+    {
+      provide: 'CartService',
+      useExisting: CartService,
+    },
     AdminGuard,
     OrderAdminControllerService,
     ShippingAdminControllerService,

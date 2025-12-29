@@ -6,16 +6,27 @@ import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { PaymentAdminControllerService } from 'src/app/api/admin/api/paymentAdminController.service';
-import {
-  PaymentResponse,
-  PagePaymentResponse,
-  PaymentSearchRequest,
-  Pageable,
-} from 'src/app/api/admin';
+import { Pageable } from 'src/app/api/admin';
 import { SimpleDialogComponent } from 'src/app/shared/components/simple-dialog/simple-dialog.component';
-interface PaymentStatusOption {
-  value: string;
-  label: string;
+// Định nghĩa các interface cục bộ vì chưa có trong module
+interface PaymentResponse {
+  id?: number;
+  orderId?: number;
+  method?: string;
+  amount?: number;
+  status?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  paymentMethod?: string;
+}
+
+interface PaymentSearchRequest {
+  status?: string;
+  method?: string;
+  fromDate?: string;
+  toDate?: string;
+  minAmount?: number;
+  maxAmount?: number;
 }
 
 @Component({
@@ -43,7 +54,7 @@ export class PaymentListComponent implements OnInit, AfterViewInit {
   pageIndex = 0;
   Math = Math;
 
-  paymentStatusOptions: PaymentStatusOption[] = [
+  paymentStatusOptions = [
     { value: 'PENDING', label: 'Chờ thanh toán' },
     { value: 'PAID', label: 'Đã thanh toán' },
     { value: 'REFUNDED', label: 'Đã hoàn tiền' },
@@ -73,26 +84,45 @@ export class PaymentListComponent implements OnInit, AfterViewInit {
   loadPayments(): void {
     this.isLoading = true;
 
-    const filter: PaymentSearchRequest = {};
+    // Tạo pageable đúng format
     const pageable: Pageable = {
       page: this.pageIndex,
       size: this.pageSize,
       sort: ['createdAt,desc'],
     };
 
-    this.paymentService.getAllPayments(filter, pageable).subscribe({
-      next: (response: PagePaymentResponse) => {
-        this.payments = response.content || [];
-        this.dataSource.data = this.payments;
-        this.totalItems = response.totalElements || 0;
-        this.isLoading = false;
-      },
-      error: (error) => {
-        console.error('Error loading payments:', error);
-        this.showError('Không thể tải danh sách thanh toán');
-        this.isLoading = false;
-      },
-    });
+    // Gọi API với các tham số đúng
+    this.paymentService
+      .getAllPayments(
+        pageable,
+        undefined, // status
+        undefined, // method
+        undefined, // fromDate
+        undefined, // toDate
+        undefined, // minAmount
+        undefined // maxAmount
+      )
+      .subscribe({
+        next: (response: any) => {
+          // Xử lý response dạng object
+          if (response && response.content) {
+            this.payments = response.content || [];
+            this.dataSource.data = this.payments;
+            this.totalItems = response.totalElements || 0;
+          } else {
+            // Nếu response là array trực tiếp
+            this.payments = response || [];
+            this.dataSource.data = this.payments;
+            this.totalItems = this.payments.length;
+          }
+          this.isLoading = false;
+        },
+        error: (error) => {
+          console.error('Error loading payments:', error);
+          this.showError('Không thể tải danh sách thanh toán');
+          this.isLoading = false;
+        },
+      });
   }
 
   // Thêm các phương thức để tính toán
@@ -165,42 +195,37 @@ export class PaymentListComponent implements OnInit, AfterViewInit {
   markAsPaid(payment: PaymentResponse): void {
     if (!payment.id) return;
 
-    this.paymentService
-      .markPaid(payment.id, {
-        transactionId: `ADMIN_${new Date().getTime()}`,
-        note: 'Đánh dấu thanh toán thủ công bởi admin',
-        amount: payment.amount?.toString() || '0',
-      })
-      .subscribe({
-        next: () => {
-          this.showSuccess('Đã đánh dấu đã thanh toán thành công');
-          this.loadPayments();
-        },
-        error: (error) => {
-          console.error('Error marking as paid:', error);
-          this.showError('Không thể cập nhật trạng thái thanh toán');
-        },
-      });
+    const transactionId = `ADMIN_${new Date().getTime()}`;
+
+    this.paymentService.markPaid(payment.id, transactionId).subscribe({
+      next: () => {
+        this.showSuccess('Đã đánh dấu đã thanh toán thành công');
+        this.loadPayments();
+      },
+      error: (error) => {
+        console.error('Error marking as paid:', error);
+        this.showError('Không thể cập nhật trạng thái thanh toán');
+      },
+    });
   }
 
   refundPayment(payment: PaymentResponse): void {
     if (!payment.id) return;
 
-    this.paymentService
-      .refund(payment.id, {
-        reason: 'Hoàn tiền thủ công bởi admin',
-        amount: payment.amount?.toString() || '0',
-      })
-      .subscribe({
-        next: () => {
-          this.showSuccess('Đã hoàn tiền thành công');
-          this.loadPayments();
-        },
-        error: (error) => {
-          console.error('Error refunding:', error);
-          this.showError('Không thể hoàn tiền');
-        },
-      });
+    const requestBody = {
+      refundReason: 'Hoàn tiền thủ công bởi admin',
+    };
+
+    this.paymentService.refund(payment.id, requestBody).subscribe({
+      next: () => {
+        this.showSuccess('Đã hoàn tiền thành công');
+        this.loadPayments();
+      },
+      error: (error) => {
+        console.error('Error refunding:', error);
+        this.showError('Không thể hoàn tiền');
+      },
+    });
   }
 
   viewOrder(orderId: number): void {

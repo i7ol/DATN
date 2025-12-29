@@ -1,142 +1,224 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, forkJoin, of } from 'rxjs';
-import { map, tap, switchMap } from 'rxjs/operators';
-import { CartResponse, CartItemResponse } from 'src/app/api/user';
-import { CartUserControllerService } from 'src/app/api/user/api/cartUserController.service';
+import { HttpClient } from '@angular/common/http';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { finalize, tap } from 'rxjs/operators';
+import { v4 as uuidv4 } from 'uuid';
+import { CartItemResponse } from 'src/app/api/user/model/cartItemResponse';
+import { CartResponse } from 'src/app/api/user/model/cartResponse';
+import { environment } from 'src/environments/environment';
+import { AuthService } from 'src/app/core/services/auth.service';
 
-@Injectable({ providedIn: 'root' })
+type CartItemView = CartItemResponse & {
+  imageUrl: string;
+};
+@Injectable({
+  providedIn: 'root',
+})
 export class CartService {
-  private cartSubject = new BehaviorSubject<CartResponse | null>(null);
-  cart$ = this.cartSubject.asObservable();
+  private itemsSubject = new BehaviorSubject<CartItemView[]>([]);
+  public items$ = this.itemsSubject.asObservable();
 
-  private guestId!: string;
-  private userId?: number;
+  private totalPriceSubject = new BehaviorSubject<number>(0);
+  public totalPrice$ = this.totalPriceSubject.asObservable();
 
-  constructor(private cartApi: CartUserControllerService) {
-    this.initGuest();
-    this.loadCart().subscribe();
+  private totalQuantitySubject = new BehaviorSubject<number>(0);
+  public totalQuantity$ = this.totalQuantitySubject.asObservable();
+
+  private loadingSubject = new BehaviorSubject<boolean>(false);
+  public loading$ = this.loadingSubject.asObservable();
+
+  private userId: number | null = null;
+  private guestId: string | null = null;
+
+  // FIX: Ensure correct base URL
+  private baseUrl = `${environment.apiUrls.shopApp}/user/cart`;
+
+  constructor(private http: HttpClient, private authService: AuthService) {
+    this.initializeGuestId();
+
+    this.authService.currentUser$.subscribe((user) => {
+      if (user) {
+        this.setUser(user.id);
+      } else {
+        this.refreshCart().subscribe();
+      }
+    });
   }
 
-  /* ===== INIT GUEST ===== */
-  private generateGuestId(): string {
-    return 'guest-' + Math.random().toString(36).substring(2, 15);
-  }
+  private initializeGuestId(): void {
+    // Try to get existing guest ID from localStorage
+    const existingGuestId = localStorage.getItem('guestId');
+    if (existingGuestId) {
+      this.guestId = existingGuestId;
+    } else {
+      // Generate new guest ID
+      this.guestId = uuidv4();
 
-  private initGuest() {
-    let gid = localStorage.getItem('guest_id');
-    if (!gid) {
-      gid = this.generateGuestId();
-      localStorage.setItem('guest_id', gid);
+      localStorage.setItem('guestId', this.guestId);
     }
-    this.guestId = gid;
   }
+  private buildParams(
+    extra: Record<string, string | number> = {}
+  ): Record<string, string | number> {
+    const params: Record<string, string | number> = { ...extra };
 
-  /* ===== PARSE RESPONSE (FIX GỐC LỖI) ===== */
-  private handleCartResponse(resp: any) {
-    if (resp instanceof Blob) {
-      return resp.text().then((text) => JSON.parse(text) as CartResponse);
+    // Ưu tiên userId
+    if (this.userId) {
+      params.userId = this.userId;
+    } else {
+      // Chưa login → bắt buộc có guestId
+      if (!this.guestId) {
+        this.initializeGuestId();
+      }
+      params.guestId = this.guestId;
     }
-    return Promise.resolve(resp as CartResponse);
+
+    return params;
   }
 
-  /* ===== API ===== */
-  loadCart() {
-    return this.cartApi.getCart(this.userId, this.guestId).pipe(
-      tap(async (resp) => {
-        const cart = await this.handleCartResponse(resp);
-        this.cartSubject.next(cart);
+  /* ===== REFRESH CART ===== */
+  refreshCart(): Observable<CartResponse> {
+    this.loadingSubject.next(true);
+
+    return this.http
+      .get<CartResponse>(this.baseUrl, {
+        params: this.buildParams(),
       })
-    );
-  }
-
-  // THÊM PHƯƠNG THỨC clearCart ĐÚNG CẤU TRÚC
-  clearCart() {
-    const currentCart = this.cartSubject.value;
-
-    if (!currentCart || !currentCart.items || currentCart.items.length === 0) {
-      // Giỏ hàng đã trống
-      const emptyCart: CartResponse = {
-        items: [],
-        totalPrice: 0,
-      };
-      this.cartSubject.next(emptyCart);
-      return of(emptyCart); // Trả về Observable
-    }
-
-    // Tạo mảng các observable để xóa từng item
-    const removeObservables = currentCart.items.map((item) =>
-      this.cartApi.removeItem(item.productId, this.userId, this.guestId)
-    );
-
-    // Sử dụng forkJoin để xóa tất cả items
-    return forkJoin(removeObservables).pipe(
-      switchMap(() => {
-        // Sau khi xóa tất cả, load lại cart (sẽ rỗng)
-        return this.loadCart();
-      }),
-      tap(() => {
-        console.log('Cart cleared successfully');
-        // Có thể tạo guestId mới để bắt đầu giỏ hàng mới
-        if (!this.userId) {
-          const newGuestId = this.generateGuestId();
-          localStorage.setItem('guest_id', newGuestId);
-          this.guestId = newGuestId;
-        }
-      })
-    );
-  }
-
-  addItem(productId: number, quantity = 1) {
-    return this.cartApi
-      .addItem(productId, quantity, this.userId, this.guestId)
       .pipe(
-        tap(async (resp) => {
-          const cart = await this.handleCartResponse(resp);
-          this.cartSubject.next(cart);
-        })
+        tap((cart) => this.setCart(cart)),
+        finalize(() => this.loadingSubject.next(false))
       );
   }
 
-  updateItem(productId: number, quantity: number) {
-    if (quantity <= 0) return this.removeItem(productId);
+  /* ===== ADD ITEM ===== */
+  addItem(variantId: number, quantity: number): Observable<CartResponse> {
+    this.loadingSubject.next(true);
 
-    return this.cartApi
-      .updateItem(productId, quantity, this.userId, this.guestId)
+    return this.http
+      .post<CartResponse>(`${this.baseUrl}/add`, null, {
+        params: this.buildParams({ variantId, quantity }),
+      })
       .pipe(
-        tap(async (resp) => {
-          const cart = await this.handleCartResponse(resp);
-          this.cartSubject.next(cart);
-        })
+        tap((cart) => this.setCart(cart)),
+        finalize(() => this.loadingSubject.next(false))
       );
   }
 
-  removeItem(productId: number) {
-    return this.cartApi.removeItem(productId, this.userId, this.guestId).pipe(
-      tap(async (resp) => {
-        const cart = await this.handleCartResponse(resp);
-        this.cartSubject.next(cart);
+  /* ===== UPDATE ITEM ===== */
+  updateItem(variantId: number, quantity: number): Observable<CartResponse> {
+    if (quantity < 1) {
+      return this.removeItem(variantId);
+    }
+
+    this.loadingSubject.next(true);
+
+    return this.http
+      .put<CartResponse>(`${this.baseUrl}/update`, null, {
+        params: this.buildParams({ variantId, quantity }),
       })
-    );
+      .pipe(
+        tap((cart) => this.setCart(cart)),
+        finalize(() => this.loadingSubject.next(false))
+      );
   }
 
-  /* ===== SELECTORS ===== */
-  items$ = this.cart$.pipe(map((cart) => cart?.items ?? []));
+  removeItem(variantId: number): Observable<CartResponse> {
+    this.loadingSubject.next(true);
 
-  totalQuantity$ = this.cart$.pipe(
-    map(
-      (cart) => cart?.items?.reduce((sum, i) => sum + (i.quantity ?? 0), 0) ?? 0
-    )
-  );
-
-  totalPrice$ = this.cart$.pipe(map((cart) => cart?.totalPrice ?? 0));
-
-  // Thêm getter để lấy items trực tiếp
-  getCurrentItems(): CartItemResponse[] {
-    return this.cartSubject.value?.items ?? [];
+    return this.http
+      .delete<CartResponse>(`${this.baseUrl}/remove`, {
+        params: this.buildParams({ variantId }),
+      })
+      .pipe(
+        tap((cart) => this.setCart(cart)),
+        finalize(() => this.loadingSubject.next(false))
+      );
   }
 
-  // Thêm getter để lấy totalPrice trực tiếp
-  getCurrentTotalPrice(): number {
-    return this.cartSubject.value?.totalPrice ?? 0;
+  /* ===== CLEAR CART ===== */
+  clearCart(): Observable<CartResponse> {
+    this.loadingSubject.next(true);
+
+    return this.http
+      .delete<CartResponse>(`${this.baseUrl}/clear`, {
+        params: this.buildParams(),
+      })
+      .pipe(
+        tap((cart) => this.setCart(cart)),
+        finalize(() => this.loadingSubject.next(false))
+      );
+  }
+
+  /* ===== MERGE GUEST → USER ===== */
+  mergeGuestToUser(userId: number): Observable<CartResponse> {
+    if (!this.guestId) {
+      this.initializeGuestId();
+    }
+
+    this.loadingSubject.next(true);
+
+    return this.http
+      .post<CartResponse>(`${this.baseUrl}/merge`, null, {
+        params: { guestId: this.guestId, userId },
+      })
+      .pipe(
+        tap((cart) => {
+          localStorage.removeItem('guestId');
+          this.guestId = null;
+          this.setCart(cart);
+        }),
+        finalize(() => this.loadingSubject.next(false))
+      );
+  }
+
+  /* ===== SET CART TO SUBJECTS ===== */
+  private setCart(cart: CartResponse) {
+    const items: CartItemView[] =
+      cart.items?.map((item) => {
+        const imageUrl =
+          item.images && item.images.length > 0 ? item.images[0].url : null;
+
+        return {
+          ...item,
+          imageUrl: imageUrl
+            ? imageUrl.startsWith('http')
+              ? imageUrl
+              : `${environment.apiUrls.shopApp}${imageUrl}`
+            : 'assets/no-image.png',
+        };
+      }) || [];
+
+    this.itemsSubject.next(items);
+    this.totalPriceSubject.next(cart.totalPrice || 0);
+
+    const totalQty =
+      cart.quantity ?? items.reduce((sum, i) => sum + (i.quantity || 0), 0);
+
+    this.totalQuantitySubject.next(totalQty);
+  }
+
+  /* ===== SET USER/GUEST ===== */
+  setUser(userId: number) {
+    this.userId = userId;
+    // If we have a guest cart, merge it
+    if (this.guestId) {
+      this.mergeGuestToUser(userId).subscribe();
+    } else {
+      this.refreshCart().subscribe();
+    }
+  }
+
+  setGuest(guestId: string) {
+    this.guestId = guestId;
+    localStorage.setItem('guestId', guestId);
+    this.refreshCart().subscribe();
+  }
+
+  // Helper method to get current cart identifiers
+  getCartIdentifiers() {
+    return {
+      userId: this.userId,
+      guestId: this.guestId,
+    };
   }
 }

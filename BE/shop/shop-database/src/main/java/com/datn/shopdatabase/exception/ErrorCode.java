@@ -31,6 +31,9 @@ public enum ErrorCode {
     CART_EMPTY(1023,"Cart hasn't any thing",HttpStatus.BAD_REQUEST),
     CANNOT_CANCEL_ORDER(1024, "Không thể hủy đơn hàng ở trạng thái hiện tại",HttpStatus.NOT_FOUND),
     FORBIDDEN(1025, "Không đủ quyền truy cập",HttpStatus.FORBIDDEN),
+    VARIANT_NOT_FOUND(1026, "Không tìm thấy biến thể",HttpStatus.NOT_FOUND),
+    USER_NOT_FOUND(1027, "User existed", HttpStatus.BAD_REQUEST),
+    CART_ITEM_NOT_FOUND(1028,"Cart hasn't found",HttpStatus.NOT_FOUND),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

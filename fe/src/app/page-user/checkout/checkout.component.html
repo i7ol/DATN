@@ -1,5 +1,41 @@
 <div class="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
   <div class="max-w-7xl mx-auto">
+    <!-- Loading Overlay -->
+    <div
+      *ngIf="isLoading"
+      class="fixed inset-0 bg-white bg-opacity-80 flex items-center justify-center z-50"
+    >
+      <div class="text-center">
+        <div
+          class="animate-spin rounded-full h-12 w-12 border-b-2 border-black mx-auto"
+        ></div>
+        <p class="mt-4 text-gray-600">Đang tải thông tin...</p>
+      </div>
+    </div>
+
+    <!-- Validation Alert -->
+    <div
+      *ngIf="formTouched && !isFormValid()"
+      class="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-xl"
+    >
+      <div class="flex items-center">
+        <svg
+          class="h-5 w-5 text-yellow-400 mr-2"
+          fill="currentColor"
+          viewBox="0 0 20 20"
+        >
+          <path
+            fill-rule="evenodd"
+            d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+            clip-rule="evenodd"
+          />
+        </svg>
+        <p class="text-sm text-yellow-700">
+          Vui lòng điền đầy đủ thông tin bắt buộc (*) trước khi đặt hàng
+        </p>
+      </div>
+    </div>
+
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
       <!-- Left Column - Main Content -->
       <div class="lg:col-span-2 space-y-8">
@@ -18,18 +54,14 @@
               <input
                 type="email"
                 formControlName="email"
-                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent transition"
-                placeholder="your@email.com"
-                [class.border-red-500]="
-                  checkoutForm.get('email')?.invalid &&
-                  checkoutForm.get('email')?.touched
+                [class]="
+                  'w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-black focus:border-transparent transition ' +
+                  getValidationClass('email')
                 "
+                placeholder="your@email.com"
               />
               <div
-                *ngIf="
-                  checkoutForm.get('email')?.invalid &&
-                  checkoutForm.get('email')?.touched
-                "
+                *ngIf="formTouched && checkoutForm.get('email')?.invalid"
                 class="mt-1 text-sm text-red-600"
               >
                 <div *ngIf="checkoutForm.get('email')?.errors?.required">
@@ -50,12 +82,11 @@
                 <input
                   type="text"
                   formControlName="name"
-                  class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent transition"
-                  placeholder="Nguyễn Văn A"
-                  [class.border-red-500]="
-                    checkoutForm.get('name')?.invalid &&
-                    checkoutForm.get('name')?.touched
+                  [class]="
+                    'w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-black focus:border-transparent transition ' +
+                    getValidationClass('name')
                   "
+                  placeholder="Nguyễn Văn A"
                 />
               </div>
               <div>
@@ -65,12 +96,11 @@
                 <input
                   type="tel"
                   formControlName="phone"
-                  class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent transition"
-                  placeholder="0912 345 678"
-                  [class.border-red-500]="
-                    checkoutForm.get('phone')?.invalid &&
-                    checkoutForm.get('phone')?.touched
+                  [class]="
+                    'w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-black focus:border-transparent transition ' +
+                    getValidationClass('phone')
                   "
+                  placeholder="0912 345 678"
                 />
               </div>
             </div>
@@ -84,10 +114,9 @@
                 <select
                   formControlName="province"
                   (change)="onProvinceChange()"
-                  class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent transition bg-white"
-                  [class.border-red-500]="
-                    checkoutForm.get('province')?.invalid &&
-                    checkoutForm.get('province')?.touched
+                  [class]="
+                    'w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-black focus:border-transparent transition bg-white ' +
+                    getValidationClass('province')
                   "
                 >
                   <option value="">Chọn tỉnh/thành</option>
@@ -107,12 +136,11 @@
                 <select
                   formControlName="district"
                   (change)="onDistrictChange()"
-                  class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent transition bg-white"
-                  [disabled]="!checkoutForm.get('province')?.value"
-                  [class.border-red-500]="
-                    checkoutForm.get('district')?.invalid &&
-                    checkoutForm.get('district')?.touched
+                  [class]="
+                    'w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-black focus:border-transparent transition bg-white ' +
+                    getValidationClass('district')
                   "
+                  [disabled]="!checkoutForm.get('province')?.value"
                 >
                   <option value="">Chọn quận/huyện</option>
                   <option
@@ -130,12 +158,11 @@
                 >
                 <select
                   formControlName="ward"
-                  class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent transition bg-white"
-                  [disabled]="!checkoutForm.get('district')?.value"
-                  [class.border-red-500]="
-                    checkoutForm.get('ward')?.invalid &&
-                    checkoutForm.get('ward')?.touched
+                  [class]="
+                    'w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-black focus:border-transparent transition bg-white ' +
+                    getValidationClass('ward')
                   "
+                  [disabled]="!checkoutForm.get('district')?.value"
                 >
                   <option value="">Chọn phường/xã</option>
                   <option *ngFor="let ward of wards" [value]="ward.code">
@@ -153,12 +180,11 @@
               <textarea
                 formControlName="addressDetail"
                 rows="2"
-                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent transition resize-none"
-                placeholder="Số nhà, tên đường..."
-                [class.border-red-500]="
-                  checkoutForm.get('addressDetail')?.invalid &&
-                  checkoutForm.get('addressDetail')?.touched
+                [class]="
+                  'w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-black focus:border-transparent transition resize-none ' +
+                  getValidationClass('addressDetail')
                 "
+                placeholder="Số nhà, tên đường..."
               ></textarea>
             </div>
 
@@ -224,7 +250,7 @@
           </div>
         </div>
 
-        <!-- Payment Methods Card -->
+        <!-- Payment Methods Card - GIỮ NGUYÊN GIAO DIỆN -->
         <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
           <h2 class="text-lg font-semibold text-gray-900 mb-4 pb-3 border-b">
             💳 Thanh toán
@@ -267,10 +293,10 @@
                 <div class="flex items-center justify-between">
                   <div>
                     <span class="font-medium text-gray-900"
-                      >📱 Thanh toán qua VNPAY-QR</span
+                      >📱 Thanh toán qua VNPAY QR</span
                     >
                     <p class="text-sm text-gray-500 mt-1">
-                      Quét mã QR để thanh toán ngay
+                      Quét mã QR để thanh toán ngay qua VNPAY
                     </p>
                   </div>
                 </div>
@@ -289,13 +315,13 @@
             Đơn hàng ({{ cartItemsCount }} sản phẩm)
           </h2>
 
-          <!-- Cart Items với ảnh -->
+          <!-- Cart Items với ảnh và thông tin size/color -->
           <div class="space-y-4 mb-6" *ngIf="cartItems.length > 0">
             <div
               *ngFor="let item of cartItems"
               class="flex items-start space-x-3"
             >
-              <!-- Hiển thị ảnh sản phẩm từ cart -->
+              <!-- Hiển thị ảnh sản phẩm -->
               <div
                 class="flex-shrink-0 w-16 h-16 bg-gray-100 rounded-lg overflow-hidden"
               >
@@ -316,22 +342,85 @@
                 <h4 class="text-sm font-medium text-gray-900 truncate">
                   {{ item.productName || "Sản phẩm không tên" }}
                 </h4>
-                <p class="text-sm text-gray-500">
-                  Số lượng: {{ item.quantity || 0 }}
-                </p>
-                <p class="text-sm font-semibold text-gray-900 mt-1">
-                  {{ formatCurrency((item.price || 0) * (item.quantity || 0)) }}
-                </p>
+
+                <!-- HIỂN THỊ SIZE VÀ COLOR -->
+                <div class="flex items-center space-x-3 mt-1">
+                  <!-- Size Badge -->
+                  <div *ngIf="item.size" class="flex items-center">
+                    <span class="text-xs text-gray-500">Size:</span>
+                    <span
+                      class="ml-1 text-xs font-medium text-gray-700 px-2 py-0.5 bg-gray-100 rounded"
+                    >
+                      {{ item.sizeText || item.size }}
+                    </span>
+                  </div>
+
+                  <!-- Color Badge với màu -->
+                  <div *ngIf="item.color" class="flex items-center">
+                    <span class="text-xs text-gray-500">Màu:</span>
+                    <div class="flex items-center ml-1">
+                      <div
+                        class="w-4 h-4 rounded-full border border-gray-300 mr-1"
+                        [style.background-color]="item.colorCode"
+                        [title]="item.colorText || item.color"
+                      ></div>
+                      <span
+                        class="text-xs font-medium text-gray-700 px-2 py-0.5 bg-gray-100 rounded"
+                      >
+                        {{ item.colorText || item.color }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Quantity and Price -->
+                <div class="flex items-center justify-between mt-2">
+                  <p class="text-sm text-gray-500">
+                    Số lượng: {{ item.quantity || 0 }}
+                  </p>
+                  <p class="text-sm font-semibold text-gray-900">
+                    {{
+                      formatCurrency((item.price || 0) * (item.quantity || 0))
+                    }}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
 
+          <!-- Nếu giỏ hàng trống -->
+          <div *ngIf="cartItems.length === 0" class="text-center py-8">
+            <div class="text-gray-400 mb-2">
+              <svg
+                class="w-12 h-12 mx-auto"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+                ></path>
+              </svg>
+            </div>
+            <p class="text-gray-500">Giỏ hàng của bạn đang trống</p>
+            <a
+              [routerLink]="['/products']"
+              class="inline-block mt-2 text-sm text-blue-600 hover:text-blue-800"
+            >
+              Tiếp tục mua sắm →
+            </a>
+          </div>
+
           <!-- Discount Code -->
-          <div class="mb-4">
+          <div class="mb-4" *ngIf="cartItems.length > 0">
             <div class="flex space-x-2">
               <input
                 type="text"
                 [(ngModel)]="discountCode"
+                (keyup.enter)="applyDiscount()"
                 class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent transition"
                 placeholder="Nhập mã giảm giá"
                 [disabled]="discountApplied"
@@ -339,7 +428,8 @@
               <button
                 *ngIf="!discountApplied"
                 (click)="applyDiscount()"
-                class="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition font-medium"
+                class="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                [disabled]="!discountCode.trim()"
               >
                 Áp dụng
               </button>
@@ -368,8 +458,11 @@
             </div>
           </div>
 
-          <!-- Order Summary - Cập nhật tự động -->
-          <div class="space-y-3 border-t border-gray-200 pt-4">
+          <!-- Order Summary -->
+          <div
+            class="space-y-3 border-t border-gray-200 pt-4"
+            *ngIf="cartItems.length > 0"
+          >
             <div class="flex justify-between">
               <span class="text-gray-600">Tạm tính</span>
               <span class="font-medium">{{
@@ -384,7 +477,7 @@
               }}</span>
               <span
                 *ngIf="orderSummary.shipping === 0"
-                class="text-xs text-green-600"
+                class="text-xs text-green-600 ml-2"
                 >(Miễn phí)</span
               >
             </div>
@@ -415,7 +508,7 @@
             [disabled]="
               isSubmitting ||
               cartItemsCount === 0 ||
-              checkoutForm.invalid ||
+              !isFormValid() ||
               isProcessingPayment
             "
             class="w-full mt-6 py-3.5 bg-black text-white rounded-xl font-semibold hover:bg-gray-900 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
@@ -450,7 +543,11 @@
                   : "Đang tạo đơn hàng..."
               }}
             </span>
-            <span *ngIf="!isSubmitting && !isProcessingPayment">ĐẶT HÀNG</span>
+            <span *ngIf="!isSubmitting && !isProcessingPayment">
+              {{
+                isFormValid() ? "ĐẶT HÀNG" : "VUI LÒNG ĐIỀN ĐẦY ĐỦ THÔNG TIN"
+              }}
+            </span>
           </button>
 
           <!-- Back to Cart -->

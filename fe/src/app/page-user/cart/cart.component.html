@@ -1,4 +1,14 @@
 <div class="max-w-6xl mx-auto py-10 px-4">
+  <!-- ================= LOADING INDICATOR ================= -->
+  <div *ngIf="loading$ | async" class="fixed top-4 right-4 z-50">
+    <div class="bg-white shadow-lg rounded-lg p-3 flex items-center gap-2">
+      <div
+        class="animate-spin rounded-full h-4 w-4 border-2 border-gray-900 border-t-transparent"
+      ></div>
+      <span class="text-sm">Đang xử lý...</span>
+    </div>
+  </div>
+
   <!-- ================= EMPTY CART ================= -->
   <ng-container *ngIf="(items$ | async)?.length === 0">
     <div class="flex flex-col items-center justify-center py-20">
@@ -8,30 +18,58 @@
         class="w-64 mb-6 opacity-80"
       />
       <p class="text-gray-500 mb-6">Giỏ hàng của bạn đang trống</p>
-      <a
-        routerLink="/products"
+      <button
+        (click)="continueShopping()"
         class="px-6 py-3 bg-black text-white rounded hover:bg-gray-800 transition"
       >
         Tiếp tục mua sắm
-      </a>
+      </button>
     </div>
   </ng-container>
 
   <!-- ================= CART CONTENT ================= -->
   <ng-container *ngIf="(items$ | async)?.length">
+    <!-- Header with Refresh Button -->
+    <div class="flex justify-between items-center mb-6">
+      <h1 class="text-2xl font-bold">Giỏ hàng của bạn</h1>
+      <button
+        (click)="refreshCart()"
+        class="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+        [disabled]="loading$ | async"
+      >
+        <svg
+          class="w-4 h-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+          />
+        </svg>
+        <span>Làm mới</span>
+      </button>
+    </div>
+
     <div class="grid grid-cols-12 gap-8">
       <!-- ===== LEFT: CART ITEMS ===== -->
       <div class="col-span-12 lg:col-span-8 bg-white rounded-lg shadow p-6">
-        <h2 class="text-lg font-semibold mb-6">Giỏ hàng</h2>
+        <h2 class="text-lg font-semibold mb-6">
+          Sản phẩm ({{ totalQuantity$ | async }})
+        </h2>
 
         <!-- HEADER -->
         <div
-          class="grid grid-cols-12 gap-4 pb-3 border-b text-sm text-gray-500"
+          class="hidden md:grid grid-cols-12 gap-4 pb-3 border-b text-sm text-gray-500"
         >
           <div class="col-span-5">Sản phẩm</div>
-          <div class="col-span-3 text-center">Số lượng</div>
+          <div class="col-span-2 text-center">Màu/Size</div>
+          <div class="col-span-2 text-center">Số lượng</div>
           <div class="col-span-2 text-right">Thành tiền</div>
-          <div class="col-span-2 text-right">Xóa</div>
+          <div class="col-span-1 text-right">Xóa</div>
         </div>
 
         <!-- ITEMS -->
@@ -39,37 +77,95 @@
           *ngFor="let item of items$ | async"
           class="grid grid-cols-12 gap-4 items-center py-4 border-b last:border-0"
         >
-          <!-- PRODUCT -->
-          <div class="col-span-5">
-            <div class="font-medium">{{ item.productName }}</div>
-            <div class="text-sm text-gray-500">{{ item.price | number }} đ</div>
+          <!-- PRODUCT INFO -->
+          <div class="col-span-12 md:col-span-5">
+            <div class="flex items-start gap-3">
+              <!-- Product Image -->
+              <img
+                *ngIf="item.images && item.images.length > 0"
+                [src]="item.images[0].url"
+                [alt]="item.productName"
+                class="w-20 h-20 object-cover rounded"
+              />
+              <div
+                class="w-20 h-20 bg-gray-100 rounded flex items-center justify-center"
+                *ngIf="!item.images || item.images.length === 0"
+              >
+                <span class="text-gray-400 text-xs">No image</span>
+              </div>
+
+              <!-- Product Details -->
+              <div class="flex-1">
+                <div class="font-medium">{{ item.productName }}</div>
+                <div class="text-sm text-gray-500 mt-1">
+                  <span *ngIf="item.color">Màu: {{ item.color }}</span>
+                  <span *ngIf="item.size">, Size: {{ item.size }}</span>
+                </div>
+                <div class="text-sm font-semibold text-gray-700 mt-1">
+                  {{ item.price | number : "1.0-0" }} đ
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- COLOR/SIZE (Desktop only) -->
+          <div class="hidden md:block col-span-2 text-center">
+            <div class="text-sm font-medium">{{ item.color }}</div>
+            <div class="text-sm text-gray-500">{{ item.size }}</div>
           </div>
 
           <!-- QUANTITY -->
-          <div class="col-span-3 flex justify-center items-center gap-3">
+          <div
+            class="col-span-6 md:col-span-2 flex justify-center items-center gap-3"
+          >
             <button
               class="qty-btn"
               (click)="decrease(item)"
-              [disabled]="item.quantity <= 1"
+              [disabled]="(item.quantity ?? 0) <= 1 || (loading$ | async)"
             >
               −
             </button>
-            <span class="w-6 text-center">{{ item.quantity }}</span>
-            <button class="qty-btn" (click)="increase(item)">+</button>
+            <span class="w-8 text-center font-medium">{{ item.quantity }}</span>
+            <button
+              class="qty-btn"
+              (click)="increase(item)"
+              [disabled]="loading$ | async"
+            >
+              +
+            </button>
           </div>
 
           <!-- TOTAL -->
-          <div class="col-span-2 text-right font-semibold">
-            {{ item.quantity! * item.price! | number }} đ
+          <div class="col-span-4 md:col-span-2 text-right">
+            <div class="font-semibold text-lg">
+              {{
+                (item.quantity ?? 0) * (item.price ?? 0) | number : "1.0-0"
+              }}
+              đ
+            </div>
           </div>
 
           <!-- REMOVE -->
-          <div class="col-span-2 text-right">
+          <div class="col-span-2 md:col-span-1 text-right">
             <button
-              class="text-red-500 hover:text-red-700"
+              class="text-red-500 hover:text-red-700 transition"
               (click)="remove(item)"
+              [disabled]="loading$ | async"
+              title="Xóa sản phẩm"
             >
-              <img src="./assets/img/garbage.png" class="w-5 inline-block" />
+              <svg
+                class="w-5 h-5 inline-block"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                />
+              </svg>
             </button>
           </div>
         </div>
@@ -77,39 +173,63 @@
 
       <!-- ===== RIGHT: SUMMARY ===== -->
       <div
-        class="col-span-12 lg:col-span-4 bg-white rounded-lg shadow p-6 h-fit"
+        class="col-span-12 lg:col-span-4 bg-white rounded-lg shadow p-6 h-fit sticky top-4"
       >
-        <h2 class="text-lg font-semibold mb-6">Thanh toán</h2>
+        <h2 class="text-lg font-semibold mb-6">Tổng đơn hàng</h2>
 
-        <div class="flex justify-between mb-4 text-sm">
-          <span>Tạm tính</span>
-          <span>{{ totalPrice$ | async | number }} đ</span>
+        <div class="space-y-3">
+          <div class="flex justify-between text-sm">
+            <span class="text-gray-600">Tạm tính</span>
+            <span class="font-medium"
+              >{{ totalPrice$ | async | number : "1.0-0" }} đ</span
+            >
+          </div>
+
+          <div class="flex justify-between text-sm">
+            <span class="text-gray-600">Số lượng</span>
+            <span class="font-medium"
+              >{{ totalQuantity$ | async }} sản phẩm</span
+            >
+          </div>
+
+          <div class="flex justify-between text-sm">
+            <span class="text-gray-600">Phí vận chuyển</span>
+            <span class="text-gray-400">Tính khi thanh toán</span>
+          </div>
+
+          <div class="border-t pt-3 flex justify-between">
+            <span class="font-bold text-lg">Tổng cộng</span>
+            <span class="font-bold text-lg text-red-600">
+              {{ totalPrice$ | async | number : "1.0-0" }} đ
+            </span>
+          </div>
         </div>
 
-        <div class="flex justify-between mb-4 text-sm">
-          <span>Phí vận chuyển</span>
-          <span>—</span>
-        </div>
-
-        <div class="border-t pt-4 flex justify-between font-bold text-lg">
-          <span>Tổng tiền</span>
-          <span>{{ totalPrice$ | async | number }} đ</span>
-        </div>
-
+        <!-- Checkout Button -->
         <button
-          routerLink="/checkout"
-          class="w-full mt-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition"
-          [disabled]="(items$ | async)?.length === 0"
+          (click)="goToCheckout()"
+          class="w-full mt-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition font-medium"
+          [disabled]="(items$ | async)?.length === 0 || (loading$ | async)"
         >
-          Thanh toán
+          Tiến hành thanh toán
         </button>
 
-        <a
-          routerLink="/products"
-          class="block text-center mt-4 text-sm text-gray-500 hover:text-black"
+        <!-- Clear All Button -->
+        <button
+          (click)="clearCart()"
+          class="w-full mt-3 py-2 text-sm border border-red-500 text-red-500 rounded-lg hover:bg-red-50 transition"
+          [disabled]="(items$ | async)?.length === 0 || (loading$ | async)"
+        >
+          Xóa tất cả
+        </button>
+
+        <!-- Continue Shopping -->
+        <button
+          (click)="continueShopping()"
+          class="w-full mt-3 text-center text-sm text-gray-500 hover:text-black transition"
         >
           ← Tiếp tục mua sắm
-        </a>
+        </button>
       </div>
     </div>
   </ng-container>

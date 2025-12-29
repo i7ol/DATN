@@ -3,19 +3,31 @@ package com.datn.shopobject.dto.response;
 import lombok.*;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class OrderItemResponse {
+
     private Long id;
+
+    /* ===== PRODUCT SNAPSHOT ===== */
     private Long productId;
     private String productName;
-    private int quantity;
-    private BigDecimal price;
+
+    /* ===== VARIANT SNAPSHOT ===== */
+    private Long variantId;
+    private String size;
+    private String color;
+
+    /* ===== PRICE SNAPSHOT ===== */
     private BigDecimal unitPrice;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private int quantity;
+    private BigDecimal totalPrice;
+
+    /* ===== AUDIT ===== */
+    private Instant createdAt;
+    private Instant updatedAt;
 }

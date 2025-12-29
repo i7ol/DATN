@@ -1,4 +1,3 @@
-// app/core/interceptors/auth.interceptor.ts
 import { Injectable } from '@angular/core';
 import {
   HttpRequest,
@@ -7,29 +6,25 @@ import {
   HttpInterceptor,
   HttpErrorResponse,
 } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
-import { catchError, switchMap } from 'rxjs/operators';
-import { AuthService, AuthResponse } from '../services/auth.service';
-import { Router } from '@angular/router';
+import { Observable, throwError, BehaviorSubject } from 'rxjs';
+import { catchError, filter, take, switchMap } from 'rxjs/operators';
+import { AuthService } from '../services/auth.service';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
   private isRefreshing = false;
+  private refreshTokenSubject = new BehaviorSubject<string | null>(null);
 
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(private authService: AuthService) {}
 
   intercept(
     request: HttpRequest<unknown>,
     next: HttpHandler
   ): Observable<HttpEvent<unknown>> {
-    // Skip adding token for auth requests
-    if (request.url.includes('/auth/')) {
-      return next.handle(request);
-    }
-
+    // Thêm token vào header nếu có
     const token = this.authService.getAccessToken();
 
-    if (token) {
+    if (token && !request.url.includes('/auth/')) {
       request = this.addToken(request, token);
     }
 
@@ -57,30 +52,29 @@ export class AuthInterceptor implements HttpInterceptor {
   ): Observable<HttpEvent<any>> {
     if (!this.isRefreshing) {
       this.isRefreshing = true;
+      this.refreshTokenSubject.next(null);
 
-      if (this.authService.isAuthenticated()) {
-        return this.authService.doRefreshToken().pipe(
-          switchMap((response: AuthResponse) => {
-            this.isRefreshing = false;
-
-            if (response.authenticated && response.accessToken) {
-              return next.handle(this.addToken(request, response.accessToken));
-            } else {
-              this.authService.logout();
-              this.router.navigate(['/']);
-              return throwError(() => new Error('Session expired'));
-            }
-          }),
-          catchError((error) => {
-            this.isRefreshing = false;
-            this.authService.logout();
-            this.router.navigate(['/']);
-            return throwError(() => error);
-          })
-        );
-      }
+      return this.authService.refreshAccessToken().pipe(
+        switchMap((response: any) => {
+          this.isRefreshing = false;
+          const newToken = response.accessToken;
+          this.refreshTokenSubject.next(newToken);
+          return next.handle(this.addToken(request, newToken));
+        }),
+        catchError((error) => {
+          this.isRefreshing = false;
+          this.authService.logout();
+          return throwError(() => error);
+        })
+      );
+    } else {
+      return this.refreshTokenSubject.pipe(
+        filter((token) => token !== null),
+        take(1),
+        switchMap((token) => {
+          return next.handle(this.addToken(request, token!));
+        })
+      );
     }
-
-    return throwError(() => new Error('Authentication required'));
   }
 }

@@ -26,7 +26,7 @@ public class CartItemEntity extends BaseEntity {
     private CartEntity cart;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id")
-    @JsonBackReference
-    private ProductEntity product;
+    @JoinColumn(name = "variant_id", nullable = false)
+    private ProductVariantEntity variant;
+
 }

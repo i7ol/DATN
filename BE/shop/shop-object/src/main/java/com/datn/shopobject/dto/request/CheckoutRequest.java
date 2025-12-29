@@ -7,9 +7,9 @@ import lombok.Data;
 
 @Data
 public class CheckoutRequest {
+    private Long userId;
     private String guestId;
 
-    @NotBlank(message = "Tên không được để trống")
     private String guestName;
 
     @Email(message = "Email không hợp lệ")

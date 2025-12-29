@@ -19,10 +19,10 @@ export interface PageProductResponse {
     content?: Array<ProductResponse>;
     number?: number;
     sort?: Array<SortObject>;
-    pageable?: PageableObject;
     first?: boolean;
     last?: boolean;
     numberOfElements?: number;
+    pageable?: PageableObject;
     empty?: boolean;
 }
 

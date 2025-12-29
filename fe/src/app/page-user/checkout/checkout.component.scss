@@ -91,3 +91,33 @@ input[type="radio"] {
     position: static;
   }
 }
+/* Modal QR Code */
+.qr-code-modal {
+  .modal-overlay {
+    backdrop-filter: blur(4px);
+  }
+
+  .modal-content {
+    max-width: 400px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+      0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  }
+
+  .qr-code-image {
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    background: white;
+  }
+
+  .payment-amount {
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: #059669;
+  }
+
+  .instructions {
+    background-color: #fffbeb;
+    border-color: #fbbf24;
+  }
+}

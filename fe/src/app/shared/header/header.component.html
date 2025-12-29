@@ -231,10 +231,10 @@
             <div class="relative">
               <img src="./assets/img/cart.png" class="w-4 h-4 opacity-70" />
               <span
-                *ngIf="cartCount$ | async as count"
+                *ngIf="cartTotalQuantity > 0"
                 class="absolute -top-1 -right-2 w-4 h-4 flex items-center justify-center text-[10px] bg-red-500 text-white rounded-full"
               >
-                {{ count }}
+                {{ cartTotalQuantity }}
               </span>
             </div>
           </div>
@@ -246,73 +246,129 @@
             (mouseenter)="onDropdownMouseEnter()"
             (mouseleave)="onDropdownMouseLeave()"
           >
-            <ng-container *ngIf="cartItems$ | async as items">
-              <!-- EMPTY -->
+            <!-- Loading State -->
+            <div *ngIf="cartLoading" class="py-6 text-center">
               <div
-                *ngIf="items.length === 0"
-                class="py-10 flex flex-col items-center gap-4 text-gray-500"
+                class="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900 mx-auto"
+              ></div>
+              <p class="text-sm text-gray-500 mt-2">Đang tải giỏ hàng...</p>
+            </div>
+
+            <!-- Empty Cart -->
+            <div
+              *ngIf="!cartLoading && cartItems.length === 0"
+              class="py-10 flex flex-col items-center gap-4 text-gray-500"
+            >
+              <img
+                src="./assets/img/empty-cart.webp"
+                class="w-32 opacity-80"
+                alt="Giỏ hàng trống"
+              />
+              <p class="text-sm">Giỏ hàng của bạn đang trống</p>
+              <button
+                routerLink="/products"
+                class="px-6 py-2 bg-black text-white rounded hover:bg-gray-800 transition text-sm"
+                (click)="isCartHover = false"
               >
-                <img
-                  src="./assets/img/empty-cart.webp"
-                  class="w-32 opacity-80"
-                />
-                <button
-                  routerLink="/products"
-                  class="px-6 py-2 bg-black text-white rounded hover:bg-gray-800 transition"
-                >
-                  Tiếp tục mua sắm
-                </button>
+                Tiếp tục mua sắm
+              </button>
+            </div>
+
+            <!-- Cart Items -->
+            <div *ngIf="!cartLoading && cartItems.length > 0">
+              <!-- Header -->
+              <div class="px-4 py-3 border-b">
+                <div class="flex items-center justify-between">
+                  <h3 class="font-semibold text-sm">Giỏ hàng của bạn</h3>
+                  <span class="text-xs text-gray-500">
+                    {{ cartTotalQuantity }} sản phẩm
+                  </span>
+                </div>
               </div>
 
-              <!-- ITEMS -->
-              <div
-                *ngIf="items.length > 0"
-                class="max-h-[360px] overflow-y-auto px-4 py-3"
-              >
+              <!-- Items List -->
+              <div class="max-h-80 overflow-y-auto px-4 py-2">
                 <div
-                  *ngFor="let item of items"
-                  class="flex gap-3 py-3 border-b last:border-0"
+                  *ngFor="let item of cartItems"
+                  class="flex gap-3 py-3 border-b last:border-0 hover:bg-gray-50 transition-colors"
                 >
-                  <img
-                    [src]="item.images?.[0]?.url || '/assets/no-image.png'"
-                    class="w-14 h-14 object-cover rounded border"
-                  />
-                  <div class="flex-1">
-                    <div class="text-sm font-medium line-clamp-2">
-                      {{ item.productName }}
-                    </div>
-                    <div class="text-xs text-gray-500 mt-1">
-                      {{ item.quantity }} × {{ item.price | number }} đ
-                    </div>
+                  <!-- Product Image -->
+                  <div class="flex-shrink-0">
+                    <img
+                      [src]="item.images?.[0]?.url || '/assets/img/no-image.png'"
+                      [alt]="item.productName"
+                      class="w-16 h-16 object-cover rounded border"
+                      onerror="this.src='/assets/img/no-image.png'"
+                    />
                   </div>
-                  <div class="text-sm font-semibold whitespace-nowrap">
-                    {{ item.quantity * item.price | number }} đ
+
+                  <!-- Product Info -->
+                  <div class="flex-1 min-w-0">
+                    <h4 class="text-sm font-medium line-clamp-2 mb-1">
+                      {{ item.productName }}
+                    </h4>
+                    <div class="text-xs text-gray-500 mb-1">
+                      Màu: {{ item.color || "N/A" }}
+                      <span *ngIf="item.sizeName">
+                        • Size: {{ item.sizeName }}</span
+                      >
+                    </div>
+                    <div class="flex items-center justify-between">
+                      <span class="text-xs text-gray-600">
+                        {{ item.quantity }} ×
+                        {{ item.price | number : "1.0-0" }}đ
+                      </span>
+                      <span class="text-sm font-semibold">
+                        {{ item.quantity * item.price | number : "1.0-0" }}đ
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <!-- FOOTER -->
-              <div class="border-t px-4 py-3">
-                <div class="flex justify-between text-sm font-semibold mb-3">
-                  <span>Tổng cộng</span>
-                  <span>{{ totalPrice$ | async | number }} đ</span>
+              <!-- Footer -->
+              <div class="border-t px-4 py-3 bg-gray-50">
+                <!-- Total -->
+                <div class="flex justify-between items-center mb-3">
+                  <span class="text-sm font-semibold">Tổng tiền:</span>
+                  <span class="text-lg font-bold text-red-600">
+                    {{ cartTotalPrice | number : "1.0-0" }}đ
+                  </span>
                 </div>
+
+                <!-- Buttons -->
                 <div class="flex gap-2">
                   <button
                     routerLink="/cart"
-                    class="flex-1 py-2 bg-black text-white rounded hover:bg-gray-800"
+                    class="flex-1 py-2 bg-black text-white rounded hover:bg-gray-800 transition text-sm font-medium"
+                    (click)="isCartHover = false"
                   >
                     Xem giỏ hàng
                   </button>
                   <button
                     routerLink="/checkout"
-                    class="flex-1 py-2 border rounded hover:bg-gray-100"
+                    class="flex-1 py-2 border border-gray-300 rounded hover:bg-gray-100 transition text-sm font-medium"
+                    (click)="isCartHover = false"
+                    [disabled]="cartTotalPrice === 0"
+                    [ngClass]="{
+                      'opacity-50 cursor-not-allowed': cartTotalPrice === 0
+                    }"
                   >
                     Thanh toán
                   </button>
                 </div>
+
+                <!-- Free Shipping Notice -->
+                <div
+                  *ngIf="cartTotalPrice < 500000"
+                  class="mt-2 text-xs text-center text-gray-600"
+                >
+                  <span class="text-red-500">*</span>
+                  Mua thêm {{ 500000 - cartTotalPrice | number : "1.0-0" }}đ để
+                  được miễn phí vận chuyển
+                </div>
               </div>
-            </ng-container>
+            </div>
           </div>
         </div>
       </div>

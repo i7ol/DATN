@@ -1,12 +1,13 @@
-// app/shared/header/header.component.ts
-import { Component, HostListener, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
+import { Router, NavigationEnd } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { filter } from 'rxjs/operators';
+import { MatDialog } from '@angular/material/dialog';
+import { AuthModalComponent } from '../components/auth-modal/auth-modal.component';
 import { CartService } from 'src/app/page-user/cart/cart.service';
 import { AuthService, User } from 'src/app/core/services/auth.service';
-import { DialogService } from 'src/app/core/services/dialog.service';
-import { Observable } from 'rxjs';
 import { CartItemResponse } from 'src/app/api/user';
-import { Router, NavigationEnd } from '@angular/router';
-import { filter } from 'rxjs/operators';
+
 @Component({
   selector: 'app-header',
   templateUrl: './header.component.html',
@@ -17,42 +18,60 @@ export class HeaderComponent implements OnInit, OnDestroy {
   isCartHover = false;
   isAccountDropdownOpen = false;
 
-  private hideCartTimeout: any = null;
-  private hideAccountTimeout: any = null;
-
-  cartCount$!: Observable<number>;
-  cartItems$!: Observable<CartItemResponse[]>;
-  totalPrice$!: Observable<number>;
+  cartItems: CartItemResponse[] = [];
+  cartLoading = false;
+  cartTotalPrice = 0;
+  cartTotalQuantity = 0;
 
   currentUser: User | null = null;
   isAdmin = false;
-  currentRoute: string = '';
+  currentRoute = '';
+
+  private hideCartTimeout: any;
+  private hideAccountTimeout: any;
+  private sub = new Subscription();
+
   constructor(
     private cartService: CartService,
     private authService: AuthService,
-    private dialogService: DialogService,
+    private dialog: MatDialog,
     private router: Router
   ) {}
 
   ngOnInit(): void {
-    this.cartCount$ = this.cartService.totalQuantity$;
-    this.cartItems$ = this.cartService.items$;
-    this.totalPrice$ = this.cartService.totalPrice$;
+    this.sub.add(
+      this.cartService.items$.subscribe((i) => (this.cartItems = i || []))
+    );
+    this.sub.add(
+      this.cartService.totalPrice$.subscribe((p) => (this.cartTotalPrice = p))
+    );
+    this.sub.add(
+      this.cartService.totalQuantity$.subscribe(
+        (q) => (this.cartTotalQuantity = q)
+      )
+    );
+    this.sub.add(
+      this.cartService.loading$.subscribe((l) => (this.cartLoading = l))
+    );
 
-    this.authService.currentUser$.subscribe((user) => {
-      this.currentUser = user;
-      this.isAdmin = this.authService.isAdmin();
-    });
-    this.router.events
-      .pipe(filter((event) => event instanceof NavigationEnd))
-      .subscribe((event: any) => {
-        this.currentRoute = event.url;
-      });
+    this.sub.add(
+      this.authService.currentUser$.subscribe((user) => {
+        this.currentUser = user;
+        this.isAdmin = this.authService.isAdmin();
+      })
+    );
+
+    this.sub.add(
+      this.router.events
+        .pipe(filter((e) => e instanceof NavigationEnd))
+        .subscribe((e: any) => (this.currentRoute = e.url))
+    );
   }
 
   ngOnDestroy(): void {
-    if (this.hideCartTimeout) clearTimeout(this.hideCartTimeout);
-    if (this.hideAccountTimeout) clearTimeout(this.hideAccountTimeout);
+    this.sub.unsubscribe();
+    clearTimeout(this.hideCartTimeout);
+    clearTimeout(this.hideAccountTimeout);
   }
 
   @HostListener('window:scroll')
@@ -60,101 +79,70 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.isScrolled = window.scrollY > 10;
   }
 
-  // CART METHODS
-  onCartMouseEnter(): void {
-    if (this.hideCartTimeout) {
-      clearTimeout(this.hideCartTimeout);
-      this.hideCartTimeout = null;
-    }
+  // CART
+  onCartMouseEnter() {
+    clearTimeout(this.hideCartTimeout);
     this.isCartHover = true;
   }
-
-  onCartMouseLeave(): void {
-    this.hideCartTimeout = setTimeout(() => {
-      this.isCartHover = false;
-    }, 300);
+  onCartMouseLeave() {
+    this.hideCartTimeout = setTimeout(() => (this.isCartHover = false), 300);
   }
-
-  onDropdownMouseEnter(): void {
-    if (this.hideCartTimeout) {
-      clearTimeout(this.hideCartTimeout);
-      this.hideCartTimeout = null;
-    }
+  onDropdownMouseEnter() {
+    clearTimeout(this.hideCartTimeout);
     this.isCartHover = true;
   }
-
-  onDropdownMouseLeave(): void {
-    this.hideCartTimeout = setTimeout(() => {
-      this.isCartHover = false;
-    }, 150);
+  onDropdownMouseLeave() {
+    this.hideCartTimeout = setTimeout(() => (this.isCartHover = false), 150);
   }
 
-  // ACCOUNT METHODS
-  onAccountMouseEnter(): void {
-    if (this.hideAccountTimeout) {
-      clearTimeout(this.hideAccountTimeout);
-      this.hideAccountTimeout = null;
-    }
+  // ACCOUNT
+  onAccountMouseEnter() {
+    clearTimeout(this.hideAccountTimeout);
     this.isAccountDropdownOpen = true;
   }
-
-  onAccountMouseLeave(): void {
-    this.hideAccountTimeout = setTimeout(() => {
-      this.isAccountDropdownOpen = false;
-    }, 300);
+  onAccountMouseLeave() {
+    this.hideAccountTimeout = setTimeout(
+      () => (this.isAccountDropdownOpen = false),
+      300
+    );
   }
-
-  onAccountDropdownMouseEnter(): void {
-    if (this.hideAccountTimeout) {
-      clearTimeout(this.hideAccountTimeout);
-      this.hideAccountTimeout = null;
-    }
+  onAccountDropdownMouseEnter() {
+    clearTimeout(this.hideAccountTimeout);
     this.isAccountDropdownOpen = true;
   }
-
-  onAccountDropdownMouseLeave(): void {
-    this.hideAccountTimeout = setTimeout(() => {
-      this.isAccountDropdownOpen = false;
-    }, 150);
+  onAccountDropdownMouseLeave() {
+    this.hideAccountTimeout = setTimeout(
+      () => (this.isAccountDropdownOpen = false),
+      150
+    );
   }
 
-  // AUTH METHODS - Sử dụng DialogService
-  openLoginModal(): void {
-    this.dialogService.openAuthModal('login');
-    this.isAccountDropdownOpen = false;
+  openLoginModal() {
+    this.dialog.open(AuthModalComponent, {
+      width: '420px',
+      data: { mode: 'login' },
+    });
   }
-
-  openRegisterModal(): void {
-    this.dialogService.openAuthModal('register');
-    this.isAccountDropdownOpen = false;
+  openRegisterModal() {
+    this.dialog.open(AuthModalComponent, {
+      width: '420px',
+      data: { mode: 'register' },
+    });
   }
-
-  logout(): void {
+  logout() {
     this.authService.logout();
-    this.isAccountDropdownOpen = false;
   }
 
   getDisplayName(): string {
-    if (this.currentUser) {
-      return this.currentUser.username;
-    }
-    return 'Tài khoản';
+    return this.currentUser?.username || 'Tài khoản';
   }
 
-  closeAllDropdowns(): void {
+  closeAllDropdowns() {
     this.isCartHover = false;
     this.isAccountDropdownOpen = false;
   }
 
   isAdminRoute(route: string): boolean {
-    const adminRoutes = [
-      '/admin/products-admin',
-      '/admin/inventory',
-      '/admin/orders',
-      '/admin/users',
-      '/admin/payments',
-    ];
-
-    return adminRoutes.some((r) => this.currentRoute.startsWith(r));
+    return route.startsWith('/admin');
   }
 }

@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -61,7 +62,6 @@ public class InventoryServiceImpl implements InventoryService {
         return toResponse(item);
     }
 
-
     // =============================
     // LIST
     // =============================
@@ -70,7 +70,6 @@ public class InventoryServiceImpl implements InventoryService {
         return repository.findAll(pageable)
                 .map(this::toResponse);
     }
-
 
     // =============================
     // RESERVE
@@ -90,7 +89,6 @@ public class InventoryServiceImpl implements InventoryService {
         logTx(item, variantId, TransactionType.RESERVE, qty, "reserve");
     }
 
-
     // =============================
     // RELEASE
     // =============================
@@ -105,7 +103,6 @@ public class InventoryServiceImpl implements InventoryService {
 
         logTx(item, variantId, TransactionType.RELEASE, -qty, "release");
     }
-
 
     // =============================
     // DEDUCT (bán hàng)
@@ -124,7 +121,6 @@ public class InventoryServiceImpl implements InventoryService {
 
         logTx(item, variantId, TransactionType.DEDUCT, -qty, "deduct sale");
     }
-
 
     // =============================
     // IMPORT
@@ -152,7 +148,6 @@ public class InventoryServiceImpl implements InventoryService {
         return toResponse(item);
     }
 
-
     // =============================
     // EXPORT
     // =============================
@@ -172,7 +167,6 @@ public class InventoryServiceImpl implements InventoryService {
         return toResponse(item);
     }
 
-
     // =============================
     // ADJUST
     // =============================
@@ -190,7 +184,6 @@ public class InventoryServiceImpl implements InventoryService {
 
         return toResponse(item);
     }
-
 
     // =============================
     // GET TRANSACTION LOGS
@@ -210,8 +203,6 @@ public class InventoryServiceImpl implements InventoryService {
                 .collect(Collectors.toList());
     }
 
-
-
     // =============================
     // LOG TRANSACTION
     // =============================
@@ -228,7 +219,6 @@ public class InventoryServiceImpl implements InventoryService {
 
         txRepository.save(tx);
     }
-
 
     // =============================
     // MAP TO RESPONSE (không dùng mapper)
@@ -247,9 +237,11 @@ public class InventoryServiceImpl implements InventoryService {
             ProductEntity product = variant.getProduct();
             if (product != null) {
                 productName = product.getName();
-
                 if (product.getImages() != null && !product.getImages().isEmpty()) {
-                    thumbnail = product.getImages().get(0).getUrl();
+                    thumbnail = product.getImages().stream()
+                            .findFirst()  // Lấy phần tử đầu tiên trong Set
+                            .map(ProductImageEntity::getUrl)
+                            .orElse(null);
                 }
             }
         }
@@ -269,5 +261,3 @@ public class InventoryServiceImpl implements InventoryService {
         );
     }
 }
-
-

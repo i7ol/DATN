@@ -16,8 +16,8 @@ public class CartUserController {
 
     @GetMapping
     public CartResponse getCart(
-            @RequestParam(name = "userId",required = false) Long userId,
-            @RequestParam(name = "guestId",required = false) String guestId
+            @RequestParam(name = "userId", required = false) Long userId,
+            @RequestParam(name = "guestId", required = false) String guestId
     ) {
         return cartService.getCartResponse(userId, guestId);
     }
@@ -26,45 +26,56 @@ public class CartUserController {
 
     @PostMapping("/add")
     public CartResponse addItem(
-            @RequestParam(name = "userId",required = false) Long userId,
-            @RequestParam(name = "guestId",required = false) String guestId,
-            @RequestParam("productId") Long productId,
+            @RequestParam(name = "userId", required = false) Long userId,
+            @RequestParam(name = "guestId", required = false) String guestId,
+            @RequestParam("variantId") Long variantId,
             @RequestParam("quantity") int quantity
     ) {
-        return cartService.addItem(userId, guestId, productId, quantity);
+        return cartService.addItem(userId, guestId, variantId, quantity);
     }
 
     /* ====================== UPDATE ITEM ====================== */
 
     @PutMapping("/update")
     public CartResponse updateItem(
-            @RequestParam(name = "userId",required = false) Long userId,
-            @RequestParam(name = "guestId",required = false) String guestId,
-            @RequestParam("productId") Long productId,
+            @RequestParam(name = "userId", required = false) Long userId,
+            @RequestParam(name = "guestId", required = false) String guestId,
+            @RequestParam("variantId") Long variantId,
             @RequestParam("quantity") int quantity
     ) {
-        return cartService.updateItem(userId, guestId, productId, quantity);
+        return cartService.updateItem(userId, guestId, variantId, quantity);
     }
 
     /* ====================== REMOVE ITEM ====================== */
 
     @DeleteMapping("/remove")
     public CartResponse removeItem(
-            @RequestParam(name = "userId",required = false) Long userId,
-            @RequestParam(name = "guestId",required = false) String guestId,
-            @RequestParam("productId") Long productId
+            @RequestParam(name = "userId", required = false) Long userId,
+            @RequestParam(name = "guestId", required = false) String guestId,
+            @RequestParam("variantId") Long variantId
     ) {
-        return cartService.removeItem(userId, guestId, productId);
+        return cartService.removeItem(userId, guestId, variantId);
     }
 
     /* ====================== MERGE CART ====================== */
 
     @PostMapping("/merge")
     public CartResponse mergeGuestCart(
-            @RequestParam(name = "guestId",required = false) String guestId,
-            @RequestParam(name = "userId",required = false) Long userId
+            @RequestParam(name = "guestId") String guestId,
+            @RequestParam(name = "userId") Long userId
     ) {
         cartService.mergeGuestToUser(guestId, userId);
         return cartService.getCartResponse(userId, null);
     }
+
+
+    /* ====================== CLEAR CART ====================== */
+    @DeleteMapping("/clear")
+    public CartResponse clearCart(
+            @RequestParam(name = "userId", required = false) Long userId,
+            @RequestParam(name = "guestId", required = false) String guestId
+    ) {
+        return cartService.clearCart(userId, guestId);
+    }
+
 }

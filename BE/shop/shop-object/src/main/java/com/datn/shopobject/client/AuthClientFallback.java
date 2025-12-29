@@ -2,9 +2,12 @@ package com.datn.shopobject.client;
 
 import com.datn.shopobject.dto.response.UserInfoResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.stereotype.Component;
 
 
 @Slf4j
+@Component
 public class AuthClientFallback implements AuthClient {
 
     @Override

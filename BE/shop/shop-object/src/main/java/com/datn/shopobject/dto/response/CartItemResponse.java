@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -16,7 +17,16 @@ import java.util.List;
 public class CartItemResponse {
     private Long productId;
     private String productName;
-    private int quantity;
-    private BigDecimal price;
-    private List<ImageDTO> images;
+    private Long variantId;
+    private String size;
+    private String color;
+
+    @Builder.Default
+    private int quantity = 0;
+
+    @Builder.Default
+    private BigDecimal price = BigDecimal.ZERO;
+
+    @Builder.Default
+    private List<ImageDTO> images = new ArrayList<>();
 }

@@ -1,27 +1,56 @@
-button {
-  cursor: pointer;
-}
+// button {
+//   cursor: pointer;
+// }
 
-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
+// button:disabled {
+//   opacity: 0.5;
+//   cursor: not-allowed;
+// }
+// .qty-btn {
+//   width: 32px;
+//   height: 32px;
+//   border: 1px solid #e5e7eb;
+//   border-radius: 6px;
+//   font-weight: bold;
+//   transition: all 0.2s;
+// }
+
+// .qty-btn:hover {
+//   background: #111827;
+//   color: #fff;
+//   border-color: #111827;
+// }
+
+// .qty-btn:disabled {
+//   opacity: 0.4;
+//   cursor: not-allowed;
+// }
+/* Thêm CSS cho nút số lượng */
 .qty-btn {
-  width: 32px;
-  height: 32px;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  font-weight: bold;
+  width: 28px;
+  height: 28px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
   transition: all 0.2s;
 }
 
-.qty-btn:hover {
-  background: #111827;
-  color: #fff;
-  border-color: #111827;
+.qty-btn:hover:not(:disabled) {
+  background: #f3f4f6;
+  border-color: #9ca3af;
 }
 
 .qty-btn:disabled {
-  opacity: 0.4;
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Style cho nút xóa tất cả */
+button:disabled {
+  opacity: 0.5;
   cursor: not-allowed;
 }

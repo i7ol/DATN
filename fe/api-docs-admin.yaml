@@ -147,13 +147,13 @@ paths:
       responses:
         "200":
           description: OK
-  /api/admin/payments/{id}/refund:
+  /api/admin/payments/{paymentId}/refund:
     put:
       tags:
       - payment-admin-controller
       operationId: refund
       parameters:
-      - name: id
+      - name: paymentId
         in: path
         required: true
         schema:
@@ -173,34 +173,50 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/PaymentResponse"
-  /api/admin/payments/{id}/mark-paid:
+                type: object
+  /api/admin/payments/{paymentId}/mark-paid:
     put:
       tags:
       - payment-admin-controller
       operationId: markPaid
       parameters:
-      - name: id
+      - name: paymentId
         in: path
         required: true
         schema:
           type: integer
           format: int64
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              additionalProperties:
-                type: string
+      - name: transactionId
+        in: query
         required: true
+        schema:
+          type: string
       responses:
         "200":
           description: OK
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/PaymentResponse"
+                type: object
+  /api/admin/payments/{paymentId}/cancel:
+    put:
+      tags:
+      - payment-admin-controller
+      operationId: cancelPayment
+      parameters:
+      - name: paymentId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: object
   /api/admin/orders/{orderId}/status:
     put:
       tags:
@@ -351,38 +367,6 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ApiResponseVoid"
-  /api/webhook/payment/vnpay:
-    post:
-      tags:
-      - payment-webhook-controller
-      operationId: handleVnpayWebhook
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              additionalProperties:
-                type: string
-        required: true
-      responses:
-        "200":
-          description: OK
-  /api/webhook/payment/momo:
-    post:
-      tags:
-      - payment-webhook-controller
-      operationId: handleMomoWebhook
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              additionalProperties:
-                type: string
-        required: true
-      responses:
-        "200":
-          description: OK
   /api/admin/shipping:
     get:
       tags:
@@ -799,11 +783,38 @@ paths:
       - payment-admin-controller
       operationId: getAllPayments
       parameters:
-      - name: filter
+      - name: status
         in: query
-        required: true
+        required: false
         schema:
-          $ref: "#/components/schemas/PaymentSearchRequest"
+          type: string
+      - name: method
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: fromDate
+        in: query
+        required: false
+        schema:
+          type: string
+          format: date
+      - name: toDate
+        in: query
+        required: false
+        schema:
+          type: string
+          format: date
+      - name: minAmount
+        in: query
+        required: false
+        schema:
+          type: number
+      - name: maxAmount
+        in: query
+        required: false
+        schema:
+          type: number
       - name: pageable
         in: query
         required: true
@@ -815,14 +826,14 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/PagePaymentResponse"
-  /api/admin/payments/{id}:
+                type: object
+  /api/admin/payments/{paymentId}:
     get:
       tags:
       - payment-admin-controller
       operationId: getPaymentById
       parameters:
-      - name: id
+      - name: paymentId
         in: path
         required: true
         schema:
@@ -834,7 +845,7 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/PaymentResponse"
+                type: object
   /api/admin/payments/summary:
     get:
       tags:
@@ -859,26 +870,7 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/PaymentSummaryResponse"
-  /api/admin/payments/order/{orderId}:
-    get:
-      tags:
-      - payment-admin-controller
-      operationId: getPaymentByOrderId
-      parameters:
-      - name: orderId
-        in: path
-        required: true
-        schema:
-          type: integer
-          format: int64
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/PaymentResponse"
+                type: object
   /api/admin/orders/{orderId}:
     get:
       tags:
@@ -1212,55 +1204,6 @@ components:
           type: number
         thumbnail:
           type: string
-    PaymentResponse:
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int64
-        orderId:
-          type: integer
-          format: int64
-        userId:
-          type: integer
-          format: int64
-        status:
-          type: string
-          enum:
-          - PENDING
-          - PAID
-          - FAILED
-          - REFUNDED
-          - CANCELLED
-        amount:
-          type: number
-        method:
-          type: string
-          enum:
-          - CASH
-          - ONLINE
-          - MOMO
-          - PAYPAL
-          - CREDIT_CARD
-        transactionId:
-          type: string
-        paidAt:
-          type: string
-          format: date-time
-        refundedAt:
-          type: string
-          format: date-time
-        cancelledAt:
-          type: string
-          format: date-time
-        refundReason:
-          type: string
-        createdAt:
-          type: string
-          format: date-time
-        updatedAt:
-          type: string
-          format: date-time
     StatusUpdateRequest:
       type: object
       properties:
@@ -1277,12 +1220,19 @@ components:
           format: int64
         productName:
           type: string
+        variantId:
+          type: integer
+          format: int64
+        size:
+          type: string
+        color:
+          type: string
+        unitPrice:
+          type: number
         quantity:
           type: integer
           format: int32
-        price:
-          type: number
-        unitPrice:
+        totalPrice:
           type: number
         createdAt:
           type: string
@@ -1313,6 +1263,7 @@ components:
           type: string
           enum:
           - NEW
+          - PENDING_PAYMENT
           - CONFIRMED
           - PROCESSING
           - PACKING
@@ -1707,12 +1658,12 @@ components:
     PageProductResponse:
       type: object
       properties:
-        totalElements:
-          type: integer
-          format: int64
         totalPages:
           type: integer
           format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -1748,14 +1699,14 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/SortObject"
-        paged:
-          type: boolean
         pageSize:
           type: integer
           format: int32
         pageNumber:
           type: integer
           format: int32
+        paged:
+          type: boolean
         unpaged:
           type: boolean
     SortObject:
@@ -1771,91 +1722,15 @@ components:
           type: string
         ignoreCase:
           type: boolean
-    PaymentSearchRequest:
-      type: object
-      properties:
-        status:
-          type: string
-          enum:
-          - PENDING
-          - PAID
-          - FAILED
-          - REFUNDED
-          - CANCELLED
-        method:
-          type: string
-          enum:
-          - CASH
-          - ONLINE
-          - MOMO
-          - PAYPAL
-          - CREDIT_CARD
-        fromDate:
-          type: string
-          format: date
-        toDate:
-          type: string
-          format: date
-        minAmount:
-          type: number
-        maxAmount:
-          type: number
-    PagePaymentResponse:
-      type: object
-      properties:
-        totalElements:
-          type: integer
-          format: int64
-        totalPages:
-          type: integer
-          format: int32
-        size:
-          type: integer
-          format: int32
-        content:
-          type: array
-          items:
-            $ref: "#/components/schemas/PaymentResponse"
-        number:
-          type: integer
-          format: int32
-        sort:
-          type: array
-          items:
-            $ref: "#/components/schemas/SortObject"
-        first:
-          type: boolean
-        last:
-          type: boolean
-        numberOfElements:
-          type: integer
-          format: int32
-        pageable:
-          $ref: "#/components/schemas/PageableObject"
-        empty:
-          type: boolean
-    PaymentSummaryResponse:
-      type: object
-      properties:
-        totalAmount:
-          type: number
-        pendingAmount:
-          type: number
-        totalTransactions:
-          type: integer
-          format: int64
-        successfulTransactions:
-          type: integer
-          format: int64
     PageInventoryResponse:
       type: object
       properties:
-        totalElements:
-          type: integer
-          format: int64
         totalPages:
           type: integer
           format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32

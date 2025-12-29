@@ -13,19 +13,46 @@ import java.math.BigDecimal;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class OrderItemEntity extends BaseEntity {
+public class OrderItemEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /* ===== SNAPSHOT PRODUCT / VARIANT ===== */
+
+    // Variant
+    @Column(name = "variant_id")
+    private Long variantId;
+
+    // Product
+    @Column(name = "product_id", nullable = false)
     private Long productId;
+
+    @Column(name = "product_name", nullable = false)
     private String productName;
-    private BigDecimal price;
-    private int quantity;
+
+    // Variant attributes
+    @Column(name = "size")
+    private String size;
+
+    @Column(name = "color")
+    private String color;
+
+    /* ===== PRICE SNAPSHOT ===== */
+
+    @Column(name = "unit_price", nullable = false)
+    private BigDecimal unitPrice;
+
+    @Column(name = "quantity", nullable = false)
+    private Integer quantity;
+
+    @Column(name = "total_price", nullable = false)
+    private BigDecimal totalPrice;
+
+    /* ===== RELATION ===== */
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id")
-    @JsonBackReference
     private OrderEntity order;
 }

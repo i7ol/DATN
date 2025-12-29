@@ -7,7 +7,6 @@ api/api.ts
 api/cartUserController.service.ts
 api/orderUserController.service.ts
 api/paymentUserController.service.ts
-api/paymentWebhookController.service.ts
 api/productUserController.service.ts
 api/shippingUserController.service.ts
 configuration.ts
@@ -24,7 +23,6 @@ model/orderResponse.ts
 model/pageProductResponse.ts
 model/pageableObject.ts
 model/paymentRequest.ts
-model/paymentResponse.ts
 model/productResponse.ts
 model/shippingResponse.ts
 model/sortObject.ts

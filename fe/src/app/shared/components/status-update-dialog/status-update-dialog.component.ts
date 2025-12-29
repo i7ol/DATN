@@ -6,7 +6,7 @@ export interface StatusUpdateDialogData {
   id: number;
   currentStatus: string;
   type: 'order' | 'shipping' | 'payment';
-  statusOptions?: Array<{ value: string; label: string }>; // Thêm statusOptions
+  statusOptions?: Array<{ value: string; label: string }>;
 }
 
 @Component({

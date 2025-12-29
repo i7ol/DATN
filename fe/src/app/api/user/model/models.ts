@@ -7,7 +7,6 @@ export * from './orderResponse';
 export * from './pageProductResponse';
 export * from './pageableObject';
 export * from './paymentRequest';
-export * from './paymentResponse';
 export * from './productResponse';
 export * from './shippingResponse';
 export * from './sortObject';

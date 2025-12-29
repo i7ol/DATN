@@ -37,19 +37,19 @@ export class CartUserControllerService extends BaseService {
 
     /**
      * @endpoint post /api/user/cart/add
-     * @param productId 
+     * @param variantId 
      * @param quantity 
      * @param userId 
      * @param guestId 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public addItem(productId: number, quantity: number, userId?: number, guestId?: string, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<CartResponse>;
-    public addItem(productId: number, quantity: number, userId?: number, guestId?: string, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpResponse<CartResponse>>;
-    public addItem(productId: number, quantity: number, userId?: number, guestId?: string, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpEvent<CartResponse>>;
-    public addItem(productId: number, quantity: number, userId?: number, guestId?: string, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<any> {
-        if (productId === null || productId === undefined) {
-            throw new Error('Required parameter productId was null or undefined when calling addItem.');
+    public addItem(variantId: number, quantity: number, userId?: number, guestId?: string, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<CartResponse>;
+    public addItem(variantId: number, quantity: number, userId?: number, guestId?: string, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpResponse<CartResponse>>;
+    public addItem(variantId: number, quantity: number, userId?: number, guestId?: string, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpEvent<CartResponse>>;
+    public addItem(variantId: number, quantity: number, userId?: number, guestId?: string, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<any> {
+        if (variantId === null || variantId === undefined) {
+            throw new Error('Required parameter variantId was null or undefined when calling addItem.');
         }
         if (quantity === null || quantity === undefined) {
             throw new Error('Required parameter quantity was null or undefined when calling addItem.');
@@ -61,7 +61,7 @@ export class CartUserControllerService extends BaseService {
         localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
           <any>guestId, 'guestId');
         localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
-          <any>productId, 'productId');
+          <any>variantId, 'variantId');
         localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
           <any>quantity, 'quantity');
 
@@ -166,10 +166,16 @@ export class CartUserControllerService extends BaseService {
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public mergeGuestCart(guestId?: string, userId?: number, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<CartResponse>;
-    public mergeGuestCart(guestId?: string, userId?: number, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpResponse<CartResponse>>;
-    public mergeGuestCart(guestId?: string, userId?: number, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpEvent<CartResponse>>;
-    public mergeGuestCart(guestId?: string, userId?: number, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<any> {
+    public mergeGuestCart(guestId: string, userId: number, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<CartResponse>;
+    public mergeGuestCart(guestId: string, userId: number, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpResponse<CartResponse>>;
+    public mergeGuestCart(guestId: string, userId: number, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpEvent<CartResponse>>;
+    public mergeGuestCart(guestId: string, userId: number, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<any> {
+        if (guestId === null || guestId === undefined) {
+            throw new Error('Required parameter guestId was null or undefined when calling mergeGuestCart.');
+        }
+        if (userId === null || userId === undefined) {
+            throw new Error('Required parameter userId was null or undefined when calling mergeGuestCart.');
+        }
 
         let localVarQueryParameters = new HttpParams({encoder: this.encoder});
         localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
@@ -217,18 +223,18 @@ export class CartUserControllerService extends BaseService {
 
     /**
      * @endpoint delete /api/user/cart/remove
-     * @param productId 
+     * @param variantId 
      * @param userId 
      * @param guestId 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public removeItem(productId: number, userId?: number, guestId?: string, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<CartResponse>;
-    public removeItem(productId: number, userId?: number, guestId?: string, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpResponse<CartResponse>>;
-    public removeItem(productId: number, userId?: number, guestId?: string, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpEvent<CartResponse>>;
-    public removeItem(productId: number, userId?: number, guestId?: string, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<any> {
-        if (productId === null || productId === undefined) {
-            throw new Error('Required parameter productId was null or undefined when calling removeItem.');
+    public removeItem(variantId: number, userId?: number, guestId?: string, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<CartResponse>;
+    public removeItem(variantId: number, userId?: number, guestId?: string, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpResponse<CartResponse>>;
+    public removeItem(variantId: number, userId?: number, guestId?: string, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpEvent<CartResponse>>;
+    public removeItem(variantId: number, userId?: number, guestId?: string, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<any> {
+        if (variantId === null || variantId === undefined) {
+            throw new Error('Required parameter variantId was null or undefined when calling removeItem.');
         }
 
         let localVarQueryParameters = new HttpParams({encoder: this.encoder});
@@ -237,7 +243,7 @@ export class CartUserControllerService extends BaseService {
         localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
           <any>guestId, 'guestId');
         localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
-          <any>productId, 'productId');
+          <any>variantId, 'variantId');
 
         let localVarHeaders = this.defaultHeaders;
 
@@ -279,19 +285,19 @@ export class CartUserControllerService extends BaseService {
 
     /**
      * @endpoint put /api/user/cart/update
-     * @param productId 
+     * @param variantId 
      * @param quantity 
      * @param userId 
      * @param guestId 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public updateItem(productId: number, quantity: number, userId?: number, guestId?: string, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<CartResponse>;
-    public updateItem(productId: number, quantity: number, userId?: number, guestId?: string, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpResponse<CartResponse>>;
-    public updateItem(productId: number, quantity: number, userId?: number, guestId?: string, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpEvent<CartResponse>>;
-    public updateItem(productId: number, quantity: number, userId?: number, guestId?: string, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<any> {
-        if (productId === null || productId === undefined) {
-            throw new Error('Required parameter productId was null or undefined when calling updateItem.');
+    public updateItem(variantId: number, quantity: number, userId?: number, guestId?: string, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<CartResponse>;
+    public updateItem(variantId: number, quantity: number, userId?: number, guestId?: string, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpResponse<CartResponse>>;
+    public updateItem(variantId: number, quantity: number, userId?: number, guestId?: string, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpEvent<CartResponse>>;
+    public updateItem(variantId: number, quantity: number, userId?: number, guestId?: string, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<any> {
+        if (variantId === null || variantId === undefined) {
+            throw new Error('Required parameter variantId was null or undefined when calling updateItem.');
         }
         if (quantity === null || quantity === undefined) {
             throw new Error('Required parameter quantity was null or undefined when calling updateItem.');
@@ -303,7 +309,7 @@ export class CartUserControllerService extends BaseService {
         localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
           <any>guestId, 'guestId');
         localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
-          <any>productId, 'productId');
+          <any>variantId, 'variantId');
         localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
           <any>quantity, 'quantity');
 

@@ -1,3 +1,4 @@
+/* Size button styling */
 .size-btn {
   width: 72px;
   height: 40px;
@@ -9,15 +10,24 @@
   align-items: center;
   justify-content: center;
   position: relative;
-  transition: 0.2s;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  outline: none;
 }
 
-.size-btn:hover {
+.size-btn:hover:not(:disabled) {
   transform: scale(1.03);
+  border-color: #9ca3af;
 }
 
 .size-btn.active {
   border: 2px solid #000;
+  font-weight: 500;
+}
+
+.size-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
 }
 
 /* Góc tam giác + dấu check */
@@ -39,4 +49,59 @@
   right: 2px;
   font-size: 10px;
   color: white;
+}
+
+/* Animation cho selection */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.alert-message {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .size-btn {
+    width: 60px;
+    height: 36px;
+    font-size: 14px;
+  }
+
+  .corner-check {
+    border-bottom: 14px solid #d90429;
+    border-left: 14px solid transparent;
+  }
+
+  .corner-check::after {
+    bottom: -12px;
+    right: 1px;
+    font-size: 8px;
+  }
+}
+
+/* Custom scrollbar for thumbnails */
+::-webkit-scrollbar {
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
 }

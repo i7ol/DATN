@@ -5,7 +5,7 @@ import com.datn.shopdatabase.enums.PaymentStatus;
 import lombok.*;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 @Data
@@ -35,9 +35,9 @@ public class OrderResponse {
 
     private List<OrderItemResponse> items;
 
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
-    private LocalDateTime paymentDate;
-    private LocalDateTime estimatedDeliveryDate;
-    private LocalDateTime actualDeliveryDate;
+    private Instant createdAt;
+    private Instant updatedAt;
+    private Instant paymentDate;
+    private Instant estimatedDeliveryDate;
+    private Instant actualDeliveryDate;
 }

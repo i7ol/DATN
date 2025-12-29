@@ -18,14 +18,14 @@ import { PaymentListComponent } from './page-admin/payment-list/payment-list.com
 import { ShippingListComponent } from './page-admin/shipping-list/shipping-list.component';
 import { ShippingManagementComponent } from './page-admin/shipping-management/shipping-management.component';
 import { AdminDashboardComponent } from './page-admin/admin-dashboard/admin-dashboard.component';
-
+import { PaymentResultComponent } from './page-user/payment-result/payment-result.component';
 const routes: Routes = [
   // Public routes
   { path: '', redirectTo: 'products', pathMatch: 'full' },
   { path: 'products', component: ProductListComponent },
   { path: 'product/:id', component: ProductDetailComponent },
   { path: 'cart', component: CartComponent },
-
+  { path: 'payment/result', component: PaymentResultComponent },
   // User protected routes
   {
     path: 'checkout',

@@ -17,5 +17,6 @@ export interface CartResponse {
     guestId?: string;
     items?: Array<CartItemResponse>;
     totalPrice?: number;
+    quantity?: number;
 }
 

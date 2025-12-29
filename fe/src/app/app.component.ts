@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { AuthService } from './core/services/auth.service';
+import { AuthService, User } from './core/services/auth.service';
 
 @Component({
   selector: 'app-root',
@@ -8,13 +8,20 @@ import { AuthService } from './core/services/auth.service';
 })
 export class AppComponent implements OnInit {
   title = 'wukong-shop';
+  currentUser: User | null = null;
 
   constructor(private authService: AuthService) {}
 
   ngOnInit(): void {
-    // Kiểm tra nếu đã có token thì load user profile
-    if (this.authService.isAuthenticated()) {
-      this.authService.loadUserProfile().subscribe();
-    }
+    // Chỉ cần subscribe currentUser$
+    this.authService.currentUser$.subscribe({
+      next: (user) => {
+        this.currentUser = user;
+        console.log('User loaded on app init:', user);
+      },
+      error: (err) => {
+        console.error('Error loading user on app init:', err);
+      },
+    });
   }
 }
