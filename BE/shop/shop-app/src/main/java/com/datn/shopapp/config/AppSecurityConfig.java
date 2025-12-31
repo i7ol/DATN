@@ -54,6 +54,11 @@ public class AppSecurityConfig {
             "/api/payment/callback/**",
             "https://sandbox.vnpayment.vn",
 
+            "/api/location",
+            "/api/location/provinces",
+            "/api/location/districts/{provinceCode}",
+            "/api/location/wards/{districtCode}",
+
     };
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {

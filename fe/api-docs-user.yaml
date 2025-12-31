@@ -437,6 +437,56 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/OrderResponse"
+  /api/location/wards/{districtCode}:
+    get:
+      tags:
+      - location-controller
+      operationId: wards
+      parameters:
+      - name: districtCode
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int32
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: object
+  /api/location/provinces:
+    get:
+      tags:
+      - location-controller
+      operationId: provinces
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: object
+  /api/location/districts/{provinceCode}:
+    get:
+      tags:
+      - location-controller
+      operationId: districts
+      parameters:
+      - name: provinceCode
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int32
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: object
   /api/user/cart/remove:
     delete:
       tags:
@@ -460,6 +510,30 @@ paths:
         schema:
           type: integer
           format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/CartResponse"
+  /api/user/cart/clear:
+    delete:
+      tags:
+      - cart-user-controller
+      operationId: clearCart
+      parameters:
+      - name: userId
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+      - name: guestId
+        in: query
+        required: false
+        schema:
+          type: string
       responses:
         "200":
           description: OK
@@ -802,11 +876,11 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/SortObject"
-        paged:
-          type: boolean
         pageNumber:
           type: integer
           format: int32
+        paged:
+          type: boolean
         pageSize:
           type: integer
           format: int32

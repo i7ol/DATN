@@ -4,6 +4,7 @@ export const environment = {
 
   apiUrls: {
     shopApp: 'http://localhost:8080/api',
+    shopApp1: 'http://localhost:8080',
 
     shopAdmin: 'http://localhost:8081/api',
 
@@ -21,7 +22,6 @@ export const environment = {
     orders: '/orders',
     checkout: '/orders/checkout',
 
-    // Payment APIs - GỘP VÀO SHOP-APP (8080)
     payments: '/user/payments',
     paymentCallback: '/payment/callback/vnpay',
 

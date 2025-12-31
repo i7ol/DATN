@@ -6,7 +6,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { AuthModalComponent } from '../components/auth-modal/auth-modal.component';
 import { CartService } from 'src/app/page-user/cart/cart.service';
 import { AuthService, User } from 'src/app/core/services/auth.service';
-import { CartItemResponse } from 'src/app/api/user';
+import { CartItemResponse } from 'src/app/api/user/model/cartItemResponse';
 
 @Component({
   selector: 'app-header',

@@ -1,10 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import {
-  ProductUserControllerService,
-  ProductResponse,
-  VariantResponse,
-} from 'src/app/api/user';
+import { ProductUserControllerService } from 'src/app/api/user/api/productUserController.service';
+import { ProductResponse } from 'src/app/api/user/model/productResponse';
+import { VariantResponse } from 'src/app/api/user/model/variantResponse';
 import { CartService } from '../../cart/cart.service';
 import { NotificationService } from 'src/app/shared/services/notification.service';
 @Component({

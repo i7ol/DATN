@@ -113,18 +113,14 @@
                 >
                 <select
                   formControlName="province"
-                  (change)="onProvinceChange()"
                   [class]="
                     'w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-black focus:border-transparent transition bg-white ' +
                     getValidationClass('province')
                   "
                 >
                   <option value="">Chọn tỉnh/thành</option>
-                  <option
-                    *ngFor="let province of provinces"
-                    [value]="province.code"
-                  >
-                    {{ province.name }}
+                  <option *ngFor="let p of provinces" [value]="p.code">
+                    {{ p.name }}
                   </option>
                 </select>
               </div>
@@ -135,19 +131,14 @@
                 >
                 <select
                   formControlName="district"
-                  (change)="onDistrictChange()"
                   [class]="
                     'w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-black focus:border-transparent transition bg-white ' +
                     getValidationClass('district')
                   "
-                  [disabled]="!checkoutForm.get('province')?.value"
                 >
                   <option value="">Chọn quận/huyện</option>
-                  <option
-                    *ngFor="let district of districts"
-                    [value]="district.code"
-                  >
-                    {{ district.name }}
+                  <option *ngFor="let d of districts" [value]="d.code">
+                    {{ d.name }}
                   </option>
                 </select>
               </div>
@@ -162,11 +153,10 @@
                     'w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-black focus:border-transparent transition bg-white ' +
                     getValidationClass('ward')
                   "
-                  [disabled]="!checkoutForm.get('district')?.value"
                 >
                   <option value="">Chọn phường/xã</option>
-                  <option *ngFor="let ward of wards" [value]="ward.code">
-                    {{ ward.name }}
+                  <option *ngFor="let w of wards" [value]="w.code">
+                    {{ w.name }}
                   </option>
                 </select>
               </div>

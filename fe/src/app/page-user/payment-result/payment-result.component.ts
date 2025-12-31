@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { PaymentUserControllerService } from 'src/app/api/user';
+import { PaymentUserControllerService } from 'src/app/api/user/api/paymentUserController.service';
 
 @Component({
   selector: 'app-payment-result',

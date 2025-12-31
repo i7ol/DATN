@@ -1,5 +1,7 @@
 export * from './cartUserController.service';
 import { CartUserControllerService } from './cartUserController.service';
+export * from './locationController.service';
+import { LocationControllerService } from './locationController.service';
 export * from './orderUserController.service';
 import { OrderUserControllerService } from './orderUserController.service';
 export * from './paymentUserController.service';
@@ -8,4 +10,4 @@ export * from './productUserController.service';
 import { ProductUserControllerService } from './productUserController.service';
 export * from './shippingUserController.service';
 import { ShippingUserControllerService } from './shippingUserController.service';
-export const APIS = [CartUserControllerService, OrderUserControllerService, PaymentUserControllerService, ProductUserControllerService, ShippingUserControllerService];
+export const APIS = [CartUserControllerService, LocationControllerService, OrderUserControllerService, PaymentUserControllerService, ProductUserControllerService, ShippingUserControllerService];

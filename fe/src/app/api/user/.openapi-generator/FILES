@@ -5,6 +5,7 @@ api.base.service.ts
 api.module.ts
 api/api.ts
 api/cartUserController.service.ts
+api/locationController.service.ts
 api/orderUserController.service.ts
 api/paymentUserController.service.ts
 api/productUserController.service.ts

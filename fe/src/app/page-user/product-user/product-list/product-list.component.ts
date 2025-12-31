@@ -1,9 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import {
-  ProductResponse,
-  PageProductResponse,
-  ProductUserControllerService,
-} from 'src/app/api/user';
+
+import { ProductUserControllerService } from 'src/app/api/user/api/productUserController.service';
+import { PageProductResponse } from 'src/app/api/user/model/pageProductResponse';
+import { ProductResponse } from 'src/app/api/user/model/productResponse';
 import { CartService } from '../../cart/cart.service';
 import { Router } from '@angular/router';
 

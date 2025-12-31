@@ -1,68 +1,62 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Subscription } from 'rxjs';
+
 import { CartService } from '../cart/cart.service';
 import { CartItemResponse } from 'src/app/api/user/model/cartItemResponse';
 import { NotificationService } from 'src/app/shared/services/notification.service';
-import { Subscription } from 'rxjs';
-interface ShippingMethod {
-  id: string;
-  name: string;
-  description: string;
-  fee: number;
-  estimatedDays?: string;
-}
+import { HttpClient } from '@angular/common/http';
+import { LocationControllerService } from 'src/app/api/user/api/locationController.service';
+import { PaymentUserControllerService } from 'src/app/api/user/api/paymentUserController.service';
+import { OrderUserControllerService } from 'src/app/api/user/api/orderUserController.service';
+import { CheckoutRequest } from 'src/app/api/user/model/checkoutRequest';
 
 @Component({
   selector: 'app-checkout',
   templateUrl: './checkout.component.html',
   styleUrls: ['./checkout.component.scss'],
 })
-export class CheckoutComponent implements OnInit {
-  checkoutForm: FormGroup;
-  formTouched = false;
+export class CheckoutComponent implements OnInit, OnDestroy {
+  checkoutForm!: FormGroup;
+  private sub = new Subscription();
+
+  /* ===== STATE ===== */
   isLoading = false;
   isSubmitting = false;
   isProcessingPayment = false;
-  cartItems: CartItemResponse[] = [];
-  cartItemsCount = 0;
-  // cartItemsCount = this.cartItems.reduce((sum, item) => sum + item.quantity, 0);
+  formTouched = false;
 
-  // Shipping
-  shippingMethods: ShippingMethod[] = [
+  /* ===== CART ===== */
+  cartItems: CartItemResponse[] = [];
+  get cartItemsCount(): number {
+    return this.cartItems.reduce((s, i) => s + (i.quantity || 0), 0);
+  }
+
+  /* ===== SHIPPING ===== */
+  shippingMethods = [
     {
-      id: 'standard',
+      id: 'STANDARD',
       name: 'Giao hàng tiêu chuẩn',
-      description: '3-5 ngày',
-      fee: 30000,
-      estimatedDays: '3-5 ngày',
-    },
-    {
-      id: 'express',
-      name: 'Giao hàng nhanh',
-      description: '1-2 ngày',
-      fee: 50000,
-      estimatedDays: '1-2 ngày',
+      description: 'Giao trong 3–5 ngày',
+      fee: 0,
+      estimatedDays: '3–5 ngày',
     },
   ];
-  selectedShippingMethodId = 'standard';
+  selectedShippingMethodId = 'STANDARD';
 
-  // Payment
+  provinces: any[] = [];
+  districts: any[] = [];
+  wards: any[] = [];
+
+  /* ===== PAYMENT ===== */
   selectedPaymentMethod: 'COD' | 'QR' = 'COD';
 
-  // Address data
-  provinces = [
-    { code: 'HN', name: 'Hà Nội' },
-    { code: 'HCM', name: 'TP. Hồ Chí Minh' },
-  ];
-  districts = [];
-  wards = [];
-
-  // Discount
+  /* ===== DISCOUNT ===== */
   discountCode = '';
   discountApplied = false;
   discountPercentage = 0;
 
-  // Order summary
+  /* ===== SUMMARY ===== */
   orderSummary = {
     subtotal: 0,
     shipping: 0,
@@ -73,158 +67,223 @@ export class CheckoutComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private cartService: CartService,
-    private notify: NotificationService
+    private orderApi: OrderUserControllerService,
+    private paymentApi: PaymentUserControllerService,
+    private notify: NotificationService,
+    private http: HttpClient,
+    private locationApi: LocationControllerService
   ) {}
 
+  private readonly PROVINCE_API = 'https://provinces.open-api.vn/api';
+
   ngOnInit(): void {
-    this.initForm();
-    this.subscribeCart();
-  }
-  private initForm() {
     this.checkoutForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       name: ['', Validators.required],
       phone: ['', Validators.required],
+
       province: ['', Validators.required],
-      district: ['', Validators.required],
-      ward: ['', Validators.required],
+      district: [{ value: '', disabled: true }, Validators.required],
+      ward: [{ value: '', disabled: true }, Validators.required],
+
       addressDetail: ['', Validators.required],
       note: [''],
     });
-  }
 
-  private sub = new Subscription();
+    this.loadProvinces();
 
-  private subscribeCart() {
+    // Province change
+    this.checkoutForm.get('province')!.valueChanges.subscribe((code) => {
+      this.loadDistricts(code);
+    });
+
+    // District change
+    this.checkoutForm.get('district')!.valueChanges.subscribe((code) => {
+      this.loadWards(code);
+    });
+
     this.sub.add(
       this.cartService.items$.subscribe((items) => {
-        this.cartItems = items;
-        this.cartItemsCount = items.reduce(
-          (sum, i) => sum + (i.quantity ?? 0),
-          0
-        );
-        this.calculateOrderSummary();
+        this.cartItems = items || [];
+        this.calculateSummary();
       })
     );
+  }
+
+  loadProvinces(): void {
+    this.locationApi.provinces().subscribe({
+      next: async (res: any) => {
+        if (res instanceof Blob) {
+          const text = await res.text();
+          this.provinces = JSON.parse(text);
+        } else {
+          this.provinces = res;
+        }
+      },
+      error: () => this.notify.error('Không tải được tỉnh/thành'),
+    });
+  }
+
+  loadDistricts(provinceCode: number): void {
+    this.districts = [];
+    this.wards = [];
+
+    this.checkoutForm.patchValue({ district: '', ward: '' });
+    this.checkoutForm.get('district')!.disable();
+    this.checkoutForm.get('ward')!.disable();
+
+    if (!provinceCode) return;
+
+    this.locationApi.districts(provinceCode).subscribe({
+      next: async (res: any) => {
+        let data: any;
+
+        if (res instanceof Blob) {
+          const text = await res.text();
+          data = JSON.parse(text);
+        } else {
+          data = res;
+        }
+
+        this.districts = data?.districts || [];
+        this.checkoutForm.get('district')!.enable();
+      },
+      error: () => this.notify.error('Không tải được quận/huyện'),
+    });
+  }
+
+  loadWards(districtCode: number): void {
+    this.wards = [];
+    this.checkoutForm.patchValue({ ward: '' });
+    this.checkoutForm.get('ward')!.disable();
+
+    if (!districtCode) return;
+
+    this.locationApi.wards(districtCode).subscribe({
+      next: async (res: any) => {
+        let data: any;
+
+        if (res instanceof Blob) {
+          const text = await res.text();
+          data = JSON.parse(text);
+        } else {
+          data = res;
+        }
+
+        this.wards = data?.wards || [];
+        this.checkoutForm.get('ward')!.enable();
+      },
+      error: () => this.notify.error('Không tải được phường/xã'),
+    });
   }
 
   ngOnDestroy(): void {
     this.sub.unsubscribe();
   }
-  // Form validation helper
-  getValidationClass(controlName: string): string {
-    const control = this.checkoutForm.get(controlName);
-    if (!this.formTouched) return '';
-    return control?.invalid ? 'border-red-500' : 'border-green-500';
-  }
 
+  /* ================= VALIDATION ================= */
   isFormValid(): boolean {
-    return (
-      this.checkoutForm.valid &&
-      !!this.selectedShippingMethodId &&
-      !!this.selectedPaymentMethod
-    );
+    return this.checkoutForm.valid && this.cartItems.length > 0;
   }
 
-  // Shipping & Payment
-  onShippingMethodChange(id: string) {
+  getValidationClass(control: string): string {
+    const c = this.checkoutForm.get(control);
+    if (!this.formTouched || !c) return 'border-gray-300';
+    return c.invalid ? 'border-red-500' : 'border-green-500';
+  }
+
+  /* ================= SHIPPING ================= */
+  onShippingMethodChange(id: string): void {
     this.selectedShippingMethodId = id;
-    this.calculateOrderSummary();
+    this.calculateSummary();
   }
 
-  onPaymentMethodChange(method: 'COD' | 'QR') {
+  /* ================= PAYMENT ================= */
+  onPaymentMethodChange(method: 'COD' | 'QR'): void {
     this.selectedPaymentMethod = method;
   }
 
-  // Address change (mock)
-  onProvinceChange() {
-    const province = this.checkoutForm.get('province')?.value;
-    if (province === 'HN') {
-      this.districts = [
-        { code: 'Q1', name: 'Quận 1' },
-        { code: 'Q2', name: 'Quận 2' },
-      ];
-    } else if (province === 'HCM') {
-      this.districts = [
-        { code: 'Q3', name: 'Quận 3' },
-        { code: 'Q4', name: 'Quận 4' },
-      ];
-    } else {
-      this.districts = [];
-    }
-    this.wards = [];
-    this.checkoutForm.patchValue({ district: '', ward: '' });
-  }
-
-  onDistrictChange() {
-    const district = this.checkoutForm.get('district')?.value;
-    if (district) {
-      this.wards = [
-        { code: 'W1', name: 'Phường 1' },
-        { code: 'W2', name: 'Phường 2' },
-      ];
-    } else {
-      this.wards = [];
-    }
-    this.checkoutForm.patchValue({ ward: '' });
-  }
-
-  // Discount
-  applyDiscount() {
-    if (!this.discountCode.trim()) return;
-    this.discountApplied = true;
-
-    if (this.discountCode === 'SALE10') this.discountPercentage = 10;
-    else if (this.discountCode === 'SALE20') this.discountPercentage = 20;
-    else if (this.discountCode === 'FREESHIP') this.discountPercentage = 0;
-    else this.discountPercentage = 0;
-
-    this.calculateOrderSummary();
-  }
-
-  removeDiscount() {
-    this.discountCode = '';
-    this.discountApplied = false;
-    this.discountPercentage = 0;
-    this.calculateOrderSummary();
-  }
-
-  // Calculate totals
-  calculateOrderSummary() {
+  /* ================= SUMMARY ================= */
+  calculateSummary(): void {
     const subtotal = this.cartItems.reduce(
-      (sum, item) => sum + item.price * item.quantity,
+      (s, i) => s + (i.price || 0) * (i.quantity || 0),
       0
     );
-    const shipping =
-      this.shippingMethods.find((m) => m.id === this.selectedShippingMethodId)
-        ?.fee || 0;
-    let discount = 0;
-    if (this.discountApplied) {
-      if (this.discountCode === 'FREESHIP') discount = shipping;
-      else discount = subtotal * (this.discountPercentage / 100);
-    }
-    const total = subtotal + shipping - discount;
 
-    this.orderSummary = { subtotal, shipping, discount, total };
+    this.orderSummary = {
+      subtotal,
+      shipping: 0,
+      discount: this.discountApplied
+        ? (subtotal * this.discountPercentage) / 100
+        : 0,
+      total:
+        subtotal -
+        (this.discountApplied ? (subtotal * this.discountPercentage) / 100 : 0),
+    };
   }
 
-  formatCurrency(value: number): string {
-    return new Intl.NumberFormat('vi-VN', {
+  /* ================= DISCOUNT ================= */
+  applyDiscount(): void {
+    if (this.discountCode === 'SALE10') {
+      this.discountPercentage = 10;
+      this.discountApplied = true;
+      this.calculateSummary();
+    }
+  }
+
+  removeDiscount(): void {
+    this.discountApplied = false;
+    this.discountPercentage = 0;
+    this.discountCode = '';
+    this.calculateSummary();
+  }
+
+  /* ================= UTILS ================= */
+  formatCurrency(v: number): string {
+    return v.toLocaleString('vi-VN', {
       style: 'currency',
       currency: 'VND',
-    }).format(value);
+    });
   }
 
-  // Submit
-  submitOrder() {
+  /* ================= SUBMIT ================= */
+  submitOrder(): void {
     this.formTouched = true;
     if (!this.isFormValid()) return;
 
     this.isSubmitting = true;
 
-    setTimeout(() => {
-      this.isSubmitting = false;
-      this.notify.success('Đơn hàng của bạn đã được tạo thành công!');
-    }, 1500);
+    const payload: CheckoutRequest = {
+      guestName: this.checkoutForm.value.name,
+      guestEmail: this.checkoutForm.value.email,
+      guestPhone: this.checkoutForm.value.phone,
+      shippingAddress: this.checkoutForm.value.addressDetail,
+      shippingProvince: this.checkoutForm.value.province,
+      shippingDistrict: this.checkoutForm.value.district,
+      shippingWard: this.checkoutForm.value.ward,
+      shippingNote: this.checkoutForm.value.note,
+      paymentMethod: this.selectedPaymentMethod,
+      shippingMethod: this.selectedShippingMethodId,
+    };
+
+    this.orderApi.checkout(payload).subscribe({
+      next: (order) => {
+        if (this.selectedPaymentMethod === 'QR') {
+          this.isProcessingPayment = true;
+          this.paymentApi
+            .createPayment({ orderId: order.id!, method: 'QR' })
+            .subscribe((p: any) => {
+              window.location.href = p.paymentUrl;
+            });
+        } else {
+          this.notify.success('Đặt hàng thành công!');
+          this.isSubmitting = false;
+        }
+      },
+      error: () => {
+        this.isSubmitting = false;
+        this.notify.error('Checkout thất bại');
+      },
+    });
   }
 }
