@@ -1,152 +1,52 @@
-<div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-  <div class="max-w-md mx-auto">
-    <!-- Loading State -->
-    <div
-      *ngIf="isLoading"
-      class="text-center bg-white rounded-2xl shadow-lg p-8"
-    >
-      <div
-        class="animate-spin rounded-full h-12 w-12 border-b-2 border-black mx-auto"
-      ></div>
-      <p class="mt-4 text-gray-600">{{ message }}</p>
+<div class="payment-result-wrapper" *ngIf="!isLoading">
+  <div class="result-card" [class.success]="success" [class.error]="!success">
+    <!-- Icon -->
+    <div class="result-icon">
+      <span *ngIf="success">✔</span>
+      <span *ngIf="!success">✖</span>
     </div>
 
-    <!-- Result State -->
-    <div
-      *ngIf="!isLoading"
-      class="bg-white rounded-2xl shadow-lg overflow-hidden"
-    >
-      <!-- Header -->
-      <div class="p-8 text-center">
-        <div
-          [ngClass]="{ 'bg-green-100': success, 'bg-red-100': !success }"
-          class="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6"
-        >
-          <svg
-            *ngIf="success"
-            class="w-10 h-10 text-green-600"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M5 13l4 4L19 7"
-            ></path>
-          </svg>
-          <svg
-            *ngIf="!success"
-            class="w-10 h-10 text-red-600"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M6 18L18 6M6 6l12 12"
-            ></path>
-          </svg>
-        </div>
+    <!-- Title -->
+    <h2 class="result-title">
+      {{ success ? "Thanh toán thành công 🎉" : "Thanh toán thất bại ❌" }}
+    </h2>
 
-        <h1 class="text-2xl font-bold text-gray-900 mb-2">
-          {{ success ? "🎉 Thanh toán thành công!" : "😔 Thanh toán thất bại" }}
-        </h1>
+    <!-- Message -->
+    <p class="result-message">
+      {{ message }}
+    </p>
 
-        <p class="text-gray-600 mb-6">{{ message }}</p>
-
-        <!-- Countdown Timer -->
-        <div class="mt-4 mb-2">
-          <p class="text-sm text-gray-500">
-            Tự động chuyển về trang chủ sau
-            <span class="font-bold text-blue-600">{{ countdown }}</span> giây...
-          </p>
-        </div>
+    <!-- Info -->
+    <div class="result-info" *ngIf="orderId">
+      <div class="info-row">
+        <span>Mã đơn hàng</span>
+        <strong>#{{ orderId }}</strong>
       </div>
 
-      <!-- Order Details -->
-      <div
-        *ngIf="orderId"
-        class="border-t border-gray-200 px-8 py-6 bg-gray-50"
-      >
-        <h3 class="text-lg font-semibold text-gray-900 mb-4">
-          Thông tin đơn hàng
-        </h3>
-        <div class="space-y-3">
-          <div class="flex justify-between">
-            <span class="text-gray-600">Mã đơn hàng:</span>
-            <span class="font-medium">#{{ orderId }}</span>
-          </div>
-
-          <div *ngIf="transactionId" class="flex justify-between">
-            <span class="text-gray-600">Mã giao dịch:</span>
-            <span class="font-medium text-sm">{{ transactionId }}</span>
-          </div>
-
-          <div class="flex justify-between">
-            <span class="text-gray-600">Trạng thái:</span>
-            <span
-              [ngClass]="{
-                'text-green-600': success,
-                'text-red-600': !success
-              }"
-              class="font-medium"
-            >
-              {{ success ? "✅ Đã thanh toán" : "❌ Thất bại" }}
-            </span>
-          </div>
-        </div>
+      <div class="info-row" *ngIf="transactionId">
+        <span>Mã giao dịch</span>
+        <strong>{{ transactionId }}</strong>
       </div>
+    </div>
 
-      <!-- Actions -->
-      <div class="border-t border-gray-200 p-8">
-        <div class="space-y-3">
-          <button
-            *ngIf="success && orderId"
-            (click)="viewOrder()"
-            class="w-full bg-black text-white py-3 rounded-lg font-medium hover:bg-gray-800 transition"
-          >
-            📦 Xem chi tiết đơn hàng
-          </button>
+    <!-- Actions -->
+    <div class="result-actions">
+      <button class="btn primary" *ngIf="success" (click)="viewOrder()">
+        Xem đơn hàng
+      </button>
 
-          <button
-            *ngIf="!success && orderId"
-            (click)="retryPayment()"
-            class="w-full bg-red-600 text-white py-3 rounded-lg font-medium hover:bg-red-700 transition"
-          >
-            🔄 Thử thanh toán lại
-          </button>
+      <button class="btn warning" *ngIf="!success" (click)="retryPayment()">
+        Thanh toán lại
+      </button>
 
-          <button
-            (click)="continueShopping()"
-            class="w-full border border-gray-300 text-gray-700 py-3 rounded-lg font-medium hover:bg-gray-50 transition"
-          >
-            🛒 Tiếp tục mua sắm
-          </button>
-
-          <button
-            (click)="redirectHome()"
-            class="w-full border border-gray-300 text-gray-700 py-3 rounded-lg font-medium hover:bg-gray-50 transition"
-          >
-            🏠 Về trang chủ ngay
-          </button>
-        </div>
-
-        <div class="mt-6 text-center">
-          <p class="text-sm text-gray-500">
-            Cần hỗ trợ? Liên hệ
-            <a
-              href="mailto:support@example.com"
-              class="text-blue-600 hover:text-blue-800"
-            >
-              support@example.com
-            </a>
-          </p>
-        </div>
-      </div>
+      <button class="btn outline" (click)="goHome()">
+        Về trang chủ ({{ countdown }}s)
+      </button>
     </div>
   </div>
+</div>
+
+<div *ngIf="isLoading" class="loading-wrapper">
+  <div class="spinner"></div>
+  <p>Đang xử lý kết quả thanh toán...</p>
 </div>

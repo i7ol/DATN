@@ -7,10 +7,10 @@ servers:
 - url: http://localhost:8080
   description: Generated server url
 paths:
-  /api/user/cart/update:
+  /api/cart-proxy/update:
     put:
       tags:
-      - cart-user-controller
+      - cart-proxy-controller
       operationId: updateItem
       parameters:
       - name: userId
@@ -43,49 +43,6 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/CartResponse"
-  /api/payments/{paymentId}/cancel:
-    put:
-      tags:
-      - payment-user-controller
-      operationId: cancelPayment
-      parameters:
-      - name: paymentId
-        in: path
-        required: true
-        schema:
-          type: integer
-          format: int64
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                type: object
-  /api/payments/order/{orderId}/mark-paid:
-    put:
-      tags:
-      - payment-user-controller
-      operationId: markPaidByOrderId
-      parameters:
-      - name: orderId
-        in: path
-        required: true
-        schema:
-          type: integer
-          format: int64
-      - name: transactionId
-        in: query
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                type: object
   /api/user/shipping/{id}/sync:
     post:
       tags:
@@ -105,10 +62,64 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ShippingResponse"
-  /api/user/cart/merge:
+  /api/payments/user:
     post:
       tags:
-      - cart-user-controller
+      - payment-proxy-controller
+      operationId: userPayment
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserPaymentRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PaymentResponse"
+  /api/payments/guest:
+    post:
+      tags:
+      - payment-proxy-controller
+      operationId: guestPayment
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GuestPaymentRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PaymentResponse"
+  /api/orders/checkout:
+    post:
+      tags:
+      - order-proxy-controller
+      operationId: checkout
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CheckoutRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/OrderResponse"
+  /api/cart-proxy/merge:
+    post:
+      tags:
+      - cart-proxy-controller
       operationId: mergeGuestCart
       parameters:
       - name: guestId
@@ -129,10 +140,10 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/CartResponse"
-  /api/user/cart/add:
+  /api/cart-proxy/add:
     post:
       tags:
-      - cart-user-controller
+      - cart-proxy-controller
       operationId: addItem
       parameters:
       - name: userId
@@ -165,61 +176,6 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/CartResponse"
-  /api/payments:
-    post:
-      tags:
-      - payment-user-controller
-      operationId: createPayment
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/PaymentRequest"
-        required: true
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                type: object
-  /api/orders/{orderId}/cancel:
-    post:
-      tags:
-      - order-user-controller
-      operationId: cancelOrder
-      parameters:
-      - name: orderId
-        in: path
-        required: true
-        schema:
-          type: integer
-          format: int64
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/OrderResponse"
-  /api/orders/checkout:
-    post:
-      tags:
-      - order-user-controller
-      operationId: checkout
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/CheckoutRequest"
-        required: true
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/OrderResponse"
   /api/user/shipping/{id}:
     get:
       tags:
@@ -318,111 +274,11 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProductResponse"
-  /api/user/cart:
-    get:
-      tags:
-      - cart-user-controller
-      operationId: getCart
-      parameters:
-      - name: userId
-        in: query
-        required: false
-        schema:
-          type: integer
-          format: int64
-      - name: guestId
-        in: query
-        required: false
-        schema:
-          type: string
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/CartResponse"
-  /api/payments/{paymentId}:
-    get:
-      tags:
-      - payment-user-controller
-      operationId: getPaymentById
-      parameters:
-      - name: paymentId
-        in: path
-        required: true
-        schema:
-          type: integer
-          format: int64
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                type: object
-  /api/payments/vnpay/return:
-    get:
-      tags:
-      - payment-user-controller
-      operationId: vnpayPaymentReturn
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                type: object
-  /api/payments/order/{orderId}:
-    get:
-      tags:
-      - payment-user-controller
-      operationId: getPaymentByOrder
-      parameters:
-      - name: orderId
-        in: path
-        required: true
-        schema:
-          type: integer
-          format: int64
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                type: object
-  /api/payments/my:
-    get:
-      tags:
-      - payment-user-controller
-      operationId: getMyPayments
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                type: object
-  /api/orders:
-    get:
-      tags:
-      - order-user-controller
-      operationId: getUserOrders
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/OrderResponse"
   /api/orders/{orderId}:
     get:
       tags:
-      - order-user-controller
-      operationId: getOrderDetail
+      - order-proxy-controller
+      operationId: getOrder
       parameters:
       - name: orderId
         in: path
@@ -487,10 +343,34 @@ paths:
             '*/*':
               schema:
                 type: object
-  /api/user/cart/remove:
+  /api/cart-proxy:
+    get:
+      tags:
+      - cart-proxy-controller
+      operationId: getCart
+      parameters:
+      - name: userId
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+      - name: guestId
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/CartResponse"
+  /api/cart-proxy/remove:
     delete:
       tags:
-      - cart-user-controller
+      - cart-proxy-controller
       operationId: removeItem
       parameters:
       - name: userId
@@ -517,10 +397,10 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/CartResponse"
-  /api/user/cart/clear:
+  /api/cart-proxy/clear:
     delete:
       tags:
-      - cart-user-controller
+      - cart-proxy-controller
       operationId: clearCart
       parameters:
       - name: userId
@@ -541,6 +421,35 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/CartResponse"
+  /api/cart-proxy/clear/user/{userId}:
+    delete:
+      tags:
+      - cart-proxy-controller
+      operationId: clearUserCart
+      parameters:
+      - name: userId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+  /api/cart-proxy/clear/guest/{guestId}:
+    delete:
+      tags:
+      - cart-proxy-controller
+      operationId: clearGuestCart
+      parameters:
+      - name: guestId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
 components:
   schemas:
     CartItemResponse:
@@ -562,6 +471,8 @@ components:
           type: integer
           format: int32
         price:
+          type: number
+        unitPrice:
           type: number
         images:
           type: array
@@ -681,10 +592,9 @@ components:
           type: string
         updatedAt:
           type: string
-    PaymentRequest:
+    UserPaymentRequest:
       required:
       - method
-      - orderId
       type: object
       properties:
         orderId:
@@ -692,6 +602,114 @@ components:
           format: int64
         method:
           type: string
+    PaymentResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        orderId:
+          type: integer
+          format: int64
+        userId:
+          type: integer
+          format: int64
+        guestId:
+          type: string
+        status:
+          type: string
+          enum:
+          - SUCCESS
+          - PENDING
+          - PAID
+          - FAILED
+          - REFUNDED
+          - CANCELLED
+        amount:
+          type: number
+        method:
+          type: string
+          enum:
+          - COD
+          - VNPAY
+        transactionId:
+          type: string
+        paidAt:
+          type: string
+          format: date-time
+        paymentUrl:
+          type: string
+    GuestPaymentRequest:
+      required:
+      - guestId
+      - method
+      type: object
+      properties:
+        orderId:
+          type: integer
+          format: int64
+        method:
+          type: string
+        guestId:
+          type: string
+    CheckoutItemRequest:
+      required:
+      - productId
+      type: object
+      properties:
+        productId:
+          type: integer
+          format: int64
+        variantId:
+          type: integer
+          format: int64
+        quantity:
+          minimum: 1
+          type: integer
+          format: int32
+    CheckoutRequest:
+      required:
+      - shippingAddress
+      type: object
+      properties:
+        userId:
+          type: integer
+          format: int64
+        guestId:
+          type: string
+        guestName:
+          type: string
+        guestEmail:
+          type: string
+        guestPhone:
+          pattern: "(84|0[3|5|7|8|9])+([0-9]{8})\\b"
+          type: string
+        shippingAddress:
+          type: string
+        shippingProvince:
+          type: string
+        shippingDistrict:
+          type: string
+        shippingWard:
+          type: string
+        shippingNote:
+          type: string
+        billingAddress:
+          type: string
+        billingProvince:
+          type: string
+        billingDistrict:
+          type: string
+        billingWard:
+          type: string
+        paymentMethod:
+          type: string
+        shippingMethod:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/CheckoutItemRequest"
     OrderItemResponse:
       type: object
       properties:
@@ -732,6 +750,8 @@ components:
         userId:
           type: integer
           format: int64
+        guestId:
+          type: string
         guestName:
           type: string
         guestEmail:
@@ -757,6 +777,7 @@ components:
         paymentStatus:
           type: string
           enum:
+          - SUCCESS
           - PENDING
           - PAID
           - FAILED
@@ -793,45 +814,6 @@ components:
         actualDeliveryDate:
           type: string
           format: date-time
-    CheckoutRequest:
-      required:
-      - shippingAddress
-      type: object
-      properties:
-        userId:
-          type: integer
-          format: int64
-        guestId:
-          type: string
-        guestName:
-          type: string
-        guestEmail:
-          type: string
-        guestPhone:
-          pattern: "(84|0[3|5|7|8|9])+([0-9]{8})\\b"
-          type: string
-        shippingAddress:
-          type: string
-        shippingProvince:
-          type: string
-        shippingDistrict:
-          type: string
-        shippingWard:
-          type: string
-        shippingNote:
-          type: string
-        billingAddress:
-          type: string
-        billingProvince:
-          type: string
-        billingDistrict:
-          type: string
-        billingWard:
-          type: string
-        paymentMethod:
-          type: string
-        shippingMethod:
-          type: string
     PageProductResponse:
       type: object
       properties:
@@ -876,6 +858,8 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/SortObject"
+        unpaged:
+          type: boolean
         pageNumber:
           type: integer
           format: int32
@@ -884,8 +868,6 @@ components:
         pageSize:
           type: integer
           format: int32
-        unpaged:
-          type: boolean
     ProductResponse:
       type: object
       properties:

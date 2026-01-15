@@ -4,7 +4,7 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
-import { OrderAdminControllerService, OrderResponse } from 'src/app/api/admin'; // Sửa OrderEntity thành OrderResponse
+import { OrderAdminControllerService, OrderResponse } from 'src/app/api/admin'; 
 import { StatusUpdateDialogComponent } from 'src/app/shared/components/status-update-dialog/status-update-dialog.component';
 
 @Component({
@@ -36,7 +36,7 @@ export class OrderListComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.loadOrders();
+    // this.loadOrders();
   }
 
   ngAfterViewInit(): void {
@@ -44,19 +44,19 @@ export class OrderListComponent implements OnInit {
     this.dataSource.sort = this.sort;
   }
 
-  loadOrders(): void {
-    this.loading = true;
-    this.orderService.getAllOrders().subscribe({
-      next: (orders) => {
-        this.dataSource.data = orders;
-        this.loading = false;
-      },
-      error: (error) => {
-        console.error('Error loading orders:', error);
-        this.loading = false;
-      },
-    });
-  }
+  // loadOrders(): void {
+  //   this.loading = true;
+  //   this.orderService.getAllOrders().subscribe({
+  //     next: (orders) => {
+  //       this.dataSource.data = orders;
+  //       this.loading = false;
+  //     },
+  //     error: (error) => {
+  //       console.error('Error loading orders:', error);
+  //       this.loading = false;
+  //     },
+  //   });
+  // }
 
   viewDetail(orderId: number): void {
     this.router.navigate(['/admin/orders', orderId]);
@@ -75,7 +75,7 @@ export class OrderListComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        this.loadOrders();
+        // this.loadOrders();
       }
     });
   }

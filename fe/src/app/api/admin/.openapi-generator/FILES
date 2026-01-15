@@ -6,9 +6,9 @@ api.module.ts
 api/accountController.service.ts
 api/api.ts
 api/categoryAdminController.service.ts
-api/inventoryController.service.ts
+api/inventoryAdminController.service.ts
 api/orderAdminController.service.ts
-api/paymentAdminController.service.ts
+api/paymentAdminProxyController.service.ts
 api/productAdminController.service.ts
 api/shippingAdminController.service.ts
 configuration.ts
@@ -33,10 +33,13 @@ model/orderItemRequest.ts
 model/orderItemResponse.ts
 model/orderResponse.ts
 model/pageInventoryResponse.ts
+model/pagePaymentResponse.ts
 model/pageProductResponse.ts
 model/pageShippingResponse.ts
 model/pageable.ts
 model/pageableObject.ts
+model/paymentResponse.ts
+model/paymentSearchRequest.ts
 model/paymentUpdateRequest.ts
 model/productCreateRequest.ts
 model/productResponse.ts

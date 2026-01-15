@@ -3,13 +3,13 @@ import { ActivatedRoute } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import {
-  OrderAdminControllerService,
-  OrderResponse, // Sửa từ OrderEntity thành OrderResponse
+  OrderResponse,
   StatusUpdateRequest,
   PaymentUpdateRequest,
-  ShippingAdminControllerService,
   ShippingResponse,
 } from 'src/app/api/admin';
+import { ShippingAdminControllerService } from 'src/app/api/admin/api/shippingAdminController.service';
+import { OrderAdminControllerService } from 'src/app/api/admin/api/orderAdminController.service';
 import { StatusUpdateDialogComponent } from '../../../shared/components/status-update-dialog/status-update-dialog.component';
 
 @Component({

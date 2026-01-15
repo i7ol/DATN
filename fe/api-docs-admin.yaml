@@ -147,13 +147,13 @@ paths:
       responses:
         "200":
           description: OK
-  /api/admin/payments/{paymentId}/refund:
+  /api/admin/payments/{id}/refund:
     put:
       tags:
-      - payment-admin-controller
+      - payment-admin-proxy-controller
       operationId: refund
       parameters:
-      - name: paymentId
+      - name: id
         in: path
         required: true
         schema:
@@ -173,14 +173,14 @@ paths:
           content:
             '*/*':
               schema:
-                type: object
-  /api/admin/payments/{paymentId}/mark-paid:
+                $ref: "#/components/schemas/PaymentResponse"
+  /api/admin/payments/{id}/mark-paid:
     put:
       tags:
-      - payment-admin-controller
+      - payment-admin-proxy-controller
       operationId: markPaid
       parameters:
-      - name: paymentId
+      - name: id
         in: path
         required: true
         schema:
@@ -197,14 +197,14 @@ paths:
           content:
             '*/*':
               schema:
-                type: object
-  /api/admin/payments/{paymentId}/cancel:
+                $ref: "#/components/schemas/PaymentResponse"
+  /api/admin/payments/{id}/cancel:
     put:
       tags:
-      - payment-admin-controller
-      operationId: cancelPayment
+      - payment-admin-proxy-controller
+      operationId: cancel
       parameters:
-      - name: paymentId
+      - name: id
         in: path
         required: true
         schema:
@@ -216,7 +216,7 @@ paths:
           content:
             '*/*':
               schema:
-                type: object
+                $ref: "#/components/schemas/PaymentResponse"
   /api/admin/orders/{orderId}/status:
     put:
       tags:
@@ -484,19 +484,6 @@ paths:
               schema:
                 $ref: "#/components/schemas/ProductResponse"
   /api/admin/orders:
-    get:
-      tags:
-      - order-admin-controller
-      operationId: getAllOrders
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/OrderResponse"
     post:
       tags:
       - order-admin-controller
@@ -517,7 +504,7 @@ paths:
   /api/admin/inventory:
     get:
       tags:
-      - inventory-controller
+      - inventory-admin-controller
       operationId: getAll
       parameters:
       - name: page
@@ -543,7 +530,7 @@ paths:
                 $ref: "#/components/schemas/PageInventoryResponse"
     post:
       tags:
-      - inventory-controller
+      - inventory-admin-controller
       operationId: createOrUpdate
       requestBody:
         content:
@@ -561,7 +548,7 @@ paths:
   /api/admin/inventory/reserve:
     post:
       tags:
-      - inventory-controller
+      - inventory-admin-controller
       operationId: reserve
       parameters:
       - name: variantId
@@ -582,7 +569,7 @@ paths:
   /api/admin/inventory/release:
     post:
       tags:
-      - inventory-controller
+      - inventory-admin-controller
       operationId: release
       parameters:
       - name: variantId
@@ -603,7 +590,7 @@ paths:
   /api/admin/inventory/import:
     post:
       tags:
-      - inventory-controller
+      - inventory-admin-controller
       operationId: importStock
       requestBody:
         content:
@@ -621,7 +608,7 @@ paths:
   /api/admin/inventory/export:
     post:
       tags:
-      - inventory-controller
+      - inventory-admin-controller
       operationId: exportStock
       requestBody:
         content:
@@ -639,7 +626,7 @@ paths:
   /api/admin/inventory/deduct:
     post:
       tags:
-      - inventory-controller
+      - inventory-admin-controller
       operationId: deduct
       parameters:
       - name: variantId
@@ -660,7 +647,7 @@ paths:
   /api/admin/inventory/adjust/{variantId}:
     post:
       tags:
-      - inventory-controller
+      - inventory-admin-controller
       operationId: adjust
       parameters:
       - name: variantId
@@ -780,41 +767,14 @@ paths:
   /api/admin/payments:
     get:
       tags:
-      - payment-admin-controller
+      - payment-admin-proxy-controller
       operationId: getAllPayments
       parameters:
-      - name: status
+      - name: filter
         in: query
-        required: false
+        required: true
         schema:
-          type: string
-      - name: method
-        in: query
-        required: false
-        schema:
-          type: string
-      - name: fromDate
-        in: query
-        required: false
-        schema:
-          type: string
-          format: date
-      - name: toDate
-        in: query
-        required: false
-        schema:
-          type: string
-          format: date
-      - name: minAmount
-        in: query
-        required: false
-        schema:
-          type: number
-      - name: maxAmount
-        in: query
-        required: false
-        schema:
-          type: number
+          $ref: "#/components/schemas/PaymentSearchRequest"
       - name: pageable
         in: query
         required: true
@@ -826,14 +786,14 @@ paths:
           content:
             '*/*':
               schema:
-                type: object
-  /api/admin/payments/{paymentId}:
+                $ref: "#/components/schemas/PagePaymentResponse"
+  /api/admin/payments/{id}:
     get:
       tags:
-      - payment-admin-controller
-      operationId: getPaymentById
+      - payment-admin-proxy-controller
+      operationId: getById_1
       parameters:
-      - name: paymentId
+      - name: id
         in: path
         required: true
         schema:
@@ -845,12 +805,12 @@ paths:
           content:
             '*/*':
               schema:
-                type: object
+                $ref: "#/components/schemas/PaymentResponse"
   /api/admin/payments/summary:
     get:
       tags:
-      - payment-admin-controller
-      operationId: getPaymentSummary
+      - payment-admin-proxy-controller
+      operationId: getSummary_1
       parameters:
       - name: fromDate
         in: query
@@ -890,85 +850,10 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/OrderResponse"
-  /api/admin/orders/user/{userId}:
-    get:
-      tags:
-      - order-admin-controller
-      operationId: getOrdersByUser
-      parameters:
-      - name: userId
-        in: path
-        required: true
-        schema:
-          type: integer
-          format: int64
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/OrderResponse"
-  /api/admin/orders/status/{status}:
-    get:
-      tags:
-      - order-admin-controller
-      operationId: getOrdersByStatus
-      parameters:
-      - name: status
-        in: path
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/OrderResponse"
-  /api/admin/orders/payment-status/{paymentStatus}:
-    get:
-      tags:
-      - order-admin-controller
-      operationId: getOrdersByPaymentStatus
-      parameters:
-      - name: paymentStatus
-        in: path
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/OrderResponse"
-  /api/admin/orders/guests:
-    get:
-      tags:
-      - order-admin-controller
-      operationId: getGuestOrders
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/OrderResponse"
   /api/admin/inventory/{variantId}:
     get:
       tags:
-      - inventory-controller
+      - inventory-admin-controller
       operationId: getByVariant
       parameters:
       - name: variantId
@@ -987,7 +872,7 @@ paths:
   /api/admin/inventory/transactions/{variantId}:
     get:
       tags:
-      - inventory-controller
+      - inventory-admin-controller
       operationId: getTransactions
       parameters:
       - name: variantId
@@ -1204,6 +1089,42 @@ components:
           type: number
         thumbnail:
           type: string
+    PaymentResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        orderId:
+          type: integer
+          format: int64
+        userId:
+          type: integer
+          format: int64
+        guestId:
+          type: string
+        status:
+          type: string
+          enum:
+          - PENDING
+          - PAID
+          - FAILED
+          - REFUNDED
+          - CANCELLED
+        amount:
+          type: number
+        method:
+          type: string
+          enum:
+          - COD
+          - VNPAY
+        transactionId:
+          type: string
+        paidAt:
+          type: string
+          format: date-time
+        paymentUrl:
+          type: string
     StatusUpdateRequest:
       type: object
       properties:
@@ -1249,6 +1170,8 @@ components:
         userId:
           type: integer
           format: int64
+        guestId:
+          type: string
         guestName:
           type: string
         guestEmail:
@@ -1658,12 +1581,16 @@ components:
     PageProductResponse:
       type: object
       properties:
-        totalPages:
-          type: integer
-          format: int32
         totalElements:
           type: integer
           format: int64
+        totalPages:
+          type: integer
+          format: int32
+        first:
+          type: boolean
+        last:
+          type: boolean
         size:
           type: integer
           format: int32
@@ -1678,10 +1605,6 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/SortObject"
-        first:
-          type: boolean
-        last:
-          type: boolean
         numberOfElements:
           type: integer
           format: int32
@@ -1699,14 +1622,14 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/SortObject"
+        paged:
+          type: boolean
         pageSize:
           type: integer
           format: int32
         pageNumber:
           type: integer
           format: int32
-        paged:
-          type: boolean
         unpaged:
           type: boolean
     SortObject:
@@ -1722,15 +1645,78 @@ components:
           type: string
         ignoreCase:
           type: boolean
-    PageInventoryResponse:
+    PaymentSearchRequest:
       type: object
       properties:
-        totalPages:
+        status:
+          type: string
+        method:
+          type: string
+        fromDate:
+          type: string
+          format: date
+        toDate:
+          type: string
+          format: date
+        minAmount:
+          type: number
+        maxAmount:
+          type: number
+        transactionId:
+          type: string
+        userId:
           type: integer
-          format: int32
+          format: int64
+        orderId:
+          type: integer
+          format: int64
+    PagePaymentResponse:
+      type: object
+      properties:
         totalElements:
           type: integer
           format: int64
+        totalPages:
+          type: integer
+          format: int32
+        first:
+          type: boolean
+        last:
+          type: boolean
+        size:
+          type: integer
+          format: int32
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/PaymentResponse"
+        number:
+          type: integer
+          format: int32
+        sort:
+          type: array
+          items:
+            $ref: "#/components/schemas/SortObject"
+        numberOfElements:
+          type: integer
+          format: int32
+        pageable:
+          $ref: "#/components/schemas/PageableObject"
+        empty:
+          type: boolean
+    PageInventoryResponse:
+      type: object
+      properties:
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+        first:
+          type: boolean
+        last:
+          type: boolean
         size:
           type: integer
           format: int32
@@ -1745,10 +1731,6 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/SortObject"
-        first:
-          type: boolean
-        last:
-          type: boolean
         numberOfElements:
           type: integer
           format: int32

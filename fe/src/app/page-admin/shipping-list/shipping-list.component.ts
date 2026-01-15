@@ -4,14 +4,13 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { Router } from '@angular/router';
 import {
-  ShippingAdminControllerService,
   ShippingResponse,
   ShippingSearchRequest,
   Pageable,
   PageShippingResponse,
-  ShippingSearchRequestStatusEnum, // IMPORT ENUM ĐÚNG
+  ShippingSearchRequestStatusEnum,
 } from 'src/app/api/admin';
-
+import { ShippingAdminControllerService } from 'src/app/api/admin/api/shippingAdminController.service';
 @Component({
   selector: 'app-shipping-list',
   templateUrl: './shipping-list.component.html',

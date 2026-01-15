@@ -13,6 +13,7 @@ import { OrderItemResponse } from './orderItemResponse';
 export interface OrderResponse { 
     id?: number;
     userId?: number;
+    guestId?: string;
     guestName?: string;
     guestEmail?: string;
     guestPhone?: string;
@@ -45,6 +46,7 @@ export enum OrderResponseStatusEnum {
     CANCELLED = 'CANCELLED'
 };
 export enum OrderResponsePaymentStatusEnum {
+    SUCCESS = 'SUCCESS',
     PENDING = 'PENDING',
     PAID = 'PAID',
     FAILED = 'FAILED',

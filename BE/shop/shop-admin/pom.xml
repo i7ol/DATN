@@ -47,10 +47,10 @@
             <groupId>com.datn</groupId>
             <artifactId>shop-payment</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.datn</groupId>
-            <artifactId>shop-notification</artifactId>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.datn</groupId>-->
+<!--            <artifactId>shop-notification</artifactId>-->
+<!--        </dependency>-->
         <!-- Core Spring Boot -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

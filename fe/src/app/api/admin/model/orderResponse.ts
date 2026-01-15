@@ -13,6 +13,7 @@ import { OrderItemResponse } from './orderItemResponse';
 export interface OrderResponse { 
     id?: number;
     userId?: number;
+    guestId?: string;
     guestName?: string;
     guestEmail?: string;
     guestPhone?: string;

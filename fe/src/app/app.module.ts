@@ -62,6 +62,7 @@ import { AuthGuard } from './core/guards/auth.guard';
 import { AuthModalComponent } from './shared/components/auth-modal/auth-modal.component';
 import { PaymentResultComponent } from './page-user/payment-result/payment-result.component';
 import { ConfirmDialogComponent } from './shared/confirm-dialog/confirm-dialog.component';
+
 @NgModule({
   declarations: [
     AppComponent,

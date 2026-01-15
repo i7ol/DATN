@@ -16,7 +16,12 @@ import java.math.BigDecimal;
 public class OrderItemEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "order_item_seq")
+    @SequenceGenerator(
+            name = "order_item_seq",
+            sequenceName = "ORDER_ITEM_SEQ",
+            allocationSize = 1
+    )
     private Long id;
 
     /* ===== SNAPSHOT PRODUCT / VARIANT ===== */
@@ -33,7 +38,7 @@ public class OrderItemEntity {
     private String productName;
 
     // Variant attributes
-    @Column(name = "size")
+    @Column(name = "SIZE_VALUE")
     private String size;
 
     @Column(name = "color")
@@ -53,6 +58,8 @@ public class OrderItemEntity {
     /* ===== RELATION ===== */
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_id")
+    @JoinColumn(name = "order_id", nullable = false)
+    @JsonBackReference
     private OrderEntity order;
+
 }

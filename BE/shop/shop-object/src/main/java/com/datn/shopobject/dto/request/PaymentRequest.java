@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -16,4 +18,10 @@ public class PaymentRequest {
 
         @NotBlank(message = "Payment method is required")
         private String method;
+
+        private Long userId;
+
+        private String guestId;
+
+
 }

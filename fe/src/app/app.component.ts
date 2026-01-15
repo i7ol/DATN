@@ -13,7 +13,6 @@ export class AppComponent implements OnInit {
   constructor(private authService: AuthService) {}
 
   ngOnInit(): void {
-    // Chỉ cần subscribe currentUser$
     this.authService.currentUser$.subscribe({
       next: (user) => {
         this.currentUser = user;

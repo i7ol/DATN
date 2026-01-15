@@ -1,25 +1,31 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+
 import { ProductUserControllerService } from 'src/app/api/user/api/productUserController.service';
 import { ProductResponse } from 'src/app/api/user/model/productResponse';
 import { VariantResponse } from 'src/app/api/user/model/variantResponse';
-import { CartService } from '../../cart/cart.service';
+import { CartService } from 'src/app/page-user/cart/cart.service';
 import { NotificationService } from 'src/app/shared/services/notification.service';
+
 @Component({
   selector: 'product-detail',
   templateUrl: './product-detail.component.html',
   styleUrls: ['./product-detail.component.scss'],
 })
 export class ProductDetailComponent implements OnInit {
+  /* ================= PRODUCT ================= */
   product: ProductResponse | null = null;
   selectedImage = '';
 
+  /* ================= VARIANT ================= */
   colors: string[] = [];
   sizes: string[] = [];
 
   selectedColor: string | null = null;
   selectedSize: string | null = null;
-  selectedVariant: VariantResponse | null = null; // Thêm property này
+  selectedVariant: VariantResponse | null = null;
+
+  isAddingToCart = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -28,51 +34,59 @@ export class ProductDetailComponent implements OnInit {
     private notify: NotificationService
   ) {}
 
+  /* ================= INIT ================= */
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));
 
-    if (id) {
-      this.productApi.getProduct(id, 'response').subscribe({
-        next: (resp) => {
-          if (resp.body instanceof Blob) {
-            resp.body.text().then((text) => {
-              this.mapProduct(JSON.parse(text));
-            });
-          } else {
-            this.mapProduct(resp.body as ProductResponse);
-          }
-        },
-        error: (err) => console.error('Lỗi load product:', err),
-      });
-    }
-  }
+    if (!id) return;
 
-  addToCart() {
-    if (!this.product) return;
-
-    // Nếu sản phẩm chỉ có 1 biến thể, lấy luôn variant đó
-    const variant: VariantResponse | undefined = this.product.variants?.[0];
-
-    // Nếu người dùng đã chọn màu/sizes thì tìm variant tương ứng
-    const selectedVariant =
-      this.product.variants?.find(
-        (v) =>
-          (!this.selectedColor || v.color === this.selectedColor) &&
-          (!this.selectedSize || v.sizeName === this.selectedSize)
-      ) || variant;
-
-    if (!selectedVariant) {
-      this.notify.error('Vui lòng chọn biến thể sản phẩm');
-      return;
-    }
-
-    this.cartService.addItem(selectedVariant.id!, 1).subscribe({
-      next: () => this.notify.success('Đã thêm vào giỏ hàng'),
-      error: (err) => console.error('Thêm vào giỏ hàng lỗi:', err),
+    this.productApi.getProduct(id, 'response').subscribe({
+      next: (resp) => {
+        if (resp.body instanceof Blob) {
+          resp.body.text().then((text) => {
+            this.mapProduct(JSON.parse(text));
+          });
+        } else {
+          this.mapProduct(resp.body as ProductResponse);
+        }
+      },
+      error: () => this.notify.error('Không tải được sản phẩm'),
     });
   }
 
-  private mapProduct(data: ProductResponse) {
+  /* ================= ADD TO CART ================= */
+  addToCart(): void {
+    if (!this.product) return;
+
+    // Nếu đã chọn variant → dùng luôn
+    let variant = this.selectedVariant;
+
+    // Nếu chưa chọn nhưng chỉ có 1 variant
+    if (!variant && this.product.variants?.length === 1) {
+      variant = this.product.variants[0];
+    }
+
+    if (!variant?.id) {
+      this.notify.error('Vui lòng chọn màu và size');
+      return;
+    }
+
+    this.isAddingToCart = true;
+
+    this.cartService.addItem(variant.id, 1).subscribe({
+      next: () => {
+        this.notify.success('Đã thêm vào giỏ hàng');
+        this.isAddingToCart = false;
+      },
+      error: () => {
+        this.notify.error('Thêm vào giỏ hàng thất bại');
+        this.isAddingToCart = false;
+      },
+    });
+  }
+
+  /* ================= PRODUCT MAP ================= */
+  private mapProduct(data: ProductResponse): void {
     this.product = {
       ...data,
       images: data.images || [],
@@ -87,12 +101,12 @@ export class ProductDetailComponent implements OnInit {
     );
   }
 
-  selectColor(color: string) {
+  /* ================= VARIANT SELECT ================= */
+  selectColor(color: string): void {
     this.selectedColor = color;
-    this.selectedSize = null; // Reset size khi chọn màu mới
-    this.selectedVariant = null; // Reset variant đã chọn
+    this.selectedSize = null;
+    this.selectedVariant = null;
 
-    // Lọc các size có sẵn cho màu đã chọn
     const availableSizes =
       this.product?.variants
         ?.filter((v) => v.color === color && (v.stock || 0) > 0)
@@ -101,10 +115,9 @@ export class ProductDetailComponent implements OnInit {
     this.sizes = Array.from(new Set(availableSizes));
   }
 
-  selectSize(size: string) {
+  selectSize(size: string): void {
     this.selectedSize = size;
 
-    // Tìm variant tương ứng với màu và size đã chọn
     if (this.selectedColor && this.selectedSize) {
       this.selectedVariant =
         this.product?.variants?.find(
@@ -116,11 +129,12 @@ export class ProductDetailComponent implements OnInit {
     }
   }
 
-  selectImage(url: string) {
+  /* ================= IMAGE ================= */
+  selectImage(url: string): void {
     this.selectedImage = url;
   }
 
-  // Helper method để kiểm tra variant có sẵn hàng
+  /* ================= HELPERS ================= */
   isVariantAvailable(color: string, size: string): boolean {
     if (!this.product?.variants) return false;
 
@@ -128,10 +142,9 @@ export class ProductDetailComponent implements OnInit {
       (v) => v.color === color && v.sizeName === size
     );
 
-    return variant ? (variant.stock || 0) > 0 : false;
+    return (variant?.stock || 0) > 0;
   }
 
-  // Helper method để lấy variant hiện tại
   getCurrentVariant(): VariantResponse | null {
     if (!this.selectedColor || !this.selectedSize) return null;
 

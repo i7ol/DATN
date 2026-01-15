@@ -1,6 +1,8 @@
 package com.datn.shopcart.service;
 
+
 import com.datn.shopcart.mapper.CartMapper;
+import com.datn.shopclient.client.InventoryClient;
 import com.datn.shopdatabase.entity.*;
 import com.datn.shopdatabase.repository.*;
 import com.datn.shopobject.dto.response.CartResponse;
@@ -24,6 +26,7 @@ public class CartService {
     private final ProductVariantRepository variantRepository;
     private final InventoryRepository inventoryRepository;
     private final UserRepository userRepository;
+    private final InventoryClient inventoryClient;
 
     /* ====================== CORE ====================== */
 
@@ -37,7 +40,7 @@ public class CartService {
                                 userRepository.findById(userId)
                                         .orElseThrow(() -> new RuntimeException("User not found"))
                         );
-                        return cartRepository.save(cart);
+                        return cartRepository.save(cart); // lưu ngay
                     });
         }
 
@@ -46,12 +49,14 @@ public class CartService {
                     .orElseGet(() -> {
                         CartEntity cart = new CartEntity();
                         cart.setGuestId(guestId);
-                        return cartRepository.save(cart);
+                        CartEntity savedCart = cartRepository.save(cart); // lưu trước
+                        return savedCart;
                     });
         }
 
         throw new IllegalArgumentException("UserId or GuestId is required");
     }
+
 
     /* ====================== CACHE READ ====================== */
 
@@ -87,10 +92,10 @@ public class CartService {
             key = "T(com.datn.shopcart.cache.CartCacheKey).of(#userId,#guestId)"
     )
     public CartResponse addItem(
-            Long userId,
-            String guestId,
             Long variantId,
-            int quantity
+            int quantity,
+            Long userId,
+            String guestId
     ) {
 
         CartEntity cart = getCart(userId, guestId);
@@ -102,17 +107,25 @@ public class CartService {
                 .findByCartIdAndVariantId(cart.getId(), variantId)
                 .orElse(null);
 
+
         if (item != null) {
             item.setQuantity(item.getQuantity() + quantity);
         } else {
+            InventoryItemEntity inv = inventoryRepository
+                    .findByVariantId(variantId)
+                    .orElseThrow(() -> new RuntimeException("Inventory not found"));
+
             CartItemEntity newItem = new CartItemEntity();
             newItem.setCart(cart);
             newItem.setVariant(variant);
+            newItem.setUnitPrice(inv.getSellingPrice());
             newItem.setQuantity(quantity);
             cart.getItems().add(newItem);
         }
 
         cartRepository.save(cart);
+        inventoryClient.reserve(variantId, quantity);
+
         return getCartResponse(userId, guestId);
     }
 
@@ -135,10 +148,17 @@ public class CartService {
                 .findByCartIdAndVariantId(cart.getId(), variantId)
                 .orElseThrow(() -> new RuntimeException("Item not found"));
 
+        int oldQty = item.getQuantity();
+
         if (quantity < 1) {
             cart.getItems().remove(item);
+            inventoryClient.release(variantId, oldQty);
+
         } else {
             item.setQuantity(quantity);
+            int diff = quantity - oldQty;
+            if (diff > 0) inventoryClient.reserve(variantId, diff);
+            else if (diff < 0) inventoryClient.release(variantId, -diff);
         }
 
         cartRepository.save(cart);
@@ -159,10 +179,16 @@ public class CartService {
     ) {
 
         CartEntity cart = getCart(userId, guestId);
-        cart.getItems().removeIf(i ->
-                i.getVariant() != null &&
-                        i.getVariant().getId().equals(variantId)
-        );
+        CartItemEntity item = cart.getItems().stream()
+                .filter(i -> i.getVariant() != null && i.getVariant().getId().equals(variantId))
+                .findFirst()
+                .orElse(null);
+
+        if (item != null) {
+            inventoryClient.release(variantId, item.getQuantity());
+            cart.getItems().remove(item);
+            cartRepository.save(cart);
+        }
 
         cartRepository.save(cart);
 
@@ -216,8 +242,14 @@ public class CartService {
     public CartResponse clearCart(Long userId, String guestId) {
 
         CartEntity cart = getCart(userId, guestId);
+        for (CartItemEntity item : cart.getItems()) {
+            if (item.getVariant() != null) {
+                inventoryClient.release(item.getVariant().getId(), item.getQuantity());
+            }
+        }
         cart.getItems().clear();
         cartRepository.save(cart);
+
 
         return getCartResponse(userId, guestId);
     }

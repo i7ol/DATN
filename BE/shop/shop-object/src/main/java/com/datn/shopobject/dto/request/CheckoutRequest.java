@@ -1,9 +1,12 @@
 package com.datn.shopobject.dto.request;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 public class CheckoutRequest {
@@ -33,4 +36,6 @@ public class CheckoutRequest {
 
     private String paymentMethod;
     private String shippingMethod;
+    @Valid
+    private List<CheckoutItemRequest> items;
 }

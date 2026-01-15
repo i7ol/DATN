@@ -30,7 +30,7 @@ public class AdminSecurityConfig {
             "/swagger-ui/**",
             "/swagger-ui.html",
             "/swagger-ui/index.html",
-
+            "/api/internal/**",
             "/api/admin/products/**",
             "/api/admin/products",
             "/api/admin/products/{id}",

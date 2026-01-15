@@ -23,8 +23,11 @@ public class PaymentEntity {
     @Column(name = "order_id", nullable = false)
     private Long orderId;
 
-    @Column(name = "user_id", nullable = false)
+    @Column(name = "user_id", nullable = true)
     private Long userId;
+
+    @Column(name = "guest_id", length = 100)
+    private String guestId;
 
     @Column(nullable = false)
     private BigDecimal amount;

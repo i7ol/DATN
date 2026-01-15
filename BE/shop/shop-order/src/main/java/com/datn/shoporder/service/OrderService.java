@@ -27,12 +27,10 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
 
-    // =============================================
-    // CREATE ORDER (FROM CHECKOUT REQUEST)
-    // =============================================
     @Transactional
     public OrderEntity createOrderFromCheckout(
             Long userId,
+            String guestId,
             String guestName,
             String guestEmail,
             String guestPhone,
@@ -50,8 +48,13 @@ public class OrderService {
         OrderEntity order = new OrderEntity();
 
         if (userId != null) {
+            // ===== USER =====
             order.setUserId(userId);
+            order.setGuestId(null);
         } else {
+            // ===== GUEST =====
+            order.setUserId(null);
+            order.setGuestId(guestId);
             order.setGuestName(guestName);
             order.setGuestEmail(guestEmail);
             order.setGuestPhone(guestPhone);

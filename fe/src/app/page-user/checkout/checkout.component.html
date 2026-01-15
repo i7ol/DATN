@@ -240,7 +240,7 @@
           </div>
         </div>
 
-        <!-- Payment Methods Card - GIỮ NGUYÊN GIAO DIỆN -->
+        <!-- Payment Methods Card -->
         <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
           <h2 class="text-lg font-semibold text-gray-900 mb-4 pb-3 border-b">
             💳 Thanh toán
@@ -259,8 +259,8 @@
               <label for="payment-cod" class="ml-3 flex-1 cursor-pointer">
                 <div class="flex items-center justify-between">
                   <div>
-                    <span class="font-medium text-gray-900"
-                      >💰 Thanh toán khi giao hàng (COD)</span
+                    <span class="font-medium text-gray-900">
+                      Thanh toán khi giao hàng (COD)</span
                     >
                     <p class="text-sm text-gray-500 mt-1">
                       Bạn chỉ phải thanh toán khi nhận được hàng
@@ -275,18 +275,18 @@
                 type="radio"
                 name="paymentMethod"
                 id="payment-qr"
-                [checked]="selectedPaymentMethod === 'QR'"
-                (change)="onPaymentMethodChange('QR')"
+                [checked]="selectedPaymentMethod === 'VNPAY'"
+                (change)="onPaymentMethodChange('VNPAY')"
                 class="mt-1 h-4 w-4 text-black focus:ring-black border-gray-300"
               />
               <label for="payment-qr" class="ml-3 flex-1 cursor-pointer">
                 <div class="flex items-center justify-between">
                   <div>
                     <span class="font-medium text-gray-900"
-                      >📱 Thanh toán qua VNPAY QR</span
+                      >Thanh toán qua VNPAY</span
                     >
                     <p class="text-sm text-gray-500 mt-1">
-                      Quét mã QR để thanh toán ngay qua VNPAY
+                      Thanh toán ngay qua VNPAY
                     </p>
                   </div>
                 </div>
@@ -419,7 +419,7 @@
                 *ngIf="!discountApplied"
                 (click)="applyDiscount()"
                 class="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                [disabled]="!discountCode.trim()"
+                [disabled]="!discountCode?.trim()"
               >
                 Áp dụng
               </button>

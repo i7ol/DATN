@@ -18,6 +18,7 @@ export interface CartItemResponse {
     color?: string;
     quantity?: number;
     price?: number;
+    unitPrice?: number;
     images?: Array<ImageDTO>;
 }
 

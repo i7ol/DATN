@@ -5,10 +5,10 @@ import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import {
-  ShippingAdminControllerService,
-  ShippingResponse,
-} from 'src/app/api/admin';
+import { ShippingResponse } from 'src/app/api/admin';
+
+import { ShippingAdminControllerService } from 'src/app/api/admin/api/shippingAdminController.service';
+
 import { StatusUpdateDialogComponent } from 'src/app/shared/components/status-update-dialog/status-update-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 

@@ -2,7 +2,7 @@ package com.datn.shopapp.config;
 
 
 
-import com.datn.shopobject.client.AuthClient;
+import com.datn.shopapp.client.AuthUserClient;
 import com.datn.shopobject.dto.response.UserInfoResponse;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private final AuthClient authClient;
+    private final AuthUserClient authClient;
 
 
     @Override

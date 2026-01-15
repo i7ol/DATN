@@ -6,27 +6,27 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
-@SpringBootApplication(
-        scanBasePackages = {
-                "com.datn.shopadmin",
-                "com.datn.shopdatabase",
-                "com.datn.shopuser",
-                "com.datn.shopobject",
-                "com.datn.shopproduct",
-                "com.datn.shopinventory",
-                "com.datn.shopshipping",
-                "com.datn.shoppayment",
-                "com.datn.shoporder",
-        }
-)
-@EntityScan(basePackages = "com.datn.shopdatabase.entity")
-@EnableJpaRepositories(basePackages = "com.datn.shopdatabase.repository")
-@EnableFeignClients(basePackages = {
-        "com.datn.shopobject.client",
-        "com.datn.shoppayment.client"
+@SpringBootApplication(scanBasePackages = {
+        "com.datn.shopadmin",
+
+        // service modules
+        "com.datn.shopuser",
+        "com.datn.shopproduct",
+        "com.datn.shopshipping",
+
+        // shared
+        "com.datn.shopdatabase",
+        "com.datn.shopobject"
 })
+@EnableFeignClients(basePackages = {
+        "com.datn.shopadmin.client",
+        "com.datn.shopclient.client",
+})
+@EntityScan("com.datn.shopdatabase.entity")
+@EnableJpaRepositories("com.datn.shopdatabase.repository")
 public class ShopAdminApplication {
     public static void main(String[] args) {
         SpringApplication.run(ShopAdminApplication.class, args);
     }
 }
+

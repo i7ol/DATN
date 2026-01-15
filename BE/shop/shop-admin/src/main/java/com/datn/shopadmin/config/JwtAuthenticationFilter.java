@@ -1,7 +1,7 @@
 package com.datn.shopadmin.config;
 
-import com.datn.shopobject.dto.response.UserInfoResponse;
-import com.datn.shopobject.client.AuthClient;
+
+import com.datn.shopadmin.client.AuthAdminClient;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,7 +14,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import org.springframework.beans.factory.annotation.Qualifier;
 import java.io.IOException;
 import java.util.stream.Collectors;
 
@@ -23,8 +22,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    @Qualifier("com.datn.shopobject.client.AuthClient")
-    private final AuthClient authClient;
+    private final AuthAdminClient authClient;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,

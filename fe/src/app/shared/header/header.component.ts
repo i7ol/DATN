@@ -1,12 +1,12 @@
+import { CartItemView } from './../../page-user/cart/cart.service';
 import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { MatDialog } from '@angular/material/dialog';
 import { AuthModalComponent } from '../components/auth-modal/auth-modal.component';
 import { CartService } from 'src/app/page-user/cart/cart.service';
 import { AuthService, User } from 'src/app/core/services/auth.service';
-import { CartItemResponse } from 'src/app/api/user/model/cartItemResponse';
 
 @Component({
   selector: 'app-header',
@@ -18,7 +18,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   isCartHover = false;
   isAccountDropdownOpen = false;
 
-  cartItems: CartItemResponse[] = [];
+  cartItems: CartItemView[] = [];
   cartLoading = false;
   cartTotalPrice = 0;
   cartTotalQuantity = 0;
@@ -30,6 +30,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   private hideCartTimeout: any;
   private hideAccountTimeout: any;
   private sub = new Subscription();
+  cartCount$!: Observable<number>;
 
   constructor(
     private cartService: CartService,
@@ -39,6 +40,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    this.cartCount$ = this.cartService.totalQuantity$;
+
     this.sub.add(
       this.cartService.items$.subscribe((i) => (this.cartItems = i || []))
     );

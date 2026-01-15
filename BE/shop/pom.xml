@@ -148,9 +148,14 @@
                 <artifactId>shop-payment</artifactId>
                 <version>${project.version}</version>
             </dependency>
+<!--            <dependency>-->
+<!--                <groupId>com.datn</groupId>-->
+<!--                <artifactId>shop-notification</artifactId>-->
+<!--                <version>${project.version}</version>-->
+<!--            </dependency>-->
             <dependency>
                 <groupId>com.datn</groupId>
-                <artifactId>shop-notification</artifactId>
+                <artifactId>shop-client</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>
@@ -167,10 +172,8 @@
         <module>shop-inventory</module>
         <module>shop-shipping</module>
         <module>shop-payment</module>
-        <module>shop-notification</module>
-        <!--
-        <module>shop-cms</module>
-        -->
+<!--        <module>shop-notification</module>-->
+        <module>shop-client</module>
         <module>shop-admin</module>
         <module>shop-app</module>
     </modules>

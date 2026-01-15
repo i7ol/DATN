@@ -1,5 +1,6 @@
-import { Component, OnInit, Inject } from '@angular/core';
-import { InventoryControllerService } from 'src/app/api/admin';
+import { Component, OnInit } from '@angular/core';
+import { InventoryAdminControllerService } from 'src/app/api/admin/api/inventoryAdminController.service';
+
 import {
   InventoryResponse,
   InventoryRequest,
@@ -23,22 +24,12 @@ export class InventoryListComponent implements OnInit {
 
   showForm = false;
   editing = false;
-
-  form: {
-    id?: number | null;
-    variantId?: number | null;
-    stock?: number;
-    importPrice?: number;
-    sellingPrice?: number;
-  } = this.emptyForm();
+  form = this.emptyForm();
 
   showDelete = false;
   deleteData: InventoryResponse | null = null;
 
-  constructor(
-    @Inject(InventoryControllerService)
-    private api: InventoryControllerService
-  ) {}
+  constructor(private api: InventoryAdminControllerService) {}
 
   ngOnInit(): void {
     this.loadData();
@@ -62,17 +53,11 @@ export class InventoryListComponent implements OnInit {
   async loadData() {
     this.loading = true;
     try {
-      const resp: any = await this.api
-        .getAll(this.page, this.size, 'response')
+      const resp = await this.api
+        .getAll(this.page, this.size, 'body')
         .toPromise();
-
-      const body =
-        resp.body instanceof Blob
-          ? JSON.parse(await resp.body.text())
-          : resp.body;
-
-      this.inventories = body.content || [];
-      this.total = body.totalElements || 0;
+      this.inventories = resp.content || [];
+      this.total = resp.totalElements || 0;
     } finally {
       this.loading = false;
     }
@@ -84,14 +69,12 @@ export class InventoryListComponent implements OnInit {
       this.loadData();
     }
   }
-
   nextPage() {
     if ((this.page + 1) * this.size < this.total) {
       this.page++;
       this.loadData();
     }
   }
-
   goTo(i: number) {
     this.page = i;
     this.loadData();
@@ -116,10 +99,7 @@ export class InventoryListComponent implements OnInit {
   }
 
   saveInventory() {
-    if (!this.form.variantId) {
-      alert('Thiếu Variant ID');
-      return;
-    }
+    if (!this.form.variantId) return alert('Thiếu Variant ID');
 
     const req: InventoryRequest = {
       id: this.form.id ?? undefined,
@@ -164,12 +144,10 @@ export class InventoryListComponent implements OnInit {
 
   deleteInventory() {
     if (!this.deleteData) return;
-
     const adjust: AdjustRequest = {
       newStock: 0,
       reason: 'Delete inventory -> set stock to 0',
     };
-
     this.api.adjust(this.deleteData.variantId!, adjust).subscribe(() => {
       this.showDelete = false;
       this.deleteData = null;

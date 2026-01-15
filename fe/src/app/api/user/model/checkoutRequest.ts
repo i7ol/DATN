@@ -7,6 +7,7 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
+import { CheckoutItemRequest } from './checkoutItemRequest';
 
 
 export interface CheckoutRequest { 
@@ -26,5 +27,6 @@ export interface CheckoutRequest {
     billingWard?: string;
     paymentMethod?: string;
     shippingMethod?: string;
+    items?: Array<CheckoutItemRequest>;
 }
 

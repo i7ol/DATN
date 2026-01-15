@@ -1,5 +1,17 @@
 package com.datn.shopobject.dto.response;
 
-import java.time.Instant;
+import lombok.*;
+import java.util.List;
 
-public record PageResponse(Long id, String slug, String title, String summary, String content, String metaTitle, String metaDescription, Boolean active, Instant createdAt, Instant updatedAt) { }
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class PageResponse<T> {
+    private int page;
+    private int size;
+    private long totalElements;
+    private int totalPages;
+    private List<T> data;
+}

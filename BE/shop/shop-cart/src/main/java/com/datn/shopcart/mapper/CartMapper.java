@@ -58,7 +58,8 @@ public class CartMapper {
                     .size(v.getSizeName())
                     .color(v.getColor())
                     .quantity(item.getQuantity())
-                    .price(inv != null ? inv.getSellingPrice() : BigDecimal.ZERO)
+                    .unitPrice(item.getUnitPrice())
+                    .price(item.getUnitPrice())
                     .images(mapImages(p.getImages()))
                     .build();
         }).toList();

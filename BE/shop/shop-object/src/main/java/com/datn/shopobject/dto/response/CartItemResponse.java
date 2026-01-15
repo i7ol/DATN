@@ -27,6 +27,8 @@ public class CartItemResponse {
     @Builder.Default
     private BigDecimal price = BigDecimal.ZERO;
 
+    private BigDecimal unitPrice;
+
     @Builder.Default
     private List<ImageDTO> images = new ArrayList<>();
 }

@@ -1,10 +1,11 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { Observable, Subscription } from 'rxjs';
-import { CartItemResponse } from 'src/app/api/user/model/cartItemResponse';
-import { CartService } from './cart.service';
+import { Subscription } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
+
+import { CartItemResponse } from 'src/app/api/user/model/cartItemResponse';
 import { ConfirmDialogComponent } from 'src/app/shared/confirm-dialog/confirm-dialog.component';
+import { CartService } from './cart.service';
 
 @Component({
   selector: 'cart',
@@ -12,10 +13,10 @@ import { ConfirmDialogComponent } from 'src/app/shared/confirm-dialog/confirm-di
   styleUrls: ['./cart.component.scss'],
 })
 export class CartComponent implements OnInit, OnDestroy {
-  items$!: Observable<CartItemResponse[]>;
-  totalPrice$!: Observable<number>;
-  totalQuantity$!: Observable<number>;
-  loading$!: Observable<boolean>;
+  items$ = this.cartService.items$;
+  loading$ = this.cartService.loading$;
+  totalQuantity$ = this.cartService.totalQuantity$;
+  totalPrice$ = this.cartService.totalPrice$;
 
   private sub = new Subscription();
 
@@ -25,45 +26,29 @@ export class CartComponent implements OnInit, OnDestroy {
     private dialog: MatDialog
   ) {}
 
-  /* ================= INIT ================= */
   ngOnInit(): void {
-    this.items$ = this.cartService.items$;
-    this.totalPrice$ = this.cartService.totalPrice$;
-    this.totalQuantity$ = this.cartService.totalQuantity$;
-    this.loading$ = this.cartService.loading$;
+    this.cartService.refreshCart().subscribe();
   }
 
   ngOnDestroy(): void {
     this.sub.unsubscribe();
   }
 
-  /* ================= CART ACTIONS ================= */
-
-  refreshCart(): void {
-    this.sub.add(this.cartService.refreshCart().subscribe());
-  }
-
-  increase(item: CartItemResponse): void {
+  increase(item: CartItemResponse) {
     if (!item.variantId) return;
-
-    this.sub.add(
-      this.cartService
-        .updateItem(item.variantId, (item.quantity ?? 0) + 1)
-        .subscribe()
-    );
+    this.cartService
+      .updateItem(item.variantId, (item.quantity ?? 0) + 1)
+      .subscribe();
   }
 
-  decrease(item: CartItemResponse): void {
+  decrease(item: CartItemResponse) {
     if (!item.variantId || (item.quantity ?? 0) <= 1) return;
-
-    this.sub.add(
-      this.cartService
-        .updateItem(item.variantId, (item.quantity ?? 0) - 1)
-        .subscribe()
-    );
+    this.cartService
+      .updateItem(item.variantId, (item.quantity ?? 0) - 1)
+      .subscribe();
   }
 
-  remove(item: CartItemResponse): void {
+  remove(item: CartItemResponse) {
     if (!item.variantId) return;
 
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
@@ -85,7 +70,7 @@ export class CartComponent implements OnInit, OnDestroy {
     );
   }
 
-  clearCart(): void {
+  clearCart() {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '380px',
       data: {
@@ -104,8 +89,6 @@ export class CartComponent implements OnInit, OnDestroy {
       })
     );
   }
-
-  /* ================= NAVIGATION ================= */
 
   goToCheckout(): void {
     this.router.navigate(['/checkout']);

@@ -4,7 +4,6 @@ export const environment = {
 
   apiUrls: {
     shopApp: 'http://localhost:8080/api',
-    shopApp1: 'http://localhost:8080',
 
     shopAdmin: 'http://localhost:8081/api',
 
@@ -12,7 +11,7 @@ export const environment = {
   },
 
   vnpay: {
-    returnUrl: 'http://localhost:4200/payment/result',
+    returnUrl: 'http://localhost:4200/payment-result',
   },
 
   frontendUrl: 'http://localhost:4200',
@@ -23,7 +22,6 @@ export const environment = {
     checkout: '/orders/checkout',
 
     payments: '/user/payments',
-    paymentCallback: '/payment/callback/vnpay',
 
     // Cart APIs
     cart: '/cart',

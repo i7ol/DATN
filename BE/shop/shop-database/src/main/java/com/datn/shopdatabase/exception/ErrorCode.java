@@ -34,6 +34,8 @@ public enum ErrorCode {
     VARIANT_NOT_FOUND(1026, "Không tìm thấy biến thể",HttpStatus.NOT_FOUND),
     USER_NOT_FOUND(1027, "User existed", HttpStatus.BAD_REQUEST),
     CART_ITEM_NOT_FOUND(1028,"Cart hasn't found",HttpStatus.NOT_FOUND),
+    OUT_OF_STOCK(1029, "Out of stock", HttpStatus.BAD_REQUEST),
+    SERVICE_UNAVAILABLE(503, "Service unavailable",HttpStatus.BAD_REQUEST),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

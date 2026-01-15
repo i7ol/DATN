@@ -47,6 +47,8 @@ public class AppSecurityConfig {
             "/api/orders/{orderId}",
             "/api/orders/my-orders",
             "/api/orders/{orderId}/cancel",
+            "/api/orders/**",
+
 
             "/api/payment/callback/**",
             "/actuator/health",
@@ -59,7 +61,19 @@ public class AppSecurityConfig {
             "/api/location/districts/{provinceCode}",
             "/api/location/wards/{districtCode}",
 
-    };
+            "/api/payments/**",
+            "/api/user/payments",
+            "/api/payments",
+            "/api/payments/vnpay/**",
+            "/api/payments/test",
+
+            "/api/cart-proxy",
+            "/api/cart-proxy/**",
+            "/api/user/orders/checkout",
+            "/api/payments/guest",
+            "/api/payments/user",
+
+};
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http

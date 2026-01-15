@@ -26,6 +26,9 @@ public class OrderEntity extends BaseEntity {
 
     private Long userId;
 
+    @Column(name = "guest_id", length = 100)
+    private String guestId;
+
     // Guest info
     private String guestName;
     private String guestEmail;
@@ -82,4 +85,11 @@ public class OrderEntity extends BaseEntity {
         item.setOrder(this);
         this.items.add(item);
     }
+    public void setItems(List<OrderItemEntity> items) {
+        this.items.clear();
+        if (items != null) {
+            items.forEach(this::addItem);
+        }
+    }
+
 }

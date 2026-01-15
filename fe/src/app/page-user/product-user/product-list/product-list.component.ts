@@ -1,22 +1,24 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 
 import { ProductUserControllerService } from 'src/app/api/user/api/productUserController.service';
 import { PageProductResponse } from 'src/app/api/user/model/pageProductResponse';
 import { ProductResponse } from 'src/app/api/user/model/productResponse';
-import { CartService } from '../../cart/cart.service';
-import { Router } from '@angular/router';
 
+import { CartService } from 'src/app/page-user/cart/cart.service';
 import { NotificationService } from 'src/app/shared/services/notification.service';
+
 @Component({
   selector: 'product-list',
   templateUrl: './product-list.component.html',
   styleUrls: ['./product-list.component.scss'],
 })
 export class ProductListComponent implements OnInit {
+  /* ================= STATE ================= */
   products: ProductResponse[] = [];
   loading = false;
 
-  // Pagination
+  /* ================= PAGINATION ================= */
   currentPage = 0;
   pageSize = 20;
   totalItems = 0;
@@ -28,23 +30,40 @@ export class ProductListComponent implements OnInit {
     private notify: NotificationService
   ) {}
 
+  /* ================= INIT ================= */
   ngOnInit(): void {
     this.loadProducts();
+  }
+
+  /* ================= ADD TO CART ================= */
+
+  /**
+   * Click từ button "Thêm vào giỏ"
+   */
+  addToCart(product: ProductResponse): void {
+    if (!product.variants || product.variants.length === 0) {
+      this.handleNoVariant(product);
+      return;
+    }
+
+    // Có nhiều hơn 1 variant → bắt buộc vào chi tiết
+    if (product.variants.length > 1) {
+      this.viewProductDetail(product);
+      return;
+    }
+
+    // Chỉ có 1 variant → add luôn
+    this.addSingleVariantToCart(product);
   }
 
   /**
    * Thêm vào giỏ hàng khi sản phẩm chỉ có 1 biến thể
    */
-  addToCart(product: ProductResponse) {
-    if (!product.variants || product.variants.length !== 1) {
-      this.viewProductDetail(product);
-      return;
-    }
+  private addSingleVariantToCart(product: ProductResponse): void {
+    const variant = product.variants?.[0];
 
-    const variant = product.variants[0];
-
-    if (!variant || variant.id == null) {
-      this.notify.error('Biến thể sản phẩm không hợp lệ!');
+    if (!variant?.id) {
+      this.notify.error('Biến thể sản phẩm không hợp lệ');
       return;
     }
 
@@ -54,10 +73,10 @@ export class ProductListComponent implements OnInit {
     });
   }
 
-  private handleAddToCartError(err: any) {
+  private handleAddToCartError(err: any): void {
     console.error(err);
 
-    switch (err.status) {
+    switch (err?.status) {
       case 400:
         this.notify.error('Dữ liệu không hợp lệ');
         break;
@@ -73,110 +92,85 @@ export class ProductListComponent implements OnInit {
     }
   }
 
-  onAddToCartClick(product: ProductResponse) {
-    if (!product.variants || product.variants.length === 0) {
-      this.handleNoVariant(product);
-      return;
-    }
+  /* ================= NAVIGATION ================= */
 
-    if (product.variants.length === 1) {
-      this.addToCart(product);
-      return;
-    }
-
-    this.viewProductDetail(product);
-  }
-
-  /**
-   * Xem chi tiết sản phẩm (dùng cho sản phẩm có nhiều biến thể)
-   */
-  viewProductDetail(product: ProductResponse) {
+  viewProductDetail(product: ProductResponse): void {
     this.router.navigate(['/product', product.id]);
   }
 
-  /**
-   * Xử lý khi sản phẩm không có biến thể
-   */
-  handleNoVariant(product: ProductResponse) {
-    this.notify.info('Sản phẩm này hiện không có biến thể nào!');
+  handleNoVariant(product: ProductResponse): void {
+    this.notify.info('Sản phẩm này hiện không có biến thể nào');
   }
 
-  /** ---------------------------
-   * Load danh sách sản phẩm
-   * --------------------------- */
-  loadProducts(page: number = 0, size: number = this.pageSize) {
+  /* ================= LOAD PRODUCTS ================= */
+
+  loadProducts(page: number = 0, size: number = this.pageSize): void {
     this.loading = true;
 
     this.productApi.getAllProducts(page, size, 'response').subscribe({
       next: (resp: any) => {
-        const onBody = (body: any) => {
+        const handleBody = (body: any) => {
           const data: PageProductResponse = body;
 
           this.products = data.content || [];
-
-          // Debug: Kiểm tra số lượng biến thể của từng sản phẩm
-          this.products.forEach((product, index) => {
-            console.log(
-              `Sản phẩm ${index}: ${product.name} - Số biến thể: ${
-                product.variants?.length || 0
-              }`
-            );
-          });
-
           this.totalItems = data.totalElements || this.products.length;
           this.currentPage = data.number || 0;
           this.pageSize = data.size || this.pageSize;
+
           this.loading = false;
         };
 
         if (resp.body instanceof Blob) {
-          resp.body.text().then((text: string) => onBody(JSON.parse(text)));
+          resp.body.text().then((text: string) => {
+            handleBody(JSON.parse(text));
+          });
         } else {
-          onBody(resp.body);
+          handleBody(resp.body);
         }
       },
       error: (err) => {
         console.error('Load products error:', err);
         this.loading = false;
 
-        // Specific error handling
         if (err.status === 404) {
-          console.error('API endpoint not found. Please check the API URL.');
+          this.notify.error('Không tìm thấy API sản phẩm');
+        } else {
+          this.notify.error('Không tải được danh sách sản phẩm');
         }
       },
     });
   }
 
-  /** ---------------------------
-   * Phân trang
-   * --------------------------- */
+  /* ================= PAGINATION ================= */
+
   get totalPages(): number {
     return Math.ceil(this.totalItems / this.pageSize);
   }
 
-  prevPage() {
-    if (this.currentPage > 0) this.loadProducts(this.currentPage - 1);
+  prevPage(): void {
+    if (this.currentPage > 0) {
+      this.loadProducts(this.currentPage - 1);
+    }
   }
 
-  nextPage() {
-    if (this.currentPage < this.totalPages - 1)
+  nextPage(): void {
+    if (this.currentPage < this.totalPages - 1) {
       this.loadProducts(this.currentPage + 1);
+    }
   }
 
-  goToPage(page: number) {
-    if (page >= 0 && page < this.totalPages) this.loadProducts(page);
+  goToPage(page: number): void {
+    if (page >= 0 && page < this.totalPages) {
+      this.loadProducts(page);
+    }
   }
 
-  /**
-   * Kiểm tra sản phẩm có nhiều hơn 1 biến thể
-   */
+  /* ================= HELPERS ================= */
+
   hasMultipleVariants(product: ProductResponse): boolean {
     return (product.variants?.length || 0) > 1;
   }
 
-  /**
-   * Kiểm tra sản phẩm có đúng 1 biến thể
-   */
   hasSingleVariant(product: ProductResponse): boolean {
     return (product.variants?.length || 0) === 1;
   }

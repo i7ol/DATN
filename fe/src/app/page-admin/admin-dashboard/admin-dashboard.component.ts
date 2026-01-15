@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { OrderAdminControllerService } from 'src/app/api/admin';
-import { PaymentAdminControllerService } from 'src/app/api/admin';
-import { ShippingAdminControllerService } from 'src/app/api/admin';
+
+import { PaymentAdminProxyControllerService } from 'src/app/api/admin/api/paymentAdminProxyController.service';
+
+import { ShippingAdminControllerService } from 'src/app/api/admin/api/shippingAdminController.service';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -24,8 +25,7 @@ export class AdminDashboardComponent implements OnInit {
   recentShippings: any[] = [];
 
   constructor(
-    private orderService: OrderAdminControllerService,
-    private paymentService: PaymentAdminControllerService,
+    private paymentService: PaymentAdminProxyControllerService,
     private shippingService: ShippingAdminControllerService
   ) {}
 
@@ -34,59 +34,25 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   loadDashboardData(): void {
-    this.loadOrderStats();
+    // this.loadOrderStats();
     this.loadPaymentStats();
     this.loadShippingStats();
   }
 
-  loadOrderStats(): void {
-    // Gọi API không có tham số
-    this.orderService.getAllOrders().subscribe({
-      next: (orders: any[]) => {
-        this.stats.totalOrders = orders.length;
-        this.stats.pendingOrders = orders.filter(
-          (o: any) => o.status === 'PENDING' || o.status === 'PROCESSING'
-        ).length;
-        // Sắp xếp theo ngày tạo mới nhất và lấy 5 cái
-        this.recentOrders = orders
-          .sort(
-            (a: any, b: any) =>
-              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-          )
-          .slice(0, 5);
+  loadPaymentStats(): void {
+    this.paymentService.getSummary1().subscribe({
+      next: (summary: any) => {
+        this.stats.totalPayments = summary.totalPayments ?? 0;
+        this.stats.pendingPayments = summary.pendingPayments ?? 0;
+        this.stats.revenue = summary.totalRevenue ?? 0;
       },
-      error: (error) => {
-        console.error('Error loading orders:', error);
+      error: (err) => {
+        console.error('Error loading payment summary:', err);
+        this.stats.totalPayments = 0;
+        this.stats.pendingPayments = 0;
+        this.stats.revenue = 0;
       },
     });
-  }
-
-  loadPaymentStats(): void {
-    // Kiểm tra xem service có phương thức getAllPayments không tham số không
-    // Nếu không, tìm phương thức phù hợp
-    if (this.paymentService.getAllPayments) {
-      // Thử gọi không tham số
-      (this.paymentService.getAllPayments as any)().subscribe({
-        next: (payments: any[]) => {
-          this.stats.totalPayments = payments.length;
-          this.stats.pendingPayments = payments.filter(
-            (p: any) => p.status === 'PENDING'
-          ).length;
-
-          // Tính tổng revenue từ payments đã thanh toán
-          this.stats.revenue = payments
-            .filter((p: any) => p.status === 'PAID')
-            .reduce((sum: number, p: any) => sum + (p.amount || 0), 0);
-        },
-        error: (error) => {
-          console.error('Error loading payments:', error);
-        },
-      });
-    } else {
-      console.warn('Payment service does not have getAllPayments method');
-      // Hoặc tìm phương thức khác
-      this.loadPaymentStatsAlternative();
-    }
   }
 
   loadPaymentStatsAlternative(): void {

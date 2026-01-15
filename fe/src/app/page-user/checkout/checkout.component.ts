@@ -1,16 +1,17 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Subscription } from 'rxjs';
-
-import { CartService } from '../cart/cart.service';
+import { GuestPaymentRequest } from 'src/app/api/user/model/guestPaymentRequest';
+import { UserPaymentRequest } from 'src/app/api/user/model/userPaymentRequest';
+import { CartService } from 'src/app/page-user/cart/cart.service';
 import { CartItemResponse } from 'src/app/api/user/model/cartItemResponse';
 import { NotificationService } from 'src/app/shared/services/notification.service';
-import { HttpClient } from '@angular/common/http';
 import { LocationControllerService } from 'src/app/api/user/api/locationController.service';
-import { PaymentUserControllerService } from 'src/app/api/user/api/paymentUserController.service';
-import { OrderUserControllerService } from 'src/app/api/user/api/orderUserController.service';
+import { OrderProxyControllerService } from 'src/app/api/user/api/orderProxyController.service';
 import { CheckoutRequest } from 'src/app/api/user/model/checkoutRequest';
-
+import { CheckoutItemRequest } from 'src/app/api/user/model/checkoutItemRequest';
+import { PaymentResponse } from 'src/app/api/user/model/paymentResponse';
+import { PaymentProxyControllerService } from 'src/app/api/user/api/paymentProxyController.service';
 @Component({
   selector: 'app-checkout',
   templateUrl: './checkout.component.html',
@@ -19,106 +20,138 @@ import { CheckoutRequest } from 'src/app/api/user/model/checkoutRequest';
 export class CheckoutComponent implements OnInit, OnDestroy {
   checkoutForm!: FormGroup;
   private sub = new Subscription();
+  discountCode = '';
+  discountApplied = false;
+  discountPercentage = 0;
+  isProcessingPayment = false;
 
-  /* ===== STATE ===== */
   isLoading = false;
   isSubmitting = false;
-  isProcessingPayment = false;
-  formTouched = false;
-
-  /* ===== CART ===== */
   cartItems: CartItemResponse[] = [];
-  get cartItemsCount(): number {
-    return this.cartItems.reduce((s, i) => s + (i.quantity || 0), 0);
+  shippingMethods = [
+    { id: 'STANDARD', name: 'Giao hàng tiêu chuẩn', fee: 0 },
+    { id: 'EXPRESS', name: 'Giao hàng nhanh', fee: 30000 },
+  ];
+
+  selectedShippingMethodId: 'STANDARD' | 'EXPRESS' = 'STANDARD';
+
+  formTouched = false;
+  selectedPaymentMethod: 'COD' | 'VNPAY' = 'VNPAY';
+
+  // ===== Add these two =====
+  isFormValid(): boolean {
+    return this.checkoutForm ? this.checkoutForm.valid : false;
   }
 
-  /* ===== SHIPPING ===== */
-  shippingMethods = [
-    {
-      id: 'STANDARD',
-      name: 'Giao hàng tiêu chuẩn',
-      description: 'Giao trong 3–5 ngày',
-      fee: 0,
-      estimatedDays: '3–5 ngày',
-    },
-  ];
-  selectedShippingMethodId = 'STANDARD';
+  get cartItemsCount(): number {
+    return this.cartItems.reduce((sum, i) => sum + (i.quantity || 0), 0);
+  }
 
   provinces: any[] = [];
   districts: any[] = [];
   wards: any[] = [];
 
-  /* ===== PAYMENT ===== */
-  selectedPaymentMethod: 'COD' | 'QR' = 'COD';
-
-  /* ===== DISCOUNT ===== */
-  discountCode = '';
-  discountApplied = false;
-  discountPercentage = 0;
-
-  /* ===== SUMMARY ===== */
-  orderSummary = {
-    subtotal: 0,
-    shipping: 0,
-    discount: 0,
-    total: 0,
-  };
+  orderSummary = { subtotal: 0, shipping: 0, discount: 0, total: 0 };
 
   constructor(
     private fb: FormBuilder,
     private cartService: CartService,
-    private orderApi: OrderUserControllerService,
-    private paymentApi: PaymentUserControllerService,
+    private orderApi: OrderProxyControllerService,
+    private locationApi: LocationControllerService,
     private notify: NotificationService,
-    private http: HttpClient,
-    private locationApi: LocationControllerService
+    private paymentApi: PaymentProxyControllerService
   ) {}
 
-  private readonly PROVINCE_API = 'https://provinces.open-api.vn/api';
-
   ngOnInit(): void {
-    this.checkoutForm = this.fb.group({
-      email: ['', [Validators.required, Validators.email]],
-      name: ['', Validators.required],
-      phone: ['', Validators.required],
+    this.buildForm();
+    this.bindCart();
+    this.loadProvinces();
+    this.listenLocationChanges();
+  }
 
+  ngOnDestroy(): void {
+    this.sub.unsubscribe();
+  }
+
+  getValidationClass(fieldName: string): string {
+    const control = this.checkoutForm?.get(fieldName);
+    if (!control || !this.formTouched) return '';
+    return control.invalid && (control.dirty || control.touched)
+      ? 'is-invalid'
+      : 'is-valid';
+  }
+
+  onPaymentMethodChange(paymentMethod: 'COD' | 'VNPAY'): void {
+    this.selectedPaymentMethod = paymentMethod;
+  }
+
+  private buildForm(): void {
+    this.checkoutForm = this.fb.group({
+      email: ['abc@gmail.com', [Validators.required, Validators.email]],
+      name: ['Lò A', Validators.required],
+      phone: ['0398287981', Validators.required],
       province: ['', Validators.required],
       district: [{ value: '', disabled: true }, Validators.required],
       ward: [{ value: '', disabled: true }, Validators.required],
-
-      addressDetail: ['', Validators.required],
+      addressDetail: ['Nhà bên trái, phía bên phải', Validators.required],
       note: [''],
     });
+  }
+  applyDiscount(): void {
+    this.discountApplied = true;
+    this.discountPercentage = 0;
+  }
 
-    this.loadProvinces();
+  removeDiscount(): void {
+    this.discountApplied = false;
+    this.discountPercentage = 0;
+  }
 
-    // Province change
-    this.checkoutForm.get('province')!.valueChanges.subscribe((code) => {
-      this.loadDistricts(code);
-    });
+  onShippingMethodChange(methodId: 'STANDARD' | 'EXPRESS'): void {
+    this.selectedShippingMethodId = methodId;
 
-    // District change
-    this.checkoutForm.get('district')!.valueChanges.subscribe((code) => {
-      this.loadWards(code);
-    });
+    const method = this.shippingMethods.find((m) => m.id === methodId);
+    const shippingFee = method?.fee ?? 0;
 
+    const subtotal = this.orderSummary.subtotal;
+    this.orderSummary = {
+      ...this.orderSummary,
+      total: subtotal + shippingFee,
+    };
+  }
+
+  private listenLocationChanges(): void {
+    this.sub.add(
+      this.checkoutForm
+        .get('province')!
+        .valueChanges.subscribe((code) => this.loadDistricts(code))
+    );
+    this.sub.add(
+      this.checkoutForm
+        .get('district')!
+        .valueChanges.subscribe((code) => this.loadWards(code))
+    );
+  }
+
+  private bindCart(): void {
+    this.isLoading = true;
     this.sub.add(
       this.cartService.items$.subscribe((items) => {
         this.cartItems = items || [];
         this.calculateSummary();
+        this.isLoading = false;
       })
     );
+
+    // refresh cart from API
+    this.cartService.refreshCart().subscribe();
   }
 
   loadProvinces(): void {
     this.locationApi.provinces().subscribe({
       next: async (res: any) => {
-        if (res instanceof Blob) {
-          const text = await res.text();
-          this.provinces = JSON.parse(text);
-        } else {
-          this.provinces = res;
-        }
+        this.provinces =
+          res instanceof Blob ? JSON.parse(await res.text()) : res;
       },
       error: () => this.notify.error('Không tải được tỉnh/thành'),
     });
@@ -127,24 +160,14 @@ export class CheckoutComponent implements OnInit, OnDestroy {
   loadDistricts(provinceCode: number): void {
     this.districts = [];
     this.wards = [];
-
     this.checkoutForm.patchValue({ district: '', ward: '' });
     this.checkoutForm.get('district')!.disable();
     this.checkoutForm.get('ward')!.disable();
-
     if (!provinceCode) return;
 
     this.locationApi.districts(provinceCode).subscribe({
       next: async (res: any) => {
-        let data: any;
-
-        if (res instanceof Blob) {
-          const text = await res.text();
-          data = JSON.parse(text);
-        } else {
-          data = res;
-        }
-
+        const data = res instanceof Blob ? JSON.parse(await res.text()) : res;
         this.districts = data?.districts || [];
         this.checkoutForm.get('district')!.enable();
       },
@@ -156,20 +179,11 @@ export class CheckoutComponent implements OnInit, OnDestroy {
     this.wards = [];
     this.checkoutForm.patchValue({ ward: '' });
     this.checkoutForm.get('ward')!.disable();
-
     if (!districtCode) return;
 
     this.locationApi.wards(districtCode).subscribe({
       next: async (res: any) => {
-        let data: any;
-
-        if (res instanceof Blob) {
-          const text = await res.text();
-          data = JSON.parse(text);
-        } else {
-          data = res;
-        }
-
+        const data = res instanceof Blob ? JSON.parse(await res.text()) : res;
         this.wards = data?.wards || [];
         this.checkoutForm.get('ward')!.enable();
       },
@@ -177,113 +191,145 @@ export class CheckoutComponent implements OnInit, OnDestroy {
     });
   }
 
-  ngOnDestroy(): void {
-    this.sub.unsubscribe();
-  }
-
-  /* ================= VALIDATION ================= */
-  isFormValid(): boolean {
-    return this.checkoutForm.valid && this.cartItems.length > 0;
-  }
-
-  getValidationClass(control: string): string {
-    const c = this.checkoutForm.get(control);
-    if (!this.formTouched || !c) return 'border-gray-300';
-    return c.invalid ? 'border-red-500' : 'border-green-500';
-  }
-
-  /* ================= SHIPPING ================= */
-  onShippingMethodChange(id: string): void {
-    this.selectedShippingMethodId = id;
-    this.calculateSummary();
-  }
-
-  /* ================= PAYMENT ================= */
-  onPaymentMethodChange(method: 'COD' | 'QR'): void {
-    this.selectedPaymentMethod = method;
-  }
-
-  /* ================= SUMMARY ================= */
-  calculateSummary(): void {
+  private calculateSummary(): void {
     const subtotal = this.cartItems.reduce(
       (s, i) => s + (i.price || 0) * (i.quantity || 0),
       0
     );
 
+    const method = this.shippingMethods.find(
+      (m) => m.id === this.selectedShippingMethodId
+    );
+    const shippingFee = method?.fee ?? 0;
+
     this.orderSummary = {
       subtotal,
-      shipping: 0,
-      discount: this.discountApplied
-        ? (subtotal * this.discountPercentage) / 100
-        : 0,
-      total:
-        subtotal -
-        (this.discountApplied ? (subtotal * this.discountPercentage) / 100 : 0),
+      shipping: shippingFee,
+      discount: 0,
+      total: subtotal + shippingFee,
     };
   }
 
-  /* ================= DISCOUNT ================= */
-  applyDiscount(): void {
-    if (this.discountCode === 'SALE10') {
-      this.discountPercentage = 10;
-      this.discountApplied = true;
-      this.calculateSummary();
-    }
-  }
-
-  removeDiscount(): void {
-    this.discountApplied = false;
-    this.discountPercentage = 0;
-    this.discountCode = '';
-    this.calculateSummary();
-  }
-
-  /* ================= UTILS ================= */
-  formatCurrency(v: number): string {
-    return v.toLocaleString('vi-VN', {
+  formatCurrency(amount: number): string {
+    return new Intl.NumberFormat('vi-VN', {
       style: 'currency',
       currency: 'VND',
-    });
+    }).format(amount || 0);
   }
 
-  /* ================= SUBMIT ================= */
   submitOrder(): void {
     this.formTouched = true;
-    if (!this.isFormValid()) return;
+    if (this.checkoutForm.invalid || this.cartItems.length === 0) {
+      this.notify.error('Vui lòng nhập đầy đủ thông tin');
+      return;
+    }
 
+    if (this.isSubmitting) return;
     this.isSubmitting = true;
 
+    const ids = this.cartService.getCartIdentifiers();
+    const isGuest = !ids.userId;
+
+    const checkoutItems: CheckoutItemRequest[] = this.cartItems.map((i) => ({
+      productId: i.productId!,
+      variantId: i.variantId!,
+      quantity: i.quantity!,
+    }));
+
     const payload: CheckoutRequest = {
-      guestName: this.checkoutForm.value.name,
-      guestEmail: this.checkoutForm.value.email,
-      guestPhone: this.checkoutForm.value.phone,
+      ...(isGuest ? { guestId: ids.guestId } : {}),
+
+      guestName: isGuest ? this.checkoutForm.value.name : undefined,
+      guestEmail: isGuest ? this.checkoutForm.value.email : undefined,
+      guestPhone: isGuest ? this.checkoutForm.value.phone : undefined,
+
       shippingAddress: this.checkoutForm.value.addressDetail,
       shippingProvince: this.checkoutForm.value.province,
       shippingDistrict: this.checkoutForm.value.district,
       shippingWard: this.checkoutForm.value.ward,
       shippingNote: this.checkoutForm.value.note,
+
       paymentMethod: this.selectedPaymentMethod,
       shippingMethod: this.selectedShippingMethodId,
+      items: checkoutItems,
     };
 
     this.orderApi.checkout(payload).subscribe({
-      next: (order) => {
-        if (this.selectedPaymentMethod === 'QR') {
-          this.isProcessingPayment = true;
-          this.paymentApi
-            .createPayment({ orderId: order.id!, method: 'QR' })
-            .subscribe((p: any) => {
-              window.location.href = p.paymentUrl;
-            });
-        } else {
-          this.notify.success('Đặt hàng thành công!');
-          this.isSubmitting = false;
+      next: async (res: any) => {
+        const order = res instanceof Blob ? JSON.parse(await res.text()) : res;
+
+        console.log('ORDER ID', order.id);
+        if (this.selectedPaymentMethod === 'VNPAY') {
+          this.createPayment(order.id);
+          return;
         }
+
+        this.completeOrder();
       },
       error: () => {
-        this.isSubmitting = false;
         this.notify.error('Checkout thất bại');
+        this.isSubmitting = false;
       },
     });
+  }
+
+  private async handlePaymentResponse(res: any): Promise<void> {
+    let data: any;
+
+    if (res instanceof Blob) {
+      const text = await res.text();
+      data = JSON.parse(text);
+    } else {
+      data = res;
+    }
+
+    console.log('PAYMENT RESPONSE:', data);
+
+    if (!data?.paymentUrl) {
+      this.notify.error('Không nhận được link thanh toán');
+      this.isSubmitting = false;
+      return;
+    }
+
+    window.location.href = data.paymentUrl;
+  }
+
+  private handlePaymentError(): void {
+    this.notify.error('Tạo thanh toán thất bại');
+    this.isSubmitting = false;
+  }
+
+  private createPayment(orderId: number): void {
+    const ids = this.cartService.getCartIdentifiers();
+    const isGuest = !ids.userId;
+
+    if (isGuest) {
+      const payload: GuestPaymentRequest = {
+        orderId,
+        guestId: ids.guestId!,
+        method: 'VNPAY',
+      };
+
+      this.paymentApi.guestPayment(payload).subscribe({
+        next: (res) => this.handlePaymentResponse(res),
+        error: () => this.handlePaymentError(),
+      });
+    } else {
+      const payload: UserPaymentRequest = {
+        orderId,
+        method: 'VNPAY',
+      };
+
+      this.paymentApi.userPayment(payload).subscribe({
+        next: (res) => this.handlePaymentResponse(res),
+        error: () => this.handlePaymentError(),
+      });
+    }
+  }
+
+  private completeOrder(): void {
+    this.notify.success('Đặt hàng thành công!');
+    this.cartService.clearCart().subscribe();
+    this.isSubmitting = false;
   }
 }

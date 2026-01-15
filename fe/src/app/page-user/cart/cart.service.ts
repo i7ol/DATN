@@ -1,16 +1,15 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { finalize, tap } from 'rxjs/operators';
+import { tap, finalize } from 'rxjs/operators';
 import { v4 as uuidv4 } from 'uuid';
+import { CartProxyControllerService } from 'src/app/api/user';
 import { CartItemResponse } from 'src/app/api/user/model/cartItemResponse';
 import { CartResponse } from 'src/app/api/user/model/cartResponse';
-import { environment } from 'src/environments/environment';
 import { AuthService } from 'src/app/core/services/auth.service';
+import { HttpResponse } from '@angular/common/http';
+import { switchMap } from 'rxjs/operators';
+export type CartItemView = CartItemResponse & { imageUrl: string };
 
-type CartItemView = CartItemResponse & {
-  imageUrl: string;
-};
 @Injectable({
   providedIn: 'root',
 })
@@ -30,94 +29,117 @@ export class CartService {
   private userId: number | null = null;
   private guestId: string | null = null;
 
-  // FIX: Ensure correct base URL
-  private baseUrl = `${environment.apiUrls.shopApp}/user/cart`;
-
-  constructor(private http: HttpClient, private authService: AuthService) {
+  constructor(
+    private cartApi: CartProxyControllerService,
+    private authService: AuthService
+  ) {
     this.initializeGuestId();
+
+    this.refreshCart().subscribe({
+      next: (cart) => console.log('Guest cart initialized:', cart),
+      error: (err) => console.error('Error initializing guest cart:', err),
+    });
 
     this.authService.currentUser$.subscribe((user) => {
       if (user) {
         this.setUser(user.id);
-      } else {
-        this.refreshCart().subscribe();
       }
     });
   }
 
+  // ================== GUEST ID ==================
   private initializeGuestId(): void {
-    // Try to get existing guest ID from localStorage
     const existingGuestId = localStorage.getItem('guestId');
     if (existingGuestId) {
       this.guestId = existingGuestId;
     } else {
-      // Generate new guest ID
       this.guestId = uuidv4();
-
       localStorage.setItem('guestId', this.guestId);
+      console.log('Generated new guestId:', this.guestId);
     }
   }
-  private buildParams(
-    extra: Record<string, string | number> = {}
-  ): Record<string, string | number> {
-    const params: Record<string, string | number> = { ...extra };
 
-    // Ưu tiên userId
-    if (this.userId) {
-      params.userId = this.userId;
-    } else {
-      // Chưa login → bắt buộc có guestId
-      if (!this.guestId) {
-        this.initializeGuestId();
+  // ================== GETTERS ==================
+  get cartItemsCount(): number {
+    return this.itemsSubject.value.reduce(
+      (sum, item) => sum + (item.quantity || 0),
+      0
+    );
+  }
+
+  private handleCartResponse(resp: any): void {
+    if (!resp) return;
+
+    // Trường hợp OpenAPI trả HttpResponse
+    if (resp instanceof HttpResponse) {
+      const body = resp.body;
+
+      if (body instanceof Blob) {
+        body.text().then((text: string) => {
+          const cart = JSON.parse(text) as CartResponse;
+          this.setCart(cart);
+        });
+      } else {
+        this.setCart(body as CartResponse);
       }
-      params.guestId = this.guestId;
+      return;
     }
 
-    return params;
+    // Trường hợp trả trực tiếp CartResponse
+    this.setCart(resp as CartResponse);
   }
 
-  /* ===== REFRESH CART ===== */
+  // ================== CART OPERATIONS ==================
   refreshCart(): Observable<CartResponse> {
     this.loadingSubject.next(true);
 
-    return this.http
-      .get<CartResponse>(this.baseUrl, {
-        params: this.buildParams(),
-      })
+    return this.cartApi
+      .getCart(this.userId ?? undefined, this.guestId ?? undefined, 'response')
       .pipe(
-        tap((cart) => this.setCart(cart)),
+        tap((resp: any) => {
+          if (resp.body instanceof Blob) {
+            resp.body.text().then((text: string) => {
+              const cart = JSON.parse(text) as CartResponse;
+              this.setCart(cart);
+            });
+          } else {
+            this.setCart(resp.body as CartResponse);
+          }
+        }),
         finalize(() => this.loadingSubject.next(false))
       );
   }
 
-  /* ===== ADD ITEM ===== */
   addItem(variantId: number, quantity: number): Observable<CartResponse> {
     this.loadingSubject.next(true);
 
-    return this.http
-      .post<CartResponse>(`${this.baseUrl}/add`, null, {
-        params: this.buildParams({ variantId, quantity }),
-      })
+    return this.cartApi
+      .addItem(
+        variantId,
+        quantity,
+        this.userId ?? undefined,
+        this.guestId ?? undefined
+      )
       .pipe(
-        tap((cart) => this.setCart(cart)),
+        switchMap(() => this.refreshCart()),
         finalize(() => this.loadingSubject.next(false))
       );
   }
 
-  /* ===== UPDATE ITEM ===== */
   updateItem(variantId: number, quantity: number): Observable<CartResponse> {
-    if (quantity < 1) {
-      return this.removeItem(variantId);
-    }
+    if (quantity < 1) return this.removeItem(variantId);
 
     this.loadingSubject.next(true);
 
-    return this.http
-      .put<CartResponse>(`${this.baseUrl}/update`, null, {
-        params: this.buildParams({ variantId, quantity }),
-      })
+    return this.cartApi
+      .updateItem(
+        variantId,
+        quantity,
+        this.userId ?? undefined,
+        this.guestId ?? undefined
+      )
       .pipe(
-        tap((cart) => this.setCart(cart)),
+        switchMap(() => this.refreshCart()),
         finalize(() => this.loadingSubject.next(false))
       );
   }
@@ -125,82 +147,73 @@ export class CartService {
   removeItem(variantId: number): Observable<CartResponse> {
     this.loadingSubject.next(true);
 
-    return this.http
-      .delete<CartResponse>(`${this.baseUrl}/remove`, {
-        params: this.buildParams({ variantId }),
-      })
+    return this.cartApi
+      .removeItem(
+        variantId,
+        this.userId ?? undefined,
+        this.guestId ?? undefined
+      )
       .pipe(
-        tap((cart) => this.setCart(cart)),
+        switchMap(() => this.refreshCart()),
         finalize(() => this.loadingSubject.next(false))
       );
   }
 
-  /* ===== CLEAR CART ===== */
   clearCart(): Observable<CartResponse> {
     this.loadingSubject.next(true);
 
-    return this.http
-      .delete<CartResponse>(`${this.baseUrl}/clear`, {
-        params: this.buildParams(),
-      })
-      .pipe(
-        tap((cart) => this.setCart(cart)),
-        finalize(() => this.loadingSubject.next(false))
-      );
+    const clear$ = this.userId
+      ? this.cartApi.clearUserCart(this.userId)
+      : this.cartApi.clearGuestCart(this.guestId!);
+
+    return clear$.pipe(
+      tap(() => {
+        this.itemsSubject.next([]);
+        this.totalPriceSubject.next(0);
+        this.totalQuantitySubject.next(0);
+      }),
+      finalize(() => this.loadingSubject.next(false))
+    );
   }
 
-  /* ===== MERGE GUEST → USER ===== */
   mergeGuestToUser(userId: number): Observable<CartResponse> {
-    if (!this.guestId) {
-      this.initializeGuestId();
-    }
-
+    if (!this.guestId) this.initializeGuestId();
     this.loadingSubject.next(true);
-
-    return this.http
-      .post<CartResponse>(`${this.baseUrl}/merge`, null, {
-        params: { guestId: this.guestId, userId },
-      })
-      .pipe(
-        tap((cart) => {
-          localStorage.removeItem('guestId');
-          this.guestId = null;
-          this.setCart(cart);
-        }),
-        finalize(() => this.loadingSubject.next(false))
-      );
+    return this.cartApi.mergeGuestCart(this.guestId!, userId).pipe(
+      tap((cart) => {
+        localStorage.removeItem('guestId');
+        this.guestId = null;
+        this.setCart(cart);
+      }),
+      finalize(() => this.loadingSubject.next(false))
+    );
   }
 
-  /* ===== SET CART TO SUBJECTS ===== */
+  // ================== HELPER METHODS ==================
   private setCart(cart: CartResponse) {
     const items: CartItemView[] =
       cart.items?.map((item) => {
         const imageUrl =
           item.images && item.images.length > 0 ? item.images[0].url : null;
-
         return {
           ...item,
           imageUrl: imageUrl
             ? imageUrl.startsWith('http')
               ? imageUrl
-              : `${environment.apiUrls.shopApp}${imageUrl}`
+              : `assets/${imageUrl}`
             : 'assets/no-image.png',
         };
       }) || [];
 
     this.itemsSubject.next(items);
     this.totalPriceSubject.next(cart.totalPrice || 0);
-
     const totalQty =
       cart.quantity ?? items.reduce((sum, i) => sum + (i.quantity || 0), 0);
-
     this.totalQuantitySubject.next(totalQty);
   }
 
-  /* ===== SET USER/GUEST ===== */
   setUser(userId: number) {
     this.userId = userId;
-    // If we have a guest cart, merge it
     if (this.guestId) {
       this.mergeGuestToUser(userId).subscribe();
     } else {
@@ -214,11 +227,14 @@ export class CartService {
     this.refreshCart().subscribe();
   }
 
-  // Helper method to get current cart identifiers
   getCartIdentifiers() {
-    return {
-      userId: this.userId,
-      guestId: this.guestId,
-    };
+    return { userId: this.userId, guestId: this.guestId };
+  }
+
+  // ================== OPTIONAL FORM CHECK ==================
+  isFormValid(formValues?: any): boolean {
+    // Bạn có thể tuỳ chỉnh theo formGroup hoặc các field
+    if (!formValues) return false;
+    return Object.values(formValues).every((v) => v !== null && v !== '');
   }
 }
