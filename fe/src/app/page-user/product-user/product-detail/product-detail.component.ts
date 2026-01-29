@@ -31,7 +31,7 @@ export class ProductDetailComponent implements OnInit {
     private route: ActivatedRoute,
     private productApi: ProductUserControllerService,
     private cartService: CartService,
-    private notify: NotificationService
+    private notify: NotificationService,
   ) {}
 
   /* ================= INIT ================= */
@@ -97,7 +97,7 @@ export class ProductDetailComponent implements OnInit {
       this.product.images.length > 0 ? this.product.images[0].url : '';
 
     this.colors = Array.from(
-      new Set(this.product.variants.map((v) => v.color))
+      new Set(this.product.variants.map((v) => v.color)),
     );
   }
 
@@ -124,7 +124,7 @@ export class ProductDetailComponent implements OnInit {
           (v) =>
             v.color === this.selectedColor &&
             v.sizeName === this.selectedSize &&
-            (v.stock || 0) > 0
+            (v.stock || 0) > 0,
         ) || null;
     }
   }
@@ -139,7 +139,7 @@ export class ProductDetailComponent implements OnInit {
     if (!this.product?.variants) return false;
 
     const variant = this.product.variants.find(
-      (v) => v.color === color && v.sizeName === size
+      (v) => v.color === color && v.sizeName === size,
     );
 
     return (variant?.stock || 0) > 0;
@@ -151,7 +151,7 @@ export class ProductDetailComponent implements OnInit {
     return (
       this.product?.variants?.find(
         (v) =>
-          v.color === this.selectedColor && v.sizeName === this.selectedSize
+          v.color === this.selectedColor && v.sizeName === this.selectedSize,
       ) || null
     );
   }

@@ -10,7 +10,7 @@
 
 
 export interface UserPaymentRequest { 
-    orderId?: number;
+    orderId: number;
     method: string;
 }
 

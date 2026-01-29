@@ -21,7 +21,6 @@ model/apiResponseVoid.ts
 model/categoryCreateRequest.ts
 model/categoryResponse.ts
 model/categoryUpdateRequest.ts
-model/createOrderRequest.ts
 model/exportRequest.ts
 model/imageDTO.ts
 model/importRequest.ts
@@ -29,13 +28,14 @@ model/inventoryRequest.ts
 model/inventoryResponse.ts
 model/inventoryTransactionDTO.ts
 model/models.ts
-model/orderItemRequest.ts
 model/orderItemResponse.ts
 model/orderResponse.ts
 model/pageInventoryResponse.ts
 model/pagePaymentResponse.ts
 model/pageProductResponse.ts
+model/pageResponseOrderResponse.ts
 model/pageShippingResponse.ts
+model/pageUserResponse.ts
 model/pageable.ts
 model/pageableObject.ts
 model/paymentResponse.ts

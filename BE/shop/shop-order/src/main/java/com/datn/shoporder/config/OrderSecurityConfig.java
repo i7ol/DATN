@@ -24,7 +24,7 @@ public class OrderSecurityConfig {
             "/api/user/orders/checkout",
             "/api/user/orders/{orderId}/cancel",
             "/api/user/orders/**",
-
+            "/api/admin/orders",
 
 
             "/v3/api-docs/**",

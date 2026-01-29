@@ -10,7 +10,7 @@
 
 
 export interface GuestPaymentRequest { 
-    orderId?: number;
+    orderId: number;
     method: string;
     guestId: string;
 }

@@ -27,7 +27,7 @@ export class ProductListComponent implements OnInit {
     private productApi: ProductUserControllerService,
     private router: Router,
     private cartService: CartService,
-    private notify: NotificationService
+    private notify: NotificationService,
   ) {}
 
   /* ================= INIT ================= */
@@ -67,8 +67,15 @@ export class ProductListComponent implements OnInit {
       return;
     }
 
+    if ((variant.stock ?? 0) <= 0) {
+      this.notify.info('Sản phẩm đã hết hàng');
+      return;
+    }
+
     this.cartService.addItem(variant.id, 1).subscribe({
-      next: () => this.notify.success('Đã thêm vào giỏ hàng'),
+      next: () => {
+        this.notify.success('Đã thêm vào giỏ hàng');
+      },
       error: (err) => this.handleAddToCartError(err),
     });
   }
@@ -173,5 +180,14 @@ export class ProductListComponent implements OnInit {
 
   hasSingleVariant(product: ProductResponse): boolean {
     return (product.variants?.length || 0) === 1;
+  }
+
+  hasStock(product: ProductResponse): boolean {
+    const variant = product.variants?.[0];
+    return !!variant && (variant.stock ?? 0) > 0;
+  }
+
+  isOutOfStock(product: ProductResponse): boolean {
+    return !this.hasStock(product);
   }
 }

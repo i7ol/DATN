@@ -11,6 +11,8 @@ import com.datn.shopdatabase.repository.OrderRepository;
 import com.datn.shopdatabase.repository.ProductRepository;
 import com.datn.shopobject.dto.request.CreateOrderRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -249,12 +251,12 @@ public class OrderService {
                 .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
     }
 
-    public List<OrderEntity> getOrdersByUserId(Long userId) {
-        return orderRepository.findByUserId(userId);
+    public Page<OrderEntity> getOrdersByUserId(Long userId,Pageable pageable) {
+        return orderRepository.findByUserId(userId,pageable);
     }
 
-    public List<OrderEntity> getAllOrders() {
-        return orderRepository.findAll();
+    public Page<OrderEntity> getAllOrders(Pageable pageable) {
+        return orderRepository.findAll(pageable);
     }
 
     public List<OrderEntity> getGuestOrders() {

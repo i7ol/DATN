@@ -39,15 +39,14 @@ export class CartProxyControllerService extends BaseService {
      * @endpoint post /api/cart-proxy/add
      * @param variantId 
      * @param quantity 
-     * @param userId 
-     * @param guestId 
+     * @param xGuestId 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public addItem(variantId: number, quantity: number, userId?: number, guestId?: string, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<CartResponse>;
-    public addItem(variantId: number, quantity: number, userId?: number, guestId?: string, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpResponse<CartResponse>>;
-    public addItem(variantId: number, quantity: number, userId?: number, guestId?: string, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpEvent<CartResponse>>;
-    public addItem(variantId: number, quantity: number, userId?: number, guestId?: string, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<any> {
+    public addItem(variantId: number, quantity: number, xGuestId?: string, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<CartResponse>;
+    public addItem(variantId: number, quantity: number, xGuestId?: string, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpResponse<CartResponse>>;
+    public addItem(variantId: number, quantity: number, xGuestId?: string, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpEvent<CartResponse>>;
+    public addItem(variantId: number, quantity: number, xGuestId?: string, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<any> {
         if (variantId === null || variantId === undefined) {
             throw new Error('Required parameter variantId was null or undefined when calling addItem.');
         }
@@ -57,15 +56,14 @@ export class CartProxyControllerService extends BaseService {
 
         let localVarQueryParameters = new HttpParams({encoder: this.encoder});
         localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
-          <any>userId, 'userId');
-        localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
-          <any>guestId, 'guestId');
-        localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
           <any>variantId, 'variantId');
         localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
           <any>quantity, 'quantity');
 
         let localVarHeaders = this.defaultHeaders;
+        if (xGuestId !== undefined && xGuestId !== null) {
+            localVarHeaders = localVarHeaders.set('X-Guest-Id', String(xGuestId));
+        }
 
         const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
             '*/*'
@@ -105,23 +103,19 @@ export class CartProxyControllerService extends BaseService {
 
     /**
      * @endpoint delete /api/cart-proxy/clear
-     * @param userId 
-     * @param guestId 
+     * @param xGuestId 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public clearCart(userId?: number, guestId?: string, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<CartResponse>;
-    public clearCart(userId?: number, guestId?: string, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpResponse<CartResponse>>;
-    public clearCart(userId?: number, guestId?: string, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpEvent<CartResponse>>;
-    public clearCart(userId?: number, guestId?: string, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<any> {
-
-        let localVarQueryParameters = new HttpParams({encoder: this.encoder});
-        localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
-          <any>userId, 'userId');
-        localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
-          <any>guestId, 'guestId');
+    public clearCart(xGuestId?: string, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<CartResponse>;
+    public clearCart(xGuestId?: string, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpResponse<CartResponse>>;
+    public clearCart(xGuestId?: string, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpEvent<CartResponse>>;
+    public clearCart(xGuestId?: string, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<any> {
 
         let localVarHeaders = this.defaultHeaders;
+        if (xGuestId !== undefined && xGuestId !== null) {
+            localVarHeaders = localVarHeaders.set('X-Guest-Id', String(xGuestId));
+        }
 
         const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
             '*/*'
@@ -149,7 +143,6 @@ export class CartProxyControllerService extends BaseService {
         return this.httpClient.request<CartResponse>('delete', `${basePath}${localVarPath}`,
             {
                 context: localVarHttpContext,
-                params: localVarQueryParameters,
                 responseType: <any>responseType_,
                 ...(withCredentials ? { withCredentials } : {}),
                 headers: localVarHeaders,
@@ -261,23 +254,19 @@ export class CartProxyControllerService extends BaseService {
 
     /**
      * @endpoint get /api/cart-proxy
-     * @param userId 
-     * @param guestId 
+     * @param xGuestId 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public getCart(userId?: number, guestId?: string, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<CartResponse>;
-    public getCart(userId?: number, guestId?: string, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpResponse<CartResponse>>;
-    public getCart(userId?: number, guestId?: string, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpEvent<CartResponse>>;
-    public getCart(userId?: number, guestId?: string, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<any> {
-
-        let localVarQueryParameters = new HttpParams({encoder: this.encoder});
-        localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
-          <any>userId, 'userId');
-        localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
-          <any>guestId, 'guestId');
+    public getCart(xGuestId?: string, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<CartResponse>;
+    public getCart(xGuestId?: string, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpResponse<CartResponse>>;
+    public getCart(xGuestId?: string, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpEvent<CartResponse>>;
+    public getCart(xGuestId?: string, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<any> {
 
         let localVarHeaders = this.defaultHeaders;
+        if (xGuestId !== undefined && xGuestId !== null) {
+            localVarHeaders = localVarHeaders.set('X-Guest-Id', String(xGuestId));
+        }
 
         const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
             '*/*'
@@ -305,7 +294,6 @@ export class CartProxyControllerService extends BaseService {
         return this.httpClient.request<CartResponse>('get', `${basePath}${localVarPath}`,
             {
                 context: localVarHttpContext,
-                params: localVarQueryParameters,
                 responseType: <any>responseType_,
                 ...(withCredentials ? { withCredentials } : {}),
                 headers: localVarHeaders,
@@ -317,29 +305,22 @@ export class CartProxyControllerService extends BaseService {
 
     /**
      * @endpoint post /api/cart-proxy/merge
-     * @param guestId 
-     * @param userId 
+     * @param xGuestId 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public mergeGuestCart(guestId: string, userId: number, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<CartResponse>;
-    public mergeGuestCart(guestId: string, userId: number, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpResponse<CartResponse>>;
-    public mergeGuestCart(guestId: string, userId: number, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpEvent<CartResponse>>;
-    public mergeGuestCart(guestId: string, userId: number, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<any> {
-        if (guestId === null || guestId === undefined) {
-            throw new Error('Required parameter guestId was null or undefined when calling mergeGuestCart.');
+    public mergeGuestCart(xGuestId: string, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<CartResponse>;
+    public mergeGuestCart(xGuestId: string, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpResponse<CartResponse>>;
+    public mergeGuestCart(xGuestId: string, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpEvent<CartResponse>>;
+    public mergeGuestCart(xGuestId: string, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<any> {
+        if (xGuestId === null || xGuestId === undefined) {
+            throw new Error('Required parameter xGuestId was null or undefined when calling mergeGuestCart.');
         }
-        if (userId === null || userId === undefined) {
-            throw new Error('Required parameter userId was null or undefined when calling mergeGuestCart.');
-        }
-
-        let localVarQueryParameters = new HttpParams({encoder: this.encoder});
-        localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
-          <any>guestId, 'guestId');
-        localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
-          <any>userId, 'userId');
 
         let localVarHeaders = this.defaultHeaders;
+        if (xGuestId !== undefined && xGuestId !== null) {
+            localVarHeaders = localVarHeaders.set('X-Guest-Id', String(xGuestId));
+        }
 
         const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
             '*/*'
@@ -367,7 +348,6 @@ export class CartProxyControllerService extends BaseService {
         return this.httpClient.request<CartResponse>('post', `${basePath}${localVarPath}`,
             {
                 context: localVarHttpContext,
-                params: localVarQueryParameters,
                 responseType: <any>responseType_,
                 ...(withCredentials ? { withCredentials } : {}),
                 headers: localVarHeaders,
@@ -380,28 +360,26 @@ export class CartProxyControllerService extends BaseService {
     /**
      * @endpoint delete /api/cart-proxy/remove
      * @param variantId 
-     * @param userId 
-     * @param guestId 
+     * @param xGuestId 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public removeItem(variantId: number, userId?: number, guestId?: string, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<CartResponse>;
-    public removeItem(variantId: number, userId?: number, guestId?: string, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpResponse<CartResponse>>;
-    public removeItem(variantId: number, userId?: number, guestId?: string, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpEvent<CartResponse>>;
-    public removeItem(variantId: number, userId?: number, guestId?: string, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<any> {
+    public removeItem(variantId: number, xGuestId?: string, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<CartResponse>;
+    public removeItem(variantId: number, xGuestId?: string, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpResponse<CartResponse>>;
+    public removeItem(variantId: number, xGuestId?: string, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpEvent<CartResponse>>;
+    public removeItem(variantId: number, xGuestId?: string, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<any> {
         if (variantId === null || variantId === undefined) {
             throw new Error('Required parameter variantId was null or undefined when calling removeItem.');
         }
 
         let localVarQueryParameters = new HttpParams({encoder: this.encoder});
         localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
-          <any>userId, 'userId');
-        localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
-          <any>guestId, 'guestId');
-        localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
           <any>variantId, 'variantId');
 
         let localVarHeaders = this.defaultHeaders;
+        if (xGuestId !== undefined && xGuestId !== null) {
+            localVarHeaders = localVarHeaders.set('X-Guest-Id', String(xGuestId));
+        }
 
         const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
             '*/*'
@@ -443,15 +421,14 @@ export class CartProxyControllerService extends BaseService {
      * @endpoint put /api/cart-proxy/update
      * @param variantId 
      * @param quantity 
-     * @param userId 
-     * @param guestId 
+     * @param xGuestId 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public updateItem(variantId: number, quantity: number, userId?: number, guestId?: string, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<CartResponse>;
-    public updateItem(variantId: number, quantity: number, userId?: number, guestId?: string, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpResponse<CartResponse>>;
-    public updateItem(variantId: number, quantity: number, userId?: number, guestId?: string, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpEvent<CartResponse>>;
-    public updateItem(variantId: number, quantity: number, userId?: number, guestId?: string, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<any> {
+    public updateItem(variantId: number, quantity: number, xGuestId?: string, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<CartResponse>;
+    public updateItem(variantId: number, quantity: number, xGuestId?: string, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpResponse<CartResponse>>;
+    public updateItem(variantId: number, quantity: number, xGuestId?: string, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpEvent<CartResponse>>;
+    public updateItem(variantId: number, quantity: number, xGuestId?: string, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<any> {
         if (variantId === null || variantId === undefined) {
             throw new Error('Required parameter variantId was null or undefined when calling updateItem.');
         }
@@ -461,15 +438,14 @@ export class CartProxyControllerService extends BaseService {
 
         let localVarQueryParameters = new HttpParams({encoder: this.encoder});
         localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
-          <any>userId, 'userId');
-        localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
-          <any>guestId, 'guestId');
-        localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
           <any>variantId, 'variantId');
         localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
           <any>quantity, 'quantity');
 
         let localVarHeaders = this.defaultHeaders;
+        if (xGuestId !== undefined && xGuestId !== null) {
+            localVarHeaders = localVarHeaders.set('X-Guest-Id', String(xGuestId));
+        }
 
         const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
             '*/*'

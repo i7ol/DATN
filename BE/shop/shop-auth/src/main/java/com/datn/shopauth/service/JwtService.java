@@ -102,7 +102,7 @@ public class JwtService {
 
             log.warn("Please update your application.properties with this key:");
             log.warn("");
-            log.warn("jwt.secret={}", newBase64Key);
+            log.warn("A new JWT secret key was generated. Please update application.properties");
             log.warn("");
             log.warn("Key information:");
             log.warn("- Length: {} characters", newBase64Key.length());

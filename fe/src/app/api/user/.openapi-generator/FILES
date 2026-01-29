@@ -3,6 +3,7 @@
 README.md
 api.base.service.ts
 api.module.ts
+api/accUserController.service.ts
 api/api.ts
 api/cartProxyController.service.ts
 api/locationController.service.ts
@@ -14,6 +15,7 @@ configuration.ts
 encoder.ts
 git_push.sh
 index.ts
+model/apiResponseUserResponse.ts
 model/cartItemResponse.ts
 model/cartResponse.ts
 model/checkoutItemRequest.ts
@@ -23,7 +25,9 @@ model/imageDTO.ts
 model/models.ts
 model/orderItemResponse.ts
 model/orderResponse.ts
+model/pageOrderResponse.ts
 model/pageProductResponse.ts
+model/pageable.ts
 model/pageableObject.ts
 model/paymentResponse.ts
 model/productResponse.ts

@@ -56,6 +56,8 @@ public class AdminSecurityConfig {
             "/api/admin/orders/{orderId}",
             "/api/admin/orders/{orderId}/status",
             "/api/admin/orders/{orderId}/payment",
+            "/api/admin/payments",
+            "/api/admin/payments/**",
             "/api/admin/payments/order/{orderId}",
             "/api/admin/payments/{paymentId}/paid",
             "/api/admin/payments/{paymentId}/refund",

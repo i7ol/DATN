@@ -48,7 +48,7 @@
       <p
         class="text-xl text-black flex justify-center poppins-regular items-center mb-4"
       >
-        {{ product.price | number : "1.0-0" }}đ
+        {{ product.price | number: "1.0-0" }}đ
       </p>
 
       <!-- Thông báo trạng thái chọn -->
@@ -116,11 +116,12 @@
             *ngFor="let s of sizes"
             (click)="selectSize(s)"
             class="size-btn poppins-regular"
-            [ngClass]="{
-              active: selectedSize === s,
-              'opacity-50 cursor-not-allowed':
-                !selectedColor || !isVariantAvailable(selectedColor, s)
-            }"
+            [ngClass]="
+              (selectedSize === s ? 'active ' : '') +
+              (!selectedColor || !isVariantAvailable(selectedColor, s)
+                ? 'opacity-50 cursor-not-allowed'
+                : '')
+            "
             [disabled]="!selectedColor || !isVariantAvailable(selectedColor, s)"
           >
             {{ s }}

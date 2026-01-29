@@ -4,6 +4,8 @@ import com.datn.shopdatabase.enums.OrderStatus;
 import com.datn.shopdatabase.enums.PaymentStatus;
 import com.datn.shopobject.dto.response.OrderResponse;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -18,7 +20,7 @@ import java.util.List;
 public interface OrderAdminClient {
 
     @GetMapping("/api/admin/orders")
-    List<OrderResponse> getAll();
+    Page<OrderResponse> getAll(Pageable pageable);
 
     @GetMapping("/api/admin/orders/{orderId}")
     OrderResponse getOrder(@PathVariable Long orderId);

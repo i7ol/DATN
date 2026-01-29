@@ -15,6 +15,8 @@ import {
   PaymentResponseStatusEnum,
 } from 'src/app/api/admin/model/paymentResponse';
 import { PaymentSearchRequest } from 'src/app/api/admin/model/paymentSearchRequest';
+import { parseBlobJson } from 'src/app/shared/utils/http.util';
+import { PagePaymentResponse } from 'src/app/api/admin/model/pagePaymentResponse';
 
 @Component({
   selector: 'app-payment-list',
@@ -61,7 +63,7 @@ export class PaymentListComponent implements OnInit, AfterViewInit {
     private paymentService: PaymentAdminProxyControllerService,
     private router: Router,
     private dialog: MatDialog,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
   ) {}
 
   /* ================= LIFECYCLE ================= */
@@ -81,16 +83,27 @@ export class PaymentListComponent implements OnInit, AfterViewInit {
     const pageable: Pageable = {
       page: this.pageIndex,
       size: this.pageSize,
-      sort: ['createdAt,desc'],
     };
 
-    this.paymentService.getAllPayments(filter, pageable).subscribe({
-      next: (res) => {
-        this.payments = res.content || [];
-        this.dataSource.data = this.payments;
-        this.totalItems = res.totalElements || 0;
-        this.isLoading = false;
+    this.paymentService.getAllPayments(filter, pageable, 'response').subscribe({
+      next: async (resp) => {
+        try {
+          const body = await parseBlobJson<any>(resp.body);
+
+          console.log('RAW BODY FROM BACKEND = ', body);
+          console.log('body.content = ', body?.content);
+
+          this.payments = body.content || [];
+          this.dataSource.data = this.payments;
+          this.totalItems = body.totalElements || 0;
+        } catch (e) {
+          console.error('Parse payment response error', e);
+          this.showError('Dữ liệu trả về không hợp lệ');
+        } finally {
+          this.isLoading = false;
+        }
       },
+
       error: () => {
         this.showError('Không thể tải danh sách thanh toán');
         this.isLoading = false;
@@ -208,13 +221,13 @@ export class PaymentListComponent implements OnInit, AfterViewInit {
 
   getPaidCount(): number {
     return this.payments.filter(
-      (p) => p.status === PaymentResponseStatusEnum.PAID
+      (p) => p.status === PaymentResponseStatusEnum.PAID,
     ).length;
   }
 
   getPendingCount(): number {
     return this.payments.filter(
-      (p) => p.status === PaymentResponseStatusEnum.PENDING
+      (p) => p.status === PaymentResponseStatusEnum.PENDING,
     ).length;
   }
 
@@ -222,7 +235,7 @@ export class PaymentListComponent implements OnInit, AfterViewInit {
     return this.payments.filter(
       (p) =>
         p.status === PaymentResponseStatusEnum.FAILED ||
-        p.status === PaymentResponseStatusEnum.REFUNDED
+        p.status === PaymentResponseStatusEnum.REFUNDED,
     ).length;
   }
 

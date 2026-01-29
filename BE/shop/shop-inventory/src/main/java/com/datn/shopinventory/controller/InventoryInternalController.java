@@ -123,7 +123,7 @@ public class InventoryInternalController {
     // LIST (PAGE)
     // =============================
     @GetMapping
-    public Page<InventoryResponse> getAll(Pageable pageable) {
-        return inventoryService.getAll(pageable);
+    public Page<InventoryResponse> getAllInventory(Pageable pageable) {
+        return inventoryService.getAllInventory(pageable);
     }
 }

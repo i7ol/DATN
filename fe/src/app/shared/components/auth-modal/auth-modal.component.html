@@ -1,113 +1,90 @@
-<div class="auth-modal-container">
-  <!-- Close -->
-  <button
-    mat-icon-button
-    class="close-button"
-    (click)="closeDialog()"
-    aria-label="Close"
-  >
-    <mat-icon>close</mat-icon>
-  </button>
+<div class="auth-backdrop">
+  <div class="auth-container">
+    <div class="auth-card" [class.register-mode]="!isLoginMode">
+      
+      <button class="close-btn" mat-icon-button (click)="closeDialog()">
+        <mat-icon>close</mat-icon>
+      </button>
 
-  <mat-tab-group
-    [selectedIndex]="isLoginMode ? 0 : 1"
-    animationDuration="0ms"
-    (selectedTabChange)="onTabChange($event)"
-  >
-    <!-- ================= LOGIN ================= -->
-    <mat-tab label="Đăng nhập">
-      <div class="p-6 max-w-md mx-auto">
-        <h2 class="text-2xl font-bold mb-2">Chào mừng trở lại</h2>
-        <p class="text-gray-600 mb-6">Đăng nhập để tiếp tục mua sắm</p>
-
-        <form [formGroup]="loginForm" (ngSubmit)="onLoginSubmit()">
-          <mat-form-field appearance="outline" class="w-full mb-4">
-            <mat-label>Tên đăng nhập</mat-label>
-            <input matInput formControlName="username" />
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" class="w-full mb-6">
-            <mat-label>Mật khẩu</mat-label>
-            <input matInput type="password" formControlName="password" />
-          </mat-form-field>
-
-          <div *ngIf="loginError" class="mb-4 text-red-600 text-sm">
-            {{ loginError }}
+      <div class="auth-content">
+        <div class="auth-header">
+          <div class="logo-placeholder">
+            <mat-icon color="primary">shopping_bag</mat-icon>
           </div>
+          <h2>{{ isLoginMode ? "Chào mừng trở lại" : "Tạo tài khoản mới" }}</h2>
+          <p class="subtitle">
+            {{ isLoginMode ? "Đăng nhập để tiếp tục mua sắm cùng chúng tôi" : "Tham gia cùng hàng nghìn khách hàng mỗi ngày" }}
+          </p>
+        </div>
 
-          <button
-            mat-raised-button
-            color="primary"
-            class="w-full py-3"
-            [disabled]="loginLoading"
-          >
-            {{ loginLoading ? "Đang đăng nhập..." : "Đăng nhập" }}
-          </button>
-        </form>
+        <mat-tab-group
+          class="auth-tabs custom-tabs"
+          [selectedIndex]="isLoginMode ? 0 : 1"
+          (selectedTabChange)="onTabChange($event)"
+          centered
+        >
+          <mat-tab label="ĐĂNG NHẬP">
+            <form class="auth-form" [formGroup]="loginForm" (ngSubmit)="onLoginSubmit()">
+              <mat-form-field appearance="fill" class="full-width">
+                <mat-label>Tên đăng nhập</mat-label>
+                <input matInput formControlName="username" placeholder="Ví dụ: nva123">
+                <mat-icon matSuffix>person_outline</mat-icon>
+              </mat-form-field>
+
+              <mat-form-field appearance="fill" class="full-width">
+                <mat-label>Mật khẩu</mat-label>
+                <input matInput [type]="hidePassword ? 'password' : 'text'" formControlName="password">
+                <button mat-icon-button matSuffix type="button" (click)="hidePassword = !hidePassword">
+                  <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+                </button>
+              </mat-form-field>
+
+              <div class="form-options">
+                <mat-checkbox color="primary">Ghi nhớ tôi</mat-checkbox>
+                <a href="javascript:void(0)" class="forgot-link">Quên mật khẩu?</a>
+              </div>
+
+              <button mat-flat-button color="primary" class="main-btn" [disabled]="loginLoading || loginForm.invalid">
+                <mat-progress-spinner *ngIf="loginLoading" diameter="20" mode="indeterminate"></mat-progress-spinner>
+                <span *ngIf="!loginLoading">Đăng nhập</span>
+              </button>
+            </form>
+          </mat-tab>
+
+          <mat-tab label="ĐĂNG KÝ">
+            <form class="auth-form register-grid" [formGroup]="registerForm" (ngSubmit)="onRegisterSubmit()">
+              <mat-form-field appearance="fill">
+                <mat-label>Tên đăng nhập</mat-label>
+                <input matInput formControlName="username">
+              </mat-form-field>
+
+              <mat-form-field appearance="fill">
+                <mat-label>Số điện thoại</mat-label>
+                <input matInput formControlName="phone">
+              </mat-form-field>
+
+              <mat-form-field appearance="fill" class="full-span">
+                <mat-label>Email liên hệ</mat-label>
+                <input matInput type="email" formControlName="email">
+              </mat-form-field>
+
+              <mat-form-field appearance="fill">
+                <mat-label>Mật khẩu</mat-label>
+                <input matInput [type]="hidePassword ? 'password' : 'text'" formControlName="password">
+              </mat-form-field>
+
+              <mat-form-field appearance="fill">
+                <mat-label>Xác nhận</mat-label>
+                <input matInput [type]="hidePassword ? 'password' : 'text'" formControlName="confirmPassword">
+              </mat-form-field>
+
+              <button mat-flat-button color="primary" class="main-btn full-span" [disabled]="registerLoading || registerForm.invalid">
+                <span>{{ registerLoading ? 'Đang khởi tạo...' : 'Tạo tài khoản' }}</span>
+              </button>
+            </form>
+          </mat-tab>
+        </mat-tab-group>
       </div>
-    </mat-tab>
-
-    <!-- ================= REGISTER ================= -->
-    <mat-tab label="Đăng ký">
-      <div class="p-6 max-w-4xl mx-auto">
-        <h2 class="text-2xl font-bold mb-2">Tạo tài khoản mới</h2>
-        <p class="text-gray-600 mb-6">Tham gia cùng chúng tôi</p>
-
-        <form [formGroup]="registerForm" (ngSubmit)="onRegisterSubmit()">
-          <!-- 2 columns -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <mat-form-field appearance="outline">
-              <mat-label>Tên đăng nhập *</mat-label>
-              <input matInput formControlName="username" />
-            </mat-form-field>
-
-            <mat-form-field appearance="outline">
-              <mat-label>Email *</mat-label>
-              <input matInput formControlName="email" />
-            </mat-form-field>
-
-            <mat-form-field appearance="outline">
-              <mat-label>Mật khẩu *</mat-label>
-              <input matInput type="password" formControlName="password" />
-            </mat-form-field>
-
-            <mat-form-field appearance="outline">
-              <mat-label>Xác nhận mật khẩu *</mat-label>
-              <input
-                matInput
-                type="password"
-                formControlName="confirmPassword"
-              />
-            </mat-form-field>
-
-            <mat-form-field appearance="outline">
-              <mat-label>Số điện thoại</mat-label>
-              <input matInput formControlName="phone" />
-            </mat-form-field>
-
-            <div></div>
-          </div>
-
-          <!-- Address -->
-          <mat-form-field appearance="outline" class="w-full mt-4">
-            <mat-label>Địa chỉ chi tiết</mat-label>
-            <input matInput formControlName="addressDetail" />
-          </mat-form-field>
-
-          <div *ngIf="registerError" class="text-red-600 mt-3 text-sm">
-            {{ registerError }}
-          </div>
-
-          <button
-            mat-raised-button
-            color="primary"
-            class="w-full py-3 mt-6"
-            [disabled]="registerLoading"
-          >
-            {{ registerLoading ? "Đang đăng ký..." : "Đăng ký" }}
-          </button>
-        </form>
-      </div>
-    </mat-tab>
-  </mat-tab-group>
+    </div>
+  </div>
 </div>

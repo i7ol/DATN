@@ -22,11 +22,11 @@ public class InventoryAdminController {
     // GET ALL (PAGE)
     // ============================
     @GetMapping
-    public Page<InventoryResponse> getAll(
+    public Page<InventoryResponse> getAllInventory(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        return inventoryClient.getAll(PageRequest.of(page, size));
+        return inventoryClient.getAllInventory(PageRequest.of(page, size));
     }
 
     // ============================

@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @SpringBootApplication(scanBasePackages = {
 		"com.datn.shopapp",
 		"com.datn.shopclient",
+		"com.datn.shopuser",
 		"com.datn.shopproduct",
 		"com.datn.shopshipping",
 		"com.datn.shopdatabase",

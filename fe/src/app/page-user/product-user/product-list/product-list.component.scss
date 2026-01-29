@@ -28,7 +28,9 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.5s ease, opacity 0.5s ease;
+  transition:
+    transform 0.5s ease,
+    opacity 0.5s ease;
 }
 
 .product-card:hover .main-image {
@@ -45,7 +47,9 @@
   object-fit: cover;
   opacity: 0;
   transform: scale(1);
-  transition: transform 0.5s ease, opacity 0.5s ease;
+  transition:
+    transform 0.5s ease,
+    opacity 0.5s ease;
 }
 
 .product-card:hover .hover-image {
@@ -63,7 +67,9 @@
 
 .product-name,
 .product-price {
-  transition: opacity 0.5s ease, transform 0.5s ease;
+  transition:
+    opacity 0.5s ease,
+    transform 0.5s ease;
 }
 
 .product-card:hover .product-name,
@@ -82,7 +88,10 @@
   font-weight: 600;
   font-size: 1.125rem;
   cursor: pointer;
-  transition: bottom 0.7s ease, padding 0.3s ease, background-color 0.3s ease,
+  transition:
+    bottom 0.7s ease,
+    padding 0.3s ease,
+    background-color 0.3s ease,
     color 0.3s ease;
 }
 
@@ -127,4 +136,10 @@
 .disabled-button:hover {
   background-color: #d1d5db;
   color: #6b7280;
+}
+.disabled-button {
+  background: #ccc;
+  color: #666;
+  cursor: not-allowed;
+  opacity: 0.7;
 }

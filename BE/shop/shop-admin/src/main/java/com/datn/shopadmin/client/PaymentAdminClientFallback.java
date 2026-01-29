@@ -1,5 +1,7 @@
 package com.datn.shopadmin.client;
 
+import com.datn.shopdatabase.enums.PaymentMethod;
+import com.datn.shopdatabase.enums.PaymentStatus;
 import com.datn.shopobject.dto.response.PaymentResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;

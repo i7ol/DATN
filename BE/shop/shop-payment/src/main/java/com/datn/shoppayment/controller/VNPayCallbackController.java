@@ -14,7 +14,7 @@ import java.io.IOException;
 @RequestMapping("/api/payments/vnpay")
 @RequiredArgsConstructor
 public class VNPayCallbackController {
-    
+
     @GetMapping("/return")
     public void handleReturn(HttpServletRequest request, HttpServletResponse response) throws IOException {
 

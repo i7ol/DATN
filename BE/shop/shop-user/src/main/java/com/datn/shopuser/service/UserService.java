@@ -14,6 +14,8 @@ import com.datn.shopdatabase.repository.UserRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -22,14 +24,26 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserService {
 
     UserRepository userRepository;
     RoleRepository roleRepository;
     PasswordEncoder passwordEncoder;
 
-    // Tạo user mới
+    /* ===================== QUERY ===================== */
+
+    public UserResponse getUserById(Long id) {
+        return mapToResponse(findUserEntity(id));
+    }
+
+    public Page<UserResponse> getAllUsers(Pageable pageable) {
+        return userRepository.findAll(pageable)
+                .map(this::mapToResponse);
+    }
+
+    /* ===================== COMMAND ===================== */
+
     public UserEntity createUser(UserCreationRequest request) {
         if (userRepository.findByUsername(request.getUsername()).isPresent()) {
             throw new AppException(ErrorCode.USER_EXISTED);
@@ -41,74 +55,61 @@ public class UserService {
         user.setEmail(request.getEmail());
         user.setPhone(request.getPhone());
         user.setAddress(request.getAddress());
+        user.setRoles(Set.of(getDefaultUserRole()));
 
-        RoleEntity userRole = roleRepository.findById(RoleEnums.USER.name())
+        return userRepository.save(user);
+    }
+
+    public UserResponse updateUser(Long id, UserUpdateRequest request) {
+        UserEntity user = findUserEntity(id);
+
+        if (hasText(request.getPassword())) {
+            user.setPassword(passwordEncoder.encode(request.getPassword()));
+        }
+        if (hasText(request.getEmail())) user.setEmail(request.getEmail());
+        if (request.getPhone() != null) user.setPhone(request.getPhone());
+        if (request.getAddress() != null) user.setAddress(request.getAddress());
+
+        if (request.getRoles() != null && !request.getRoles().isEmpty()) {
+            Set<RoleEntity> roles = request.getRoles().stream()
+                    .map(this::getRoleByName)
+                    .collect(Collectors.toSet());
+            user.setRoles(roles);
+        }
+
+        return mapToResponse(userRepository.save(user));
+    }
+
+    public void deleteUser(Long id) {
+        userRepository.delete(findUserEntity(id));
+    }
+
+    /* ===================== PRIVATE ===================== */
+
+    private UserEntity findUserEntity(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+    }
+
+    private RoleEntity getDefaultUserRole() {
+        return roleRepository.findById(RoleEnums.USER.name())
                 .orElseGet(() -> roleRepository.save(
                         RoleEntity.builder()
                                 .name(RoleEnums.USER.name())
                                 .description("Default user role")
                                 .build()
                 ));
-        user.setRoles(Set.of(userRole));
-
-        return userRepository.save(user);
     }
 
-    // Lấy tất cả user
-    public List<UserResponse> getAllUsers() {
-        return userRepository.findAll().stream()
-                .map(this::mapToResponse)
-                .toList();
-    }
-    // Lấy User entity trực tiếp
-    public UserEntity getById(Long id) {
-        return userRepository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+    private RoleEntity getRoleByName(String roleName) {
+        return roleRepository.findById(roleName)
+                .orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_EXISTED));
     }
 
-    // Lấy tất cả User entity
-    public List<UserEntity> getAllUserEntities() {
-        return userRepository.findAll();
+    private boolean hasText(String value) {
+        return value != null && !value.isBlank();
     }
 
-
-    // Lấy 1 user theo id
-    public UserResponse getUser(Long id) {
-        UserEntity user = userRepository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
-        return mapToResponse(user);
-    }
-
-    // Cập nhật user
-    public UserResponse updateUser(Long id, UserUpdateRequest request) {
-        UserEntity user = userRepository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
-
-        if (request.getPassword() != null && !request.getPassword().isBlank()) {
-            user.setPassword(passwordEncoder.encode(request.getPassword()));
-        }
-        if (request.getEmail() != null && !request.getEmail().isBlank()) user.setEmail(request.getEmail());
-        if (request.getPhone() != null) user.setPhone(request.getPhone());
-        if (request.getAddress() != null) user.setAddress(request.getAddress());
-
-        if (request.getRoles() != null && !request.getRoles().isEmpty()) {
-            Set<RoleEntity> roles = request.getRoles().stream()
-                    .map(roleName -> roleRepository.findById(roleName)
-                            .orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_EXISTED)))
-                    .collect(Collectors.toSet());
-            user.setRoles(roles);
-        }
-
-        userRepository.save(user);
-        return mapToResponse(user);
-    }
-
-    // Xóa user
-    public void deleteUser(Long id) {
-        userRepository.deleteById(id);
-    }
-
-    // Chuyển entity -> DTO
     private UserResponse mapToResponse(UserEntity user) {
         return UserResponse.builder()
                 .id(user.getId())
@@ -116,9 +117,13 @@ public class UserService {
                 .email(user.getEmail())
                 .phone(user.getPhone())
                 .address(user.getAddress())
-                .roles(user.getRoles() != null
-                        ? user.getRoles().stream().map(RoleEntity::getName).toList()
-                        : List.of())
+                .roles(
+                        user.getRoles() == null
+                                ? List.of()
+                                : user.getRoles().stream()
+                                .map(RoleEntity::getName)
+                                .toList()
+                )
                 .pushToken(user.getPushToken())
                 .build();
     }

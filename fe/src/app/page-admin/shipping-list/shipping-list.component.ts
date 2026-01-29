@@ -71,7 +71,7 @@ export class ShippingListComponent implements OnInit {
 
   constructor(
     private shippingService: ShippingAdminControllerService,
-    private router: Router
+    private router: Router,
   ) {}
 
   ngOnInit(): void {
@@ -188,7 +188,7 @@ export class ShippingListComponent implements OnInit {
       error: (error) => {
         console.error('Error syncing shipping:', error);
         alert(
-          'Đồng bộ thất bại: ' + (error.error?.message || 'Vui lòng thử lại')
+          'Đồng bộ thất bại: ' + (error.error?.message || 'Vui lòng thử lại'),
         );
       },
     });

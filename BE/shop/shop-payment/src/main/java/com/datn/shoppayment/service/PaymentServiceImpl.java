@@ -9,8 +9,15 @@ import com.datn.shopobject.dto.request.UserPaymentRequest;
 import com.datn.shoppayment.repository.PaymentRepository;
 import com.datn.shopobject.dto.response.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.PathVariable;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.Map;
 
 
 @Service
@@ -104,4 +111,85 @@ public class PaymentServiceImpl implements PaymentService {
 
         return PaymentResponse.from(payment);
     }
+
+    @Override
+    public Page<PaymentResponse> getAllPayments(
+            PaymentStatus status,
+            PaymentMethod method,
+            LocalDate fromDate,
+            LocalDate toDate,
+            BigDecimal minAmount,
+            BigDecimal maxAmount,
+            Pageable pageable
+    ) {
+        return paymentRepository
+                .findAll(
+                        PaymentSpecification.filter(
+                                status, method, fromDate, toDate,
+                                minAmount, maxAmount
+                        ),
+                        pageable
+                )
+                .map(PaymentResponse::from);
+    }
+
+    @Override
+    public PaymentResponse getById(Long id) {
+        PaymentEntity payment = paymentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Payment not found"));
+        return PaymentResponse.from(payment);
+    }
+
+    @Override
+    public PaymentResponse markPaid(Long id, String transactionId) {
+        PaymentEntity payment = paymentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Payment not found"));
+
+        payment.setStatus(PaymentStatus.SUCCESS);
+        payment.setTransactionId(transactionId);
+
+        return PaymentResponse.from(paymentRepository.save(payment));
+    }
+
+    @Override
+    public PaymentResponse refund(Long id, String reason) {
+        PaymentEntity payment = paymentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Payment not found"));
+
+        if (payment.getStatus() != PaymentStatus.SUCCESS) {
+            throw new RuntimeException("Only successful payments can be refunded");
+        }
+
+        payment.setStatus(PaymentStatus.REFUNDED);
+
+        return PaymentResponse.from(paymentRepository.save(payment));
+    }
+
+    @Override
+    public PaymentResponse cancel(Long id) {
+        PaymentEntity payment = paymentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Payment not found"));
+
+        if (payment.getStatus() == PaymentStatus.SUCCESS) {
+            throw new RuntimeException("Cannot cancel paid payment");
+        }
+
+        payment.setStatus(PaymentStatus.CANCELLED);
+        return PaymentResponse.from(paymentRepository.save(payment));
+    }
+
+    @Override
+    public Object getSummary(LocalDate fromDate, LocalDate toDate) {
+
+        BigDecimal totalPaid = paymentRepository
+                .getTotalAmountByPeriodAndStatus(fromDate, toDate, PaymentStatus.SUCCESS);
+
+        long totalPayments = paymentRepository.count();
+
+        return Map.of(
+                "totalPayments", totalPayments,
+                "totalPaidAmount", totalPaid == null ? BigDecimal.ZERO : totalPaid
+        );
+    }
+
 }

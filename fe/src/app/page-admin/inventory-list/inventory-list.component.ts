@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { InventoryAdminControllerService } from 'src/app/api/admin/api/inventoryAdminController.service';
+import { ChangeDetectorRef } from '@angular/core';
 
 import {
   InventoryResponse,
@@ -9,13 +10,28 @@ import {
   AdjustRequest,
 } from 'src/app/api/admin';
 
+interface InventoryUI {
+  id?: number;
+  variantId?: number;
+  stock?: number;
+  importPrice?: number;
+  sellingPrice?: number;
+
+  productName?: string;
+  thumbnail?: string;
+  color?: string;
+  size?: string;
+  sku?: string;
+}
+
 @Component({
   selector: 'app-inventory-list',
   templateUrl: './inventory-list.component.html',
   styleUrls: ['./inventory-list.component.scss'],
 })
 export class InventoryListComponent implements OnInit {
-  inventories: InventoryResponse[] = [];
+  inventories: InventoryUI[] = [];
+
   loading = false;
 
   page = 0;
@@ -29,7 +45,10 @@ export class InventoryListComponent implements OnInit {
   showDelete = false;
   deleteData: InventoryResponse | null = null;
 
-  constructor(private api: InventoryAdminControllerService) {}
+  constructor(
+    private api: InventoryAdminControllerService,
+    private cdr: ChangeDetectorRef,
+  ) {}
 
   ngOnInit(): void {
     this.loadData();
@@ -50,17 +69,53 @@ export class InventoryListComponent implements OnInit {
     return Array.from({ length: pages }, (_, i) => i);
   }
 
-  async loadData() {
+  loadData() {
     this.loading = true;
-    try {
-      const resp = await this.api
-        .getAll(this.page, this.size, 'body')
-        .toPromise();
-      this.inventories = resp.content || [];
-      this.total = resp.totalElements || 0;
-    } finally {
-      this.loading = false;
-    }
+
+    this.api.getAllInventory(this.page, this.size).subscribe({
+      next: async (resp: any) => {
+        console.log('RAW resp:', resp);
+        console.log('TYPE OF resp:', typeof resp);
+
+        let body: any = null;
+
+        // 👉 TRƯỜNG HỢP API TRẢ VỀ BLOB
+        if (resp instanceof Blob) {
+          console.log('RESP IS BLOB, parsing...');
+
+          try {
+            const text = await resp.text();
+            console.log('BLOB TEXT:', text);
+
+            body = JSON.parse(text);
+            console.log('PARSED BODY:', body);
+          } catch (e) {
+            console.error('❌ Parse Blob failed', e);
+          }
+        }
+        // 👉 TRƯỜNG HỢP API TRẢ VỀ OBJECT (phòng khi sửa service sau này)
+        else {
+          body = resp;
+        }
+
+        console.log('FINAL BODY:', body);
+
+        this.inventories = body?.content ?? [];
+        this.total = body?.totalElements ?? 0;
+
+        console.log('SET inventories:', this.inventories);
+        console.log('TOTAL:', this.total);
+
+        this.loading = false;
+        this.cdr.detectChanges();
+      },
+
+      error: (err) => {
+        console.error('API ERROR:', err);
+        this.loading = false;
+        alert('Không tải được dữ liệu tồn kho');
+      },
+    });
   }
 
   prevPage() {

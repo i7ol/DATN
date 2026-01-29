@@ -12,11 +12,11 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
@@ -45,24 +45,19 @@ public class AccountController {
 
 
     @GetMapping
-    List<UserResponse> getAllUsers(){
-        return userService.getAllUsers();
+    Page<UserResponse> getAllUsers(Pageable pageable){
+        return userService.getAllUsers(pageable);
     }
 
 
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<UserResponse>> getUser(@PathVariable("id") Long id) {
-        UserResponse user = userService.getUser(id);
-
-        return ResponseEntity.ok(
-                ApiResponse.<UserResponse>builder()
-                        .code(200)
-                        .message("User retrieved successfully")
-                        .result(user)
-                        .build()
-        );
+    public ApiResponse<UserResponse> getUser(@PathVariable Long id) {
+        return ApiResponse.<UserResponse>builder()
+                .result(userService.getUserById(id))
+                .build();
     }
+
 
     @PutMapping("/{id}")
     UserResponse updateUser(@PathVariable("id") Long id , @RequestBody UserUpdateRequest request){

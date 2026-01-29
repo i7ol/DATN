@@ -54,7 +54,7 @@ export class ShippingManagementComponent implements OnInit {
     private fb: FormBuilder,
     private shippingService: ShippingAdminControllerService,
     private snackBar: MatSnackBar,
-    private dialog: MatDialog
+    private dialog: MatDialog,
   ) {
     this.shippingForm = this.fb.group({
       shippingCompany: ['', Validators.required],
@@ -115,7 +115,7 @@ export class ShippingManagementComponent implements OnInit {
         },
         error: (error) => {
           this.showError(
-            'Lỗi khi tạo thông tin vận chuyển: ' + (error.error?.message || '')
+            'Lỗi khi tạo thông tin vận chuyển: ' + (error.error?.message || ''),
           );
           console.error('Error creating shipping:', error);
         },
@@ -145,7 +145,7 @@ export class ShippingManagementComponent implements OnInit {
         this.shippingService.updateStatus(shippingId, requestBody).subscribe({
           next: (updatedShipping) => {
             const index = this.dataSource.data.findIndex(
-              (s) => s.id === shippingId
+              (s) => s.id === shippingId,
             );
             if (index !== -1) {
               const updatedData = [...this.dataSource.data];
@@ -167,7 +167,7 @@ export class ShippingManagementComponent implements OnInit {
     this.shippingService.syncWithProvider(shippingId).subscribe({
       next: (updatedShipping) => {
         const index = this.dataSource.data.findIndex(
-          (s) => s.id === shippingId
+          (s) => s.id === shippingId,
         );
         if (index !== -1) {
           const updatedData = [...this.dataSource.data];

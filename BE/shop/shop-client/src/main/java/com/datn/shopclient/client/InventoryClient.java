@@ -37,7 +37,7 @@ public interface InventoryClient {
     // LIST (PAGE)
     // =============================
     @GetMapping("/internal/inventory")
-    Page<InventoryResponse> getAll(
+    Page<InventoryResponse> getAllInventory(
             Pageable pageable
     );
 

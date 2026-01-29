@@ -21,6 +21,10 @@ import { ApiResponseUserResponse } from '../model/apiResponseUserResponse';
 // @ts-ignore
 import { ApiResponseVoid } from '../model/apiResponseVoid';
 // @ts-ignore
+import { PageUserResponse } from '../model/pageUserResponse';
+// @ts-ignore
+import { Pageable } from '../model/pageable';
+// @ts-ignore
 import { UserCreationRequest } from '../model/userCreationRequest';
 // @ts-ignore
 import { UserResponse } from '../model/userResponse';
@@ -157,13 +161,21 @@ export class AccountControllerService extends BaseService {
 
     /**
      * @endpoint get /api/admin/account
+     * @param pageable 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public getAllUsers(observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<Array<UserResponse>>;
-    public getAllUsers(observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpResponse<Array<UserResponse>>>;
-    public getAllUsers(observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpEvent<Array<UserResponse>>>;
-    public getAllUsers(observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<any> {
+    public getAllUsers(pageable: Pageable, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<PageUserResponse>;
+    public getAllUsers(pageable: Pageable, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpResponse<PageUserResponse>>;
+    public getAllUsers(pageable: Pageable, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpEvent<PageUserResponse>>;
+    public getAllUsers(pageable: Pageable, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<any> {
+        if (pageable === null || pageable === undefined) {
+            throw new Error('Required parameter pageable was null or undefined when calling getAllUsers.');
+        }
+
+        let localVarQueryParameters = new HttpParams({encoder: this.encoder});
+        localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
+          <any>pageable, 'pageable');
 
         let localVarHeaders = this.defaultHeaders;
 
@@ -190,9 +202,10 @@ export class AccountControllerService extends BaseService {
 
         let localVarPath = `/api/admin/account`;
         const { basePath, withCredentials } = this.configuration;
-        return this.httpClient.request<Array<UserResponse>>('get', `${basePath}${localVarPath}`,
+        return this.httpClient.request<PageUserResponse>('get', `${basePath}${localVarPath}`,
             {
                 context: localVarHttpContext,
+                params: localVarQueryParameters,
                 responseType: <any>responseType_,
                 ...(withCredentials ? { withCredentials } : {}),
                 headers: localVarHeaders,

@@ -62,7 +62,9 @@ import { AuthGuard } from './core/guards/auth.guard';
 import { AuthModalComponent } from './shared/components/auth-modal/auth-modal.component';
 import { PaymentResultComponent } from './page-user/payment-result/payment-result.component';
 import { ConfirmDialogComponent } from './shared/confirm-dialog/confirm-dialog.component';
-
+import { ProductUserControllerService } from 'src/app/api/user/api/productUserController.service';
+import { ProfileComponent } from './page-user/profile/profile.component';
+import { GuestIdInterceptor } from './core/interceptors/guest-id.interceptor';
 @NgModule({
   declarations: [
     AppComponent,
@@ -85,6 +87,7 @@ import { ConfirmDialogComponent } from './shared/confirm-dialog/confirm-dialog.c
     ProductDetailComponent,
     PaymentResultComponent,
     ConfirmDialogComponent,
+    ProfileComponent,
   ],
   imports: [
     BrowserModule,
@@ -129,11 +132,14 @@ import { ConfirmDialogComponent } from './shared/confirm-dialog/confirm-dialog.c
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
     AuthGuard,
-    CartService,
+
     {
-      provide: 'CartService',
-      useExisting: CartService,
+      provide: HTTP_INTERCEPTORS,
+      useClass: GuestIdInterceptor,
+      multi: true,
     },
+
+    ProductUserControllerService,
     AdminGuard,
     OrderAdminControllerService,
     ShippingAdminControllerService,

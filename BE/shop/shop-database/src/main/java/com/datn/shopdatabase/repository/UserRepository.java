@@ -2,6 +2,7 @@ package com.datn.shopdatabase.repository;
 
 import com.datn.shopdatabase.entity.UserEntity;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

@@ -1,6 +1,7 @@
 package com.datn.shopadmin.controller;
 
 import com.datn.shopclient.client.OrderAdminClient;
+import com.datn.shopdatabase.entity.OrderEntity;
 import com.datn.shopdatabase.enums.PaymentStatus;
 import com.datn.shopdatabase.exception.AppException;
 import com.datn.shopdatabase.exception.ErrorCode;
@@ -8,8 +9,12 @@ import com.datn.shopobject.dto.request.CreateOrderRequest;
 import com.datn.shopobject.dto.request.PaymentUpdateRequest;
 import com.datn.shopobject.dto.request.StatusUpdateRequest;
 import com.datn.shopobject.dto.response.OrderResponse;
+import com.datn.shopobject.dto.response.PageResponse;
+import com.datn.shoporder.mapper.OrderMapper;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
@@ -22,14 +27,21 @@ public class OrderAdminController {
 
     private final OrderAdminClient orderClient;
 
-    @PostMapping
-    public OrderResponse createOrder(@Valid @RequestBody CreateOrderRequest request) {
-        // nếu cần endpoint riêng thì tạo thêm ở order-service
-        throw new AppException(
-                ErrorCode.INVALID_REQUEST,
-                "Admin createOrder chưa được expose ở order-service"
-        );
+    @GetMapping
+    public PageResponse<OrderResponse> getAll(Pageable pageable) {
+
+        Page<OrderResponse> page = orderClient.getAll(pageable);
+
+        return PageResponse.<OrderResponse>builder()
+                .data(page.getContent())
+                .page(page.getNumber())
+                .size(page.getSize())
+                .totalElements(page.getTotalElements())
+                .totalPages(page.getTotalPages())
+                .build();
     }
+
+
 
     /**
      * Admin xem chi tiết đơn hàng
@@ -84,5 +96,7 @@ public class OrderAdminController {
                 "Admin updateStatus cần endpoint riêng trong order-service"
         );
     }
+
+
 
 }

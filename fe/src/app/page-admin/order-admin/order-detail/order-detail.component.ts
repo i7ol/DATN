@@ -11,6 +11,7 @@ import {
 import { ShippingAdminControllerService } from 'src/app/api/admin/api/shippingAdminController.service';
 import { OrderAdminControllerService } from 'src/app/api/admin/api/orderAdminController.service';
 import { StatusUpdateDialogComponent } from '../../../shared/components/status-update-dialog/status-update-dialog.component';
+import { PaymentUpdateDialogComponent } from '../../../shared/components/payment-update-dialog/payment-update-dialog.component';
 
 @Component({
   selector: 'app-order-detail',
@@ -18,7 +19,7 @@ import { StatusUpdateDialogComponent } from '../../../shared/components/status-u
   styleUrls: ['./order-detail.component.scss'],
 })
 export class OrderDetailComponent implements OnInit {
-  order?: OrderResponse; // Sửa từ OrderEntity thành OrderResponse
+  order?: OrderResponse;
   shippingInfo: ShippingResponse[] = [];
   loading = false;
   error = '';
@@ -51,7 +52,7 @@ export class OrderDetailComponent implements OnInit {
     private orderApi: OrderAdminControllerService,
     private shippingApi: ShippingAdminControllerService,
     private dialog: MatDialog,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
   ) {}
 
   ngOnInit(): void {
@@ -100,14 +101,14 @@ export class OrderDetailComponent implements OnInit {
 
   getPaymentStatusLabel(status?: string): string {
     const option = this.paymentStatusOptions.find(
-      (opt) => opt.value === status
+      (opt) => opt.value === status,
     );
     return option ? option.label : status || '';
   }
 
   getShippingStatusLabel(status?: string): string {
     const option = this.shippingStatusOptions.find(
-      (opt) => opt.value === status
+      (opt) => opt.value === status,
     );
     return option ? option.label : status || '';
   }
@@ -151,7 +152,6 @@ export class OrderDetailComponent implements OnInit {
     if (!this.order) return;
 
     const req: PaymentUpdateRequest = { paymentStatus };
-    // Sửa từ updatePayment thành updatePaymentStatus
     this.orderApi.updatePaymentStatus(this.order.id!, req).subscribe({
       next: (res) => {
         this.order = res;
@@ -160,6 +160,47 @@ export class OrderDetailComponent implements OnInit {
       error: (err) => {
         console.error('Error updating payment status:', err);
         this.showError('Cập nhật trạng thái thanh toán thất bại');
+      },
+    });
+  }
+
+  openPaymentDialog(): void {
+    if (!this.order) return;
+
+    const dialogRef = this.dialog.open(PaymentUpdateDialogComponent, {
+      width: '420px',
+      data: {
+        paymentId: this.order.id,
+        currentStatus: this.order.paymentStatus,
+        targetStatus: 'PAID',
+        currentAmount: this.order.totalPrice,
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (!result) return;
+
+      this.updatePaymentStatusFromDialog(result);
+    });
+  }
+
+  updatePaymentStatusFromDialog(formValue: { amount: number }): void {
+    if (!this.order) return;
+
+    const req: PaymentUpdateRequest = {
+      paymentStatus: 'PAID',
+    };
+
+    console.log('📤 PAYMENT UPDATE REQUEST:', req);
+
+    this.orderApi.updatePaymentStatus(this.order.id!, req).subscribe({
+      next: (res) => {
+        this.order = res;
+        this.showSuccess('Cập nhật thanh toán thành công');
+      },
+      error: (err) => {
+        console.error('❌ Payment update failed:', err);
+        this.showError('Cập nhật thanh toán thất bại');
       },
     });
   }

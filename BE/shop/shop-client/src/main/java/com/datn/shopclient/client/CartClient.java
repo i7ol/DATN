@@ -10,13 +10,13 @@ import org.springframework.web.bind.annotation.*;
 )
 public interface CartClient {
 
-    @GetMapping("/api/user/cart")
+    @GetMapping("/api/internal/cart")
     CartResponse getCart(
             @RequestParam(name = "userId", required = false) Long userId,
             @RequestParam(name = "guestId", required = false) String guestId
     );
 
-    @PostMapping("/api/user/cart/add")
+    @PostMapping("/api/internal/cart/add")
     CartResponse addItem(
             @RequestParam(name = "userId", required = false) Long userId,
             @RequestParam(name = "guestId", required = false) String guestId,
@@ -24,7 +24,7 @@ public interface CartClient {
             @RequestParam("quantity") int quantity
     );
 
-    @PutMapping("/api/user/cart/update")
+    @PutMapping("/api/internal/cart/update")
     CartResponse updateItem(
             @RequestParam(name = "userId", required = false) Long userId,
             @RequestParam(name = "guestId", required = false) String guestId,
@@ -32,29 +32,29 @@ public interface CartClient {
             @RequestParam("quantity") int quantity
     );
 
-    @DeleteMapping("/api/user/cart/remove")
+    @DeleteMapping("/api/internal/cart/remove")
     CartResponse removeItem(
             @RequestParam(name = "userId", required = false) Long userId,
             @RequestParam(name = "guestId", required = false) String guestId,
             @RequestParam("variantId") Long variantId
     );
 
-    @PostMapping("/api/user/cart/merge")
+    @PostMapping("/api/internal/cart/merge")
     CartResponse mergeGuestCart(
             @RequestParam("guestId") String guestId,
             @RequestParam("userId") Long userId
     );
 
-    @DeleteMapping("/api/user/cart/clear")
+    @DeleteMapping("/api/internal/cart/clear")
     CartResponse clearCart(
             @RequestParam(name = "userId", required = false) Long userId,
             @RequestParam(name = "guestId", required = false) String guestId
     );
 
-    @DeleteMapping("/api/user/cart/clear/user/{userId}")
+    @DeleteMapping("/api/internal/cart/clear/user/{userId}")
     void clearUserCart(@PathVariable("userId") Long userId);
 
-    @DeleteMapping("/api/user/cart/clear/guest/{guestId}")
+    @DeleteMapping("/api/internal/cart/clear/guest/{guestId}")
     void clearGuestCart(@PathVariable("guestId") String guestId);
 
 

@@ -17,9 +17,11 @@ import { CustomHttpParameterCodec }                          from '../encoder';
 import { Observable }                                        from 'rxjs';
 
 // @ts-ignore
-import { CreateOrderRequest } from '../model/createOrderRequest';
-// @ts-ignore
 import { OrderResponse } from '../model/orderResponse';
+// @ts-ignore
+import { PageResponseOrderResponse } from '../model/pageResponseOrderResponse';
+// @ts-ignore
+import { Pageable } from '../model/pageable';
 // @ts-ignore
 import { PaymentUpdateRequest } from '../model/paymentUpdateRequest';
 // @ts-ignore
@@ -42,18 +44,22 @@ export class OrderAdminControllerService extends BaseService {
     }
 
     /**
-     * @endpoint post /api/admin/orders
-     * @param createOrderRequest 
+     * @endpoint get /api/admin/orders
+     * @param pageable 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public createOrder(createOrderRequest: CreateOrderRequest, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<OrderResponse>;
-    public createOrder(createOrderRequest: CreateOrderRequest, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpResponse<OrderResponse>>;
-    public createOrder(createOrderRequest: CreateOrderRequest, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpEvent<OrderResponse>>;
-    public createOrder(createOrderRequest: CreateOrderRequest, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<any> {
-        if (createOrderRequest === null || createOrderRequest === undefined) {
-            throw new Error('Required parameter createOrderRequest was null or undefined when calling createOrder.');
+    public getAll(pageable: Pageable, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<PageResponseOrderResponse>;
+    public getAll(pageable: Pageable, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpResponse<PageResponseOrderResponse>>;
+    public getAll(pageable: Pageable, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpEvent<PageResponseOrderResponse>>;
+    public getAll(pageable: Pageable, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<any> {
+        if (pageable === null || pageable === undefined) {
+            throw new Error('Required parameter pageable was null or undefined when calling getAll.');
         }
+
+        let localVarQueryParameters = new HttpParams({encoder: this.encoder});
+        localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
+          <any>pageable, 'pageable');
 
         let localVarHeaders = this.defaultHeaders;
 
@@ -66,15 +72,6 @@ export class OrderAdminControllerService extends BaseService {
 
         const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
 
-
-        // to determine the Content-Type header
-        const consumes: string[] = [
-            'application/json'
-        ];
-        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType(consumes);
-        if (httpContentTypeSelected !== undefined) {
-            localVarHeaders = localVarHeaders.set('Content-Type', httpContentTypeSelected);
-        }
 
         let responseType_: 'text' | 'json' | 'blob' = 'json';
         if (localVarHttpHeaderAcceptSelected) {
@@ -89,10 +86,10 @@ export class OrderAdminControllerService extends BaseService {
 
         let localVarPath = `/api/admin/orders`;
         const { basePath, withCredentials } = this.configuration;
-        return this.httpClient.request<OrderResponse>('post', `${basePath}${localVarPath}`,
+        return this.httpClient.request<PageResponseOrderResponse>('get', `${basePath}${localVarPath}`,
             {
                 context: localVarHttpContext,
-                body: createOrderRequest,
+                params: localVarQueryParameters,
                 responseType: <any>responseType_,
                 ...(withCredentials ? { withCredentials } : {}),
                 headers: localVarHeaders,

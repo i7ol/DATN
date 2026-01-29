@@ -8,6 +8,7 @@ import { ProductListComponent } from './page-user/product-user/product-list/prod
 import { ProductDetailComponent } from './page-user/product-user/product-detail/product-detail.component';
 import { CartComponent } from './page-user/cart/cart.component';
 import { CheckoutComponent } from './page-user/checkout/checkout.component';
+import { ProfileComponent } from './page-user/profile/profile.component';
 
 // Admin Components
 import { ProductListAdminComponent } from './page-admin/product-admin/product-list-admin/product-list-admin.component';
@@ -36,7 +37,11 @@ const routes: Routes = [
     path: 'checkout',
     component: CheckoutComponent,
   },
-
+  {
+    path: 'profile',
+    component: ProfileComponent,
+    canActivate: [AuthGuard],
+  },
   // Admin protected routes
   {
     path: 'admin',

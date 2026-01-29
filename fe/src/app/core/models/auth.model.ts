@@ -3,6 +3,15 @@ export interface LoginRequest {
   password: string;
 }
 
+export interface RegisterRequest {
+  username: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  phone?: string;
+  address?: string;
+}
+
 export interface AuthResponse {
   accessToken: string;
   refreshToken: string;
@@ -12,16 +21,12 @@ export interface AuthResponse {
   permissions: string[];
 }
 
-export interface UserInfoResponse {
-  id?: number;
+export interface User {
+  id: number;
   username: string;
-  email?: string;
+  email: string;
   phone?: string;
   address?: string;
   roles: string[];
   permissions: string[];
-}
-
-export interface RefreshTokenRequest {
-  refreshToken: string;
 }

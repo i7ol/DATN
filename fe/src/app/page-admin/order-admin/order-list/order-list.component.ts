@@ -1,10 +1,17 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
-import { MatPaginator } from '@angular/material/paginator';
+import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
-import { OrderAdminControllerService, OrderResponse } from 'src/app/api/admin'; 
+
+import {
+  OrderAdminControllerService,
+  OrderResponse,
+  PageResponseOrderResponse,
+  Pageable,
+} from 'src/app/api/admin';
+
 import { StatusUpdateDialogComponent } from 'src/app/shared/components/status-update-dialog/status-update-dialog.component';
 
 @Component({
@@ -12,7 +19,7 @@ import { StatusUpdateDialogComponent } from 'src/app/shared/components/status-up
   templateUrl: './order-list.component.html',
   styleUrls: ['./order-list.component.scss'],
 })
-export class OrderListComponent implements OnInit {
+export class OrderListComponent implements OnInit, AfterViewInit {
   displayedColumns: string[] = [
     'id',
     'customer',
@@ -22,8 +29,15 @@ export class OrderListComponent implements OnInit {
     'createdAt',
     'actions',
   ];
-  dataSource = new MatTableDataSource<OrderResponse>(); // Sửa từ OrderEntity thành OrderResponse
+
+  dataSource = new MatTableDataSource<OrderResponse>([]);
   loading = false;
+
+  // paging
+  page = 0;
+  size = 10;
+  totalElements = 0;
+
   filterStatus = '';
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -32,11 +46,11 @@ export class OrderListComponent implements OnInit {
   constructor(
     private orderService: OrderAdminControllerService,
     private router: Router,
-    private dialog: MatDialog
+    private dialog: MatDialog,
   ) {}
 
   ngOnInit(): void {
-    // this.loadOrders();
+    this.loadOrders();
   }
 
   ngAfterViewInit(): void {
@@ -44,26 +58,71 @@ export class OrderListComponent implements OnInit {
     this.dataSource.sort = this.sort;
   }
 
-  // loadOrders(): void {
-  //   this.loading = true;
-  //   this.orderService.getAllOrders().subscribe({
-  //     next: (orders) => {
-  //       this.dataSource.data = orders;
-  //       this.loading = false;
-  //     },
-  //     error: (error) => {
-  //       console.error('Error loading orders:', error);
-  //       this.loading = false;
-  //     },
-  //   });
-  // }
+  // ================= LOAD ORDERS =================
+  loadOrders(): void {
+    this.loading = true;
 
+    const pageable: Pageable = {
+      page: this.page,
+      size: this.size,
+    };
+
+    console.log('📤 CALL getAll orders:', pageable);
+
+    this.orderService.getAll(pageable).subscribe({
+      next: async (resp: any) => {
+        console.log('📥 RAW response:', resp);
+
+        try {
+          if (resp instanceof Blob) {
+            const text = await resp.text();
+            console.log('📄 BLOB text:', text);
+
+            const body: PageResponseOrderResponse = JSON.parse(text);
+            this.applyPage(body);
+            return;
+          }
+
+          if (resp?.body instanceof Blob) {
+            const text = await resp.body.text();
+            console.log('📄 BLOB body text:', text);
+
+            const body: PageResponseOrderResponse = JSON.parse(text);
+            this.applyPage(body);
+            return;
+          }
+
+          this.applyPage(resp);
+        } catch (e) {
+          console.error('❌ Parse error:', e);
+          this.dataSource.data = [];
+          this.totalElements = 0;
+        } finally {
+          this.loading = false;
+        }
+      },
+      error: (err) => {
+        console.error('❌ Load orders failed:', err);
+        this.loading = false;
+      },
+    });
+  }
+  private applyPage(body?: PageResponseOrderResponse): void {
+    console.log(' PARSED body:', body);
+
+    this.dataSource.data = body?.data ?? [];
+    this.totalElements = body?.totalElements ?? 0;
+
+    console.log(' SET orders:', this.dataSource.data);
+    console.log(' TOTAL:', this.totalElements);
+  }
+
+  // ================= ACTIONS =================
   viewDetail(orderId: number): void {
     this.router.navigate(['/admin/orders', orderId]);
   }
 
   openStatusDialog(order: OrderResponse): void {
-    // Sửa từ OrderEntity thành OrderResponse
     const dialogRef = this.dialog.open(StatusUpdateDialogComponent, {
       width: '400px',
       data: {
@@ -73,16 +132,17 @@ export class OrderListComponent implements OnInit {
       },
     });
 
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result) {
-        // this.loadOrders();
+    dialogRef.afterClosed().subscribe((ok) => {
+      if (ok) {
+        this.loadOrders();
       }
     });
   }
 
+  // ================= HELPERS =================
   getCustomerName(order: OrderResponse): string {
-    // Sửa từ OrderEntity thành OrderResponse
-    return order.userId ? `User #${order.userId}` : order.guestName || 'Khách';
+    if (order.userId) return `User #${order.userId}`;
+    return order.guestName || 'Khách';
   }
 
   getStatusClass(status: string): string {
@@ -118,12 +178,8 @@ export class OrderListComponent implements OnInit {
   }
 
   applyFilter(event: Event): void {
-    const filterValue = (event.target as HTMLInputElement).value;
-    this.dataSource.filter = filterValue.trim().toLowerCase();
-
-    if (this.dataSource.paginator) {
-      this.dataSource.paginator.firstPage();
-    }
+    const value = (event.target as HTMLInputElement).value;
+    this.dataSource.filter = value.trim().toLowerCase();
   }
 
   filterByStatus(status: string): void {
@@ -131,8 +187,14 @@ export class OrderListComponent implements OnInit {
     this.dataSource.filter = status || '';
   }
 
+  // ================= PAGINATION =================
+  onPageChange(event: PageEvent): void {
+    this.page = event.pageIndex;
+    this.size = event.pageSize;
+    this.loadOrders();
+  }
+
   exportOrders(): void {
-    // Implement export logic
     console.log('Export orders');
   }
 }

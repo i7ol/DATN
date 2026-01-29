@@ -13,6 +13,8 @@ import com.datn.shoporder.mapper.OrderMapper;
 import com.datn.shoporder.service.OrderService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -95,11 +97,9 @@ public class OrderUserController {
     }
 
     @GetMapping("/my")
-    public List<OrderResponse> myOrders(@RequestParam Long userId) {
-        return orderService.getOrdersByUserId(userId)
-                .stream()
-                .map(OrderMapper::toResponse)
-                .toList();
+    public Page<OrderResponse> myOrders(@RequestParam Long userId, Pageable pageable) {
+        return orderService.getOrdersByUserId(userId, pageable)
+                .map(OrderMapper::toResponse);
     }
 
     // ===== CANCEL =====

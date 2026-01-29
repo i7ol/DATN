@@ -46,6 +46,7 @@ export enum OrderResponseStatusEnum {
     CANCELLED = 'CANCELLED'
 };
 export enum OrderResponsePaymentStatusEnum {
+    SUCCESS = 'SUCCESS',
     PENDING = 'PENDING',
     PAID = 'PAID',
     FAILED = 'FAILED',

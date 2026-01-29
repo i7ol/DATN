@@ -72,6 +72,7 @@ public class AppSecurityConfig {
             "/api/user/orders/checkout",
             "/api/payments/guest",
             "/api/payments/user",
+            "/api/user/account/me"
 
 };
     @Bean

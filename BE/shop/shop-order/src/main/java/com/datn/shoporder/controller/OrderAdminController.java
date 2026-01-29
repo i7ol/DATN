@@ -6,6 +6,8 @@ import com.datn.shopobject.dto.response.OrderResponse;
 import com.datn.shoporder.mapper.OrderMapper;
 import com.datn.shoporder.service.OrderService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,11 +20,9 @@ public class OrderAdminController {
     private final OrderService orderService;
 
     @GetMapping
-    public List<OrderResponse> getAll() {
-        return orderService.getAllOrders()
-                .stream()
-                .map(OrderMapper::toResponse)
-                .toList();
+    public Page<OrderResponse> getAllOrders(Pageable pageable) {
+        return orderService.getAllOrders(pageable)
+                .map(OrderMapper::toResponse);
     }
 
     @GetMapping("/{orderId}")

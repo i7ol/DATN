@@ -26,7 +26,7 @@ export class AdminDashboardComponent implements OnInit {
 
   constructor(
     private paymentService: PaymentAdminProxyControllerService,
-    private shippingService: ShippingAdminControllerService
+    private shippingService: ShippingAdminControllerService,
   ) {}
 
   ngOnInit(): void {
@@ -74,14 +74,14 @@ export class AdminDashboardComponent implements OnInit {
         next: (shippings: any[]) => {
           this.stats.totalShippings = shippings.length;
           this.stats.processingShippings = shippings.filter(
-            (s: any) => s.status === 'PROCESSING' || s.status === 'SHIPPING'
+            (s: any) => s.status === 'PROCESSING' || s.status === 'SHIPPING',
           ).length;
           // Sắp xếp theo ngày tạo mới nhất
           this.recentShippings = shippings
             .sort(
               (a: any, b: any) =>
                 new Date(b.createdAt).getTime() -
-                new Date(a.createdAt).getTime()
+                new Date(a.createdAt).getTime(),
             )
             .slice(0, 5);
         },
@@ -100,7 +100,7 @@ export class AdminDashboardComponent implements OnInit {
     // Tìm phương thức khác hoặc sử dụng mock data
     console.log(
       'Available shipping methods:',
-      Object.keys(this.shippingService)
+      Object.keys(this.shippingService),
     );
 
     // Tạm thời set default values

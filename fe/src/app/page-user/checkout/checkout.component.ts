@@ -59,7 +59,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
     private orderApi: OrderProxyControllerService,
     private locationApi: LocationControllerService,
     private notify: NotificationService,
-    private paymentApi: PaymentProxyControllerService
+    private paymentApi: PaymentProxyControllerService,
   ) {}
 
   ngOnInit(): void {
@@ -124,12 +124,12 @@ export class CheckoutComponent implements OnInit, OnDestroy {
     this.sub.add(
       this.checkoutForm
         .get('province')!
-        .valueChanges.subscribe((code) => this.loadDistricts(code))
+        .valueChanges.subscribe((code) => this.loadDistricts(code)),
     );
     this.sub.add(
       this.checkoutForm
         .get('district')!
-        .valueChanges.subscribe((code) => this.loadWards(code))
+        .valueChanges.subscribe((code) => this.loadWards(code)),
     );
   }
 
@@ -140,7 +140,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
         this.cartItems = items || [];
         this.calculateSummary();
         this.isLoading = false;
-      })
+      }),
     );
 
     // refresh cart from API
@@ -194,11 +194,11 @@ export class CheckoutComponent implements OnInit, OnDestroy {
   private calculateSummary(): void {
     const subtotal = this.cartItems.reduce(
       (s, i) => s + (i.price || 0) * (i.quantity || 0),
-      0
+      0,
     );
 
     const method = this.shippingMethods.find(
-      (m) => m.id === this.selectedShippingMethodId
+      (m) => m.id === this.selectedShippingMethodId,
     );
     const shippingFee = method?.fee ?? 0;
 

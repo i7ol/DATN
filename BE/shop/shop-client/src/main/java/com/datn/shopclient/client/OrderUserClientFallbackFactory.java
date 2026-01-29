@@ -8,6 +8,8 @@ import com.datn.shopobject.dto.response.OrderResponse;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.openfeign.FallbackFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -40,7 +42,7 @@ public class OrderUserClientFallbackFactory
             }
 
             @Override
-            public List<OrderResponse> myOrders(Long userId) {
+            public Page<OrderResponse> myOrders(Long userId, Pageable pageable) {
                 throw new AppException(
                         ErrorCode.SERVICE_UNAVAILABLE,
                         "Không thể lấy danh sách đơn hàng"

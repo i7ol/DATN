@@ -6,7 +6,8 @@ import { filter } from 'rxjs/operators';
 import { MatDialog } from '@angular/material/dialog';
 import { AuthModalComponent } from '../components/auth-modal/auth-modal.component';
 import { CartService } from 'src/app/page-user/cart/cart.service';
-import { AuthService, User } from 'src/app/core/services/auth.service';
+import { AuthService } from 'src/app/core/services/auth.service';
+import { User } from 'src/app/core/models/user.model';
 
 @Component({
   selector: 'app-header',

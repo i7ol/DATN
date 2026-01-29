@@ -22,6 +22,7 @@ export interface PaymentResponse {
     paymentUrl?: string;
 }
 export enum PaymentResponseStatusEnum {
+    SUCCESS = 'SUCCESS',
     PENDING = 'PENDING',
     PAID = 'PAID',
     FAILED = 'FAILED',

@@ -28,15 +28,26 @@
       <!-- TITLE + PRICE -->
       <div class="product-info">
         <h2 class="product-name">{{ product.name }}</h2>
-        <p class="product-price">{{ product.price | number : "1.0-0" }}đ</p>
+        <p class="product-price">{{ product.price | number: "1.0-0" }}đ</p>
 
-        <!-- Button hiển thị theo số lượng biến thể -->
-        <ng-container *ngIf="product.variants?.length === 1">
+        <!-- CHỈ 1 VARIANT + CÒN HÀNG -->
+        <ng-container
+          *ngIf="product.variants?.length === 1 && hasStock(product)"
+        >
           <button
             (click)="addToCart(product); $event.stopPropagation()"
             class="slide-up-button add-to-cart"
           >
             Thêm vào giỏ hàng
+          </button>
+        </ng-container>
+
+        <!-- CHỈ 1 VARIANT + HẾT HÀNG -->
+        <ng-container
+          *ngIf="product.variants?.length === 1 && isOutOfStock(product)"
+        >
+          <button class="slide-up-button disabled-button" disabled>
+            Đã hết hàng
           </button>
         </ng-container>
 

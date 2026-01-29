@@ -162,7 +162,9 @@
 
               <td class="px-6 py-4 whitespace-nowrap">
                 <span class="capitalize">{{
-                  payment.paymentMethod ? payment.paymentMethod.toLowerCase() : "COD"
+                  payment.paymentMethod
+                    ? payment.paymentMethod.toLowerCase()
+                    : "COD"
                 }}</span>
               </td>
 

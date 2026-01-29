@@ -483,29 +483,11 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProductResponse"
-  /api/admin/orders:
-    post:
-      tags:
-      - order-admin-controller
-      operationId: createOrder
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/CreateOrderRequest"
-        required: true
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/OrderResponse"
   /api/admin/inventory:
     get:
       tags:
       - inventory-admin-controller
-      operationId: getAll
+      operationId: getAllInventory
       parameters:
       - name: page
         in: query
@@ -705,15 +687,19 @@ paths:
       tags:
       - account-controller
       operationId: getAllUsers
+      parameters:
+      - name: pageable
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/Pageable"
       responses:
         "200":
           description: OK
           content:
             '*/*':
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/UserResponse"
+                $ref: "#/components/schemas/PageUserResponse"
     post:
       tags:
       - account-controller
@@ -831,6 +817,24 @@ paths:
             '*/*':
               schema:
                 type: object
+  /api/admin/orders:
+    get:
+      tags:
+      - order-admin-controller
+      operationId: getAll
+      parameters:
+      - name: pageable
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/Pageable"
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PageResponseOrderResponse"
   /api/admin/orders/{orderId}:
     get:
       tags:
@@ -1106,6 +1110,7 @@ components:
         status:
           type: string
           enum:
+          - SUCCESS
           - PENDING
           - PAID
           - FAILED
@@ -1197,6 +1202,7 @@ components:
         paymentStatus:
           type: string
           enum:
+          - SUCCESS
           - PENDING
           - PAID
           - FAILED
@@ -1344,40 +1350,6 @@ components:
           type: string
         color:
           type: string
-    CreateOrderRequest:
-      required:
-      - items
-      type: object
-      properties:
-        userId:
-          type: integer
-          format: int64
-        guestName:
-          type: string
-        guestEmail:
-          type: string
-        guestPhone:
-          type: string
-        shippingAddress:
-          type: string
-        billingAddress:
-          type: string
-        items:
-          type: array
-          items:
-            $ref: "#/components/schemas/OrderItemRequest"
-    OrderItemRequest:
-      required:
-      - productId
-      type: object
-      properties:
-        productId:
-          type: integer
-          format: int64
-        quantity:
-          minimum: 1
-          type: integer
-          format: int32
     InventoryRequest:
       type: object
       properties:
@@ -1587,10 +1559,6 @@ components:
         totalPages:
           type: integer
           format: int32
-        first:
-          type: boolean
-        last:
-          type: boolean
         size:
           type: integer
           format: int32
@@ -1605,6 +1573,10 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/SortObject"
+        first:
+          type: boolean
+        last:
+          type: boolean
         numberOfElements:
           type: integer
           format: int32
@@ -1622,14 +1594,14 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/SortObject"
-        paged:
-          type: boolean
-        pageSize:
-          type: integer
-          format: int32
         pageNumber:
           type: integer
           format: int32
+        pageSize:
+          type: integer
+          format: int32
+        paged:
+          type: boolean
         unpaged:
           type: boolean
     SortObject:
@@ -1679,10 +1651,6 @@ components:
         totalPages:
           type: integer
           format: int32
-        first:
-          type: boolean
-        last:
-          type: boolean
         size:
           type: integer
           format: int32
@@ -1697,6 +1665,10 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/SortObject"
+        first:
+          type: boolean
+        last:
+          type: boolean
         numberOfElements:
           type: integer
           format: int32
@@ -1704,6 +1676,25 @@ components:
           $ref: "#/components/schemas/PageableObject"
         empty:
           type: boolean
+    PageResponseOrderResponse:
+      type: object
+      properties:
+        page:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/OrderResponse"
     PageInventoryResponse:
       type: object
       properties:
@@ -1713,10 +1704,6 @@ components:
         totalPages:
           type: integer
           format: int32
-        first:
-          type: boolean
-        last:
-          type: boolean
         size:
           type: integer
           format: int32
@@ -1731,6 +1718,10 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/SortObject"
+        first:
+          type: boolean
+        last:
+          type: boolean
         numberOfElements:
           type: integer
           format: int32
@@ -1754,6 +1745,40 @@ components:
           format: int32
         note:
           type: string
+    PageUserResponse:
+      type: object
+      properties:
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/UserResponse"
+        number:
+          type: integer
+          format: int32
+        sort:
+          type: array
+          items:
+            $ref: "#/components/schemas/SortObject"
+        first:
+          type: boolean
+        last:
+          type: boolean
+        numberOfElements:
+          type: integer
+          format: int32
+        pageable:
+          $ref: "#/components/schemas/PageableObject"
+        empty:
+          type: boolean
     ApiResponseVoid:
       type: object
       properties:

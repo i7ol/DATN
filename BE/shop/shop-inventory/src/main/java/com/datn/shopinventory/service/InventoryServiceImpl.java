@@ -66,7 +66,7 @@ public class InventoryServiceImpl implements InventoryService {
     // LIST
     // =============================
     @Override
-    public Page<InventoryResponse> getAll(Pageable pageable) {
+    public Page<InventoryResponse> getAllInventory(Pageable pageable) {
         return repository.findAll(pageable)
                 .map(this::toResponse);
     }

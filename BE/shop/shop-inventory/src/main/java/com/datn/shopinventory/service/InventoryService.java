@@ -15,7 +15,7 @@ public interface InventoryService {
     void reserve(Long variantId, Integer qty);
     void release(Long variantId, Integer qty);
     void deduct(Long variantId, Integer qty);
-    Page<InventoryResponse> getAll(Pageable pageable);
+    Page<InventoryResponse> getAllInventory(Pageable pageable);
     InventoryResponse importStock(Long variantId, Integer qty, BigDecimal importPrice, String note);
     InventoryResponse exportStock(Long variantId, Integer qty, String note);
     InventoryResponse adjust(Long variantId, Integer newStock, String reason);

@@ -3,6 +3,7 @@ package com.datn.shopdatabase.repository;
 import com.datn.shopdatabase.entity.OrderEntity;
 import com.datn.shopdatabase.enums.OrderStatus;
 import com.datn.shopdatabase.enums.PaymentStatus;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -19,7 +20,7 @@ import java.util.List;
 public interface OrderRepository extends JpaRepository<OrderEntity, Long> {
 
     // ==================== BASIC QUERIES ====================
-    List<OrderEntity> findByUserId(Long userId);
+    Page<OrderEntity> findByUserId(Long userId, Pageable pageable);
     List<OrderEntity> findByUserIdIsNull();
     List<OrderEntity> findByStatus(OrderStatus status);
     List<OrderEntity> findByPaymentStatus(PaymentStatus paymentStatus);

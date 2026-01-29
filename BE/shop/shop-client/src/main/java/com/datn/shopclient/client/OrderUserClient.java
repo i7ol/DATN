@@ -1,11 +1,11 @@
     package com.datn.shopclient.client;
 
-    import com.datn.shopdatabase.entity.OrderEntity;
-    import com.datn.shopobject.dto.request.CheckoutItemRequest;
+
     import com.datn.shopobject.dto.request.CheckoutRequest;
     import com.datn.shopobject.dto.response.OrderResponse;
-    import jakarta.validation.Valid;
     import org.springframework.cloud.openfeign.FeignClient;
+    import org.springframework.data.domain.Page;
+    import org.springframework.data.domain.Pageable;
     import org.springframework.web.bind.annotation.*;
 
     import java.util.List;
@@ -23,7 +23,8 @@
         @GetMapping("/api/user/orders/{orderId}")
         OrderResponse getOrder(@PathVariable("orderId") Long orderId);
 
+
         @GetMapping("/api/user/orders/my")
-        List<OrderResponse> myOrders(@RequestParam("userId") Long userId);
+        Page<OrderResponse> myOrders(@RequestParam("userId") Long userId, Pageable pageable);
     }
 
