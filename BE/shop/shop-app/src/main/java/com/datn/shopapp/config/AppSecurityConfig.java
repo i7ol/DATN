@@ -46,6 +46,7 @@ public class AppSecurityConfig {
             "/api/orders/checkout",
             "/api/orders/{orderId}",
             "/api/orders/my-orders",
+            "/api/orders/my-orders/**",
             "/api/orders/{orderId}/cancel",
             "/api/orders/**",
 

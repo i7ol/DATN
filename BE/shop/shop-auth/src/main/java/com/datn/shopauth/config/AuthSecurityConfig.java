@@ -26,14 +26,14 @@ public class AuthSecurityConfig {
     private final CustomUserDetailsService userDetailsService;
     private final PasswordEncoder passwordEncoder;
     private final String[] PUBLIC_ENDPOINTS = {
-            "/auth/login",
-            "/auth/register",
-            "/auth/me",
-            "/auth/check-username",
-            "/auth/check-email",
+            "/api/auth/login",
+            "/api/auth/register",
+            "/api/auth/me",
+            "/api/auth/check-username",
+            "/api/auth/check-email",
             "/api/user/profile",
-            "/auth/refresh-token",
-            "/auth/validate",
+            "/api/auth/refresh-token",
+            "/api/auth/validate",
             "/swagger-ui/**",
             "/v3/api-docs/**"
     };

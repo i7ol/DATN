@@ -103,7 +103,7 @@
                 Hồ sơ của tôi
               </a>
               <a
-                routerLink="/checkout"
+                routerLink="/my-orders"
                 class="block px-4 py-3 text-sm hover:bg-gray-100 flex items-center gap-2"
                 (click)="isAccountDropdownOpen = false"
               >
@@ -295,10 +295,12 @@
                   <!-- Product Image -->
                   <div class="flex-shrink-0">
                     <img
-                      [src]="item.images?.[0]?.url || '/assets/img/no-image.png'"
+                      [src]="
+                        item.images?.[0]?.url || '/assets/img/no-image.png'
+                      "
                       [alt]="item.productName"
                       class="w-16 h-16 object-cover rounded border"
-                      onerror="this.src='/assets/img/no-image.png'"
+                      onerror="this.src = '/assets/img/no-image.png'"
                     />
                   </div>
 
@@ -316,10 +318,10 @@
                     <div class="flex items-center justify-between">
                       <span class="text-xs text-gray-600">
                         {{ item.quantity }} ×
-                        {{ item.price | number : "1.0-0" }}đ
+                        {{ item.price | number: "1.0-0" }}đ
                       </span>
                       <span class="text-sm font-semibold">
-                        {{ item.quantity * item.price | number : "1.0-0" }}đ
+                        {{ item.quantity * item.price | number: "1.0-0" }}đ
                       </span>
                     </div>
                   </div>
@@ -332,7 +334,7 @@
                 <div class="flex justify-between items-center mb-3">
                   <span class="text-sm font-semibold">Tổng tiền:</span>
                   <span class="text-lg font-bold text-red-600">
-                    {{ cartTotalPrice | number : "1.0-0" }}đ
+                    {{ cartTotalPrice | number: "1.0-0" }}đ
                   </span>
                 </div>
 
@@ -350,9 +352,11 @@
                     class="flex-1 py-2 border border-gray-300 rounded hover:bg-gray-100 transition text-sm font-medium"
                     (click)="isCartHover = false"
                     [disabled]="cartTotalPrice === 0"
-                    [ngClass]="{
-                      'opacity-50 cursor-not-allowed': cartTotalPrice === 0
-                    }"
+                    [ngClass]="
+                      cartTotalPrice === 0
+                        ? ['opacity-50', 'cursor-not-allowed']
+                        : []
+                    "
                   >
                     Thanh toán
                   </button>
@@ -364,7 +368,7 @@
                   class="mt-2 text-xs text-center text-gray-600"
                 >
                   <span class="text-red-500">*</span>
-                  Mua thêm {{ 500000 - cartTotalPrice | number : "1.0-0" }}đ để
+                  Mua thêm {{ 500000 - cartTotalPrice | number: "1.0-0" }}đ để
                   được miễn phí vận chuyển
                 </div>
               </div>

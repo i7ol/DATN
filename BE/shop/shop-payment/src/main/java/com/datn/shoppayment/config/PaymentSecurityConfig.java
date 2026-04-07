@@ -38,15 +38,14 @@ public class PaymentSecurityConfig {
                         sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/api/payments/**",
-                                "/api/payments/vnpay/**",
-                                "/api/payments/test",
+                        .requestMatchers("/api/payments/vnpay/return",
+                                "/api/payments/guest",
                                 "/v3/api-docs/**",
-                                "/swagger-ui/**"
-                        ).permitAll()
-                        .requestMatchers("/actuator/**").permitAll()
-                        .requestMatchers("/api/user/**").hasAnyRole("USER", "ADMIN")
+                                "/swagger-ui/**").permitAll()
+
+                        .requestMatchers(HttpMethod.POST, "/api/payments/user").authenticated()  // quan trọng
+                        .requestMatchers("/api/payments/**").permitAll()   // tạm thời để test
+
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

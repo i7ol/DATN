@@ -25,6 +25,13 @@ public interface OrderRepository extends JpaRepository<OrderEntity, Long> {
     List<OrderEntity> findByStatus(OrderStatus status);
     List<OrderEntity> findByPaymentStatus(PaymentStatus paymentStatus);
     List<OrderEntity> findByCreatedAtBetween(Instant startDate, Instant endDate);
+    @Query("""
+        SELECT DISTINCT o 
+        FROM OrderEntity o 
+        LEFT JOIN FETCH o.items 
+        WHERE o.userId = :userId
+        """)
+    Page<OrderEntity> findByUserIdWithItems(@Param("userId") Long userId, Pageable pageable);
 
     // ==================== COUNT QUERIES ====================
     long countByStatus(OrderStatus status);

@@ -26,11 +26,11 @@ public class ShippingProviderService {
                 .build();
     }
 
-    public TrackingInfo getTrackingInfo(String trackingNumber, String company) {
+    public TrackingInfo getTrackingInfo(String trackingCode, String company) {
         // Gọi API tracking của hãng vận chuyển
         // Đây là mock implementation - thực tế sẽ gọi API thật
         return TrackingInfo.builder()
-                .trackingNumber(trackingNumber)
+                .trackingCode(trackingCode)
                 .status(getMockStatus())
                 .currentLocation("Hà Nội")
                 .estimatedDeliveryDate(java.time.LocalDate.now().plusDays(2))
@@ -70,7 +70,7 @@ public class ShippingProviderService {
     @Data
     @Builder
     public static class TrackingInfo {
-        private String trackingNumber;
+        private String trackingCode;
         private String status;
         private String currentLocation;
         private java.time.LocalDate estimatedDeliveryDate;

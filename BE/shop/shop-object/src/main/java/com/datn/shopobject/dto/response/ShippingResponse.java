@@ -25,7 +25,7 @@ public class ShippingResponse {
     private String recipientAddress;
     private String shippingCompany;
     private String shippingMethod;
-    private String trackingNumber;
+    private String trackingCode;
     private Double shippingFee;
     private Integer estimatedDeliveryDays;
     private LocalDate estimatedDeliveryDate;

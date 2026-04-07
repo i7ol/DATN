@@ -899,7 +899,7 @@ components:
     ShippingUpdateRequest:
       type: object
       properties:
-        trackingNumber:
+        trackingCode:
           type: string
         shippingCompany:
           type: string
@@ -937,7 +937,7 @@ components:
           type: string
         shippingMethod:
           type: string
-        trackingNumber:
+        trackingCode:
           type: string
         shippingFee:
           type: number
@@ -1110,7 +1110,6 @@ components:
         status:
           type: string
           enum:
-          - SUCCESS
           - PENDING
           - PAID
           - FAILED
@@ -1130,11 +1129,27 @@ components:
           format: date-time
         paymentUrl:
           type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
     StatusUpdateRequest:
       type: object
       properties:
         status:
           type: string
+          enum:
+          - NEW
+          - PENDING_PAYMENT
+          - CONFIRMED
+          - PROCESSING
+          - PACKING
+          - SHIPPING
+          - DELIVERED
+          - COMPLETED
+          - CANCELLED
     OrderItemResponse:
       type: object
       properties:
@@ -1202,7 +1217,6 @@ components:
         paymentStatus:
           type: string
           enum:
-          - SUCCESS
           - PENDING
           - PAID
           - FAILED
@@ -1218,6 +1232,9 @@ components:
           type: number
         paymentMethod:
           type: string
+          enum:
+          - COD
+          - VNPAY
         shippingMethod:
           type: string
         items:
@@ -1244,6 +1261,12 @@ components:
       properties:
         paymentStatus:
           type: string
+          enum:
+          - PENDING
+          - PAID
+          - FAILED
+          - REFUNDED
+          - CANCELLED
     CategoryUpdateRequest:
       type: object
       properties:
@@ -1272,6 +1295,15 @@ components:
           type: string
         address:
           type: string
+        provinceCode:
+          type: integer
+          format: int32
+        districtCode:
+          type: integer
+          format: int32
+        wardCode:
+          type: integer
+          format: int32
         roles:
           type: array
           items:
@@ -1290,6 +1322,15 @@ components:
           type: string
         address:
           type: string
+        provinceCode:
+          type: integer
+          format: int32
+        districtCode:
+          type: integer
+          format: int32
+        wardCode:
+          type: integer
+          format: int32
         roles:
           type: array
           items:
@@ -1308,7 +1349,7 @@ components:
           type: string
         shippingMethod:
           type: string
-        trackingNumber:
+        trackingCode:
           type: string
         shippingFee:
           type: number
@@ -1594,14 +1635,14 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/SortObject"
-        pageNumber:
-          type: integer
-          format: int32
+        paged:
+          type: boolean
         pageSize:
           type: integer
           format: int32
-        paged:
-          type: boolean
+        pageNumber:
+          type: integer
+          format: int32
         unpaged:
           type: boolean
     SortObject:

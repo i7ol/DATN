@@ -2,10 +2,12 @@ package com.datn.shoppayment.controller;
 
 import com.datn.shopdatabase.enums.PaymentMethod;
 import com.datn.shopdatabase.enums.PaymentStatus;
+import com.datn.shopdatabase.exception.AppException;
+import com.datn.shopdatabase.exception.ErrorCode;
 import com.datn.shopobject.dto.request.GuestPaymentRequest;
 import com.datn.shopobject.dto.request.UserPaymentRequest;
 import com.datn.shopobject.dto.response.PaymentResponse;
-import com.datn.shoppayment.config.UserPrincipal;
+import com.datn.shopobject.security.UserPrincipal;
 import com.datn.shoppayment.service.PaymentService;
 
 import com.datn.shoppayment.service.VNPayService;
@@ -22,7 +24,7 @@ import org.springframework.web.bind.annotation.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Map;
-
+@Slf4j
 @RestController
 @RequestMapping("/api/payments")
 @RequiredArgsConstructor
@@ -30,21 +32,35 @@ public class PaymentController {
 
     private final PaymentService paymentService;
 
+//    @PostMapping("/user")
+//    public ResponseEntity<PaymentResponse> userPayment(
+//            @Valid @RequestBody UserPaymentRequest request,
+//            @AuthenticationPrincipal UserPrincipal principal,
+//            HttpServletRequest httpRequest
+//    ) {
+//        return ResponseEntity.ok(
+//                paymentService.createUserPayment(
+//                        request,
+//                        principal.getId(),
+//                        httpRequest.getRemoteAddr()
+//                )
+//        );
+//    }
+
     @PostMapping("/user")
     public ResponseEntity<PaymentResponse> userPayment(
             @Valid @RequestBody UserPaymentRequest request,
             @AuthenticationPrincipal UserPrincipal principal,
-            HttpServletRequest httpRequest
-    ) {
-        return ResponseEntity.ok(
-                paymentService.createUserPayment(
-                        request,
-                        principal.getId(),
-                        httpRequest.getRemoteAddr()
-                )
-        );
-    }
+            HttpServletRequest httpRequest) {
 
+        if (principal == null) {
+            log.error("Principal is null when calling /api/payments/user");
+            throw new AppException(ErrorCode.UNAUTHORIZED, "Token không hợp lệ hoặc hết hạn");
+        }
+
+        return ResponseEntity.ok(paymentService.createUserPayment(
+                request, principal.getId(), httpRequest.getRemoteAddr()));
+    }
     @PostMapping("/guest")
     public ResponseEntity<PaymentResponse> guestPayment(
             @Valid @RequestBody GuestPaymentRequest request,

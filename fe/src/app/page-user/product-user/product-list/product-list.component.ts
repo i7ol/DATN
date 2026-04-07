@@ -1,7 +1,7 @@
+import { ProductUserControllerService } from 'src/app/api/user/api/productUserController.service';
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 
-import { ProductUserControllerService } from 'src/app/api/user/api/productUserController.service';
 import { PageProductResponse } from 'src/app/api/user/model/pageProductResponse';
 import { ProductResponse } from 'src/app/api/user/model/productResponse';
 

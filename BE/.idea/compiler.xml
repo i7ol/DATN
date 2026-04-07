@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile default="true" name="Default" enabled="true" />
+      <profile name="Annotation profile for shop" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.30/lombok-1.18.30.jar" />
+          <entry name="$MAVEN_REPOSITORY$/org/mapstruct/mapstruct-processor/1.6.3/mapstruct-processor-1.6.3.jar" />
+          <entry name="$MAVEN_REPOSITORY$/org/mapstruct/mapstruct/1.6.3/mapstruct-1.6.3.jar" />
+        </processorPath>
+        <module name="shop-payment" />
+        <module name="shop-cart" />
+        <module name="shop-auth" />
+        <module name="shop-object" />
+        <module name="shop-admin" />
+        <module name="shop-client" />
+        <module name="shop-inventory" />
+        <module name="shop-database" />
+        <module name="shop-shipping" />
+        <module name="shop-app" />
+        <module name="shop-order" />
+        <module name="shop-product" />
+        <module name="shop-user" />
+      </profile>
+    </annotationProcessing>
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="shop-admin" options="-parameters" />
+      <module name="shop-app" options="-parameters" />
+      <module name="shop-auth" options="-parameters" />
+      <module name="shop-cart" options="-parameters" />
+      <module name="shop-client" options="-parameters" />
+      <module name="shop-database" options="-parameters" />
+      <module name="shop-inventory" options="-parameters" />
+      <module name="shop-object" options="-parameters" />
+      <module name="shop-order" options="-parameters" />
+      <module name="shop-payment" options="-parameters" />
+      <module name="shop-product" options="-parameters" />
+      <module name="shop-shipping" options="-parameters" />
+      <module name="shop-user" options="-parameters" />
+    </option>
+  </component>
+</project>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding">
+    <file url="file://$PROJECT_DIR$/shop/shop-admin/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/shop/shop-admin/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/shop/shop-app/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/shop/shop-app/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/shop/shop-auth/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/shop/shop-auth/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/shop/shop-cart/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/shop/shop-cart/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/shop/shop-client/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/shop/shop-client/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/shop/shop-database/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/shop/shop-database/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/shop/shop-inventory/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/shop/shop-inventory/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/shop/shop-object/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/shop/shop-object/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/shop/shop-order/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/shop/shop-order/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/shop/shop-payment/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/shop/shop-payment/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/shop/shop-product/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/shop/shop-product/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/shop/shop-shipping/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/shop/shop-shipping/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/shop/shop-user/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/shop/shop-user/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/shop/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/shop/src/main/resources" charset="UTF-8" />
+  </component>
+</project>

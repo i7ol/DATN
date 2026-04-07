@@ -3,6 +3,7 @@ package com.datn.shopapp.client;
 import com.datn.shopobject.dto.response.UserInfoResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -12,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 )
 public interface AuthUserClient {
 
-    @GetMapping("/api/auth/validate")
+    @PostMapping("/api/auth/validate")
     boolean validateToken(
             @RequestHeader("Authorization") String token
     );

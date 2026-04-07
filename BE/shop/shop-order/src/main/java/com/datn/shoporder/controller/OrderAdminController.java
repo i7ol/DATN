@@ -1,7 +1,9 @@
 package com.datn.shoporder.controller;
 
+import com.datn.shopdatabase.entity.OrderEntity;
 import com.datn.shopdatabase.enums.OrderStatus;
 import com.datn.shopdatabase.enums.PaymentStatus;
+import com.datn.shopdatabase.repository.OrderRepository;
 import com.datn.shopobject.dto.response.OrderResponse;
 import com.datn.shoporder.mapper.OrderMapper;
 import com.datn.shoporder.service.OrderService;
@@ -9,7 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import java.util.List;
 
 @RestController
@@ -18,11 +21,17 @@ import java.util.List;
 public class OrderAdminController {
 
     private final OrderService orderService;
+    private final OrderRepository orderRepository;
+
 
     @GetMapping
-    public Page<OrderResponse> getAllOrders(Pageable pageable) {
-        return orderService.getAllOrders(pageable)
-                .map(OrderMapper::toResponse);
+    public Page<OrderEntity> getAllOrders(Pageable pageable) {
+        Pageable sortedPageable = PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                Sort.by(Sort.Direction.DESC, "createdAt")
+        );
+        return orderRepository.findAll(sortedPageable);
     }
 
     @GetMapping("/{orderId}")

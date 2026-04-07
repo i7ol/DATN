@@ -35,17 +35,15 @@ public class UserEntity extends BaseEntity {
     @Column(name = "address")
     String address;
 
-    String fullName;
 
-    String firstName;
+    @Column(name = "province_code")
+    Integer provinceCode;
 
-    String lastName;
+    @Column(name = "district_code")
+    Integer districtCode;
 
-    String province;
-
-    String district;
-
-    String ward;
+    @Column(name = "ward_code")
+    Integer wardCode;
 
 
     LocalDateTime lastLoginAt;

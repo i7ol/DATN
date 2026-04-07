@@ -21,11 +21,12 @@ public class OrderSecurityConfig {
     private final JwtAuthenticationFilter jwtFilter;
     private final String[] PUBLIC_ENDPOINTS = {
             "/api/user/orders",
+            "/api/user/orders/my-orders",
+            "/api/user/orders/my-orders/**",
             "/api/user/orders/checkout",
             "/api/user/orders/{orderId}/cancel",
-            "/api/user/orders/**",
             "/api/admin/orders",
-
+            "/api/admin/orders/**",
 
             "/v3/api-docs/**",
             "/swagger-ui/**",
@@ -42,12 +43,18 @@ public class OrderSecurityConfig {
                         sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/internal/**").permitAll()
-                        .requestMatchers("/api/internal/orders/**").permitAll()
-                        .requestMatchers("/actuator/**").permitAll()
-                        .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
+                        // Cho phép Guest checkout
                         .requestMatchers(HttpMethod.POST, "/api/user/orders/checkout").permitAll()
-                        .requestMatchers("/api/user/**").hasAnyRole("USER", "ADMIN")
+
+                        // Các endpoint user khác cần auth
+                        .requestMatchers("/api/user/orders/my-orders/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/api/user/orders/{orderId}/cancel").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/api/user/orders/**").hasAnyRole("USER", "ADMIN")
+
+                        .requestMatchers("/api/admin/orders/**").hasRole("ADMIN")
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/actuator/**").permitAll()
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

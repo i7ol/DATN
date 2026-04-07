@@ -3,12 +3,15 @@ package com.datn.shoporder.service;
 import com.datn.shopdatabase.entity.OrderEntity;
 import com.datn.shopdatabase.entity.OrderItemEntity;
 import com.datn.shopdatabase.entity.ProductEntity;
+import com.datn.shopdatabase.entity.UserEntity;
 import com.datn.shopdatabase.enums.OrderStatus;
+import com.datn.shopdatabase.enums.PaymentMethod;
 import com.datn.shopdatabase.enums.PaymentStatus;
 import com.datn.shopdatabase.exception.AppException;
 import com.datn.shopdatabase.exception.ErrorCode;
 import com.datn.shopdatabase.repository.OrderRepository;
 import com.datn.shopdatabase.repository.ProductRepository;
+import com.datn.shopdatabase.repository.UserRepository;
 import com.datn.shopobject.dto.request.CreateOrderRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -18,7 +21,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -28,7 +35,7 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
-
+    private final UserRepository userRepository;
     @Transactional
     public OrderEntity createOrderFromCheckout(
             Long userId,
@@ -37,57 +44,134 @@ public class OrderService {
             String guestEmail,
             String guestPhone,
             String shippingAddress,
-            String shippingProvince,
-            String shippingDistrict,
-            String shippingWard,
+            Integer shippingProvince,
+            Integer shippingDistrict,
+            Integer shippingWard,
             String shippingNote,
             String billingAddress,
-            String billingProvince,
-            String billingDistrict,
-            String billingWard,
+            Integer  billingProvince,
+            Integer  billingDistrict,
+            Integer  billingWard,
+            PaymentMethod paymentMethod,
             List<OrderItemEntity> items
     ) {
+
+        if (userId == null) {
+            if (shippingAddress == null
+                    || shippingProvince == null
+                    || shippingDistrict == null
+                    || shippingWard == null) {
+
+                throw new AppException(ErrorCode.INVALID_REQUEST, "Thiếu địa chỉ giao hàng");
+            }
+        }
         OrderEntity order = new OrderEntity();
 
         if (userId != null) {
-            // ===== USER =====
             order.setUserId(userId);
             order.setGuestId(null);
+
+            UserEntity user = userRepository.findById(userId)
+                    .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+            if (shippingAddress == null && user.getAddress() == null) {
+                throw new AppException(ErrorCode.INVALID_REQUEST, "User chưa có địa chỉ");
+            }
+
+            if (shippingProvince == null && user.getProvinceCode() == null) {
+                throw new AppException(ErrorCode.INVALID_REQUEST, "Thiếu tỉnh/thành");
+            }
+
+            if (shippingDistrict == null && user.getDistrictCode() == null) {
+                throw new AppException(ErrorCode.INVALID_REQUEST, "Thiếu quận/huyện");
+            }
+
+            if (shippingWard == null && user.getWardCode() == null) {
+                throw new AppException(ErrorCode.INVALID_REQUEST, "Thiếu phường/xã");
+            }
+            order.setShippingAddress(
+                    shippingAddress != null ? shippingAddress : user.getAddress()
+            );
+
+            order.setShippingProvince(
+                    shippingProvince != null ? shippingProvince : user.getProvinceCode()
+            );
+
+            order.setShippingDistrict(
+                    shippingDistrict != null ? shippingDistrict : user.getDistrictCode()
+            );
+
+            order.setShippingWard(
+                    shippingWard != null ? shippingWard : user.getWardCode()
+            );
         } else {
-            // ===== GUEST =====
             order.setUserId(null);
             order.setGuestId(guestId);
+            if (guestName == null || guestPhone == null) {
+                throw new AppException(ErrorCode.INVALID_REQUEST, "Thiếu thông tin khách hàng");
+            }
             order.setGuestName(guestName);
             order.setGuestEmail(guestEmail);
             order.setGuestPhone(guestPhone);
+
+            order.setShippingAddress(shippingAddress);
+            order.setShippingProvince(shippingProvince);
+            order.setShippingDistrict(shippingDistrict);
+            order.setShippingWard(shippingWard);
         }
 
         // Set shipping address details
-        order.setShippingAddress(shippingAddress);
-        order.setShippingProvince(shippingProvince);
-        order.setShippingDistrict(shippingDistrict);
-        order.setShippingWard(shippingWard);
         order.setShippingNote(shippingNote);
-
+        order.setShippingMethod("STANDARD");
         // Set billing address (use shipping if not provided)
-        if (billingAddress != null) {
+        boolean hasFullBilling =
+                billingAddress != null &&
+                        billingProvince != null &&
+                        billingDistrict != null &&
+                        billingWard != null;
+
+        if (hasFullBilling) {
             order.setBillingAddress(billingAddress);
             order.setBillingProvince(billingProvince);
             order.setBillingDistrict(billingDistrict);
             order.setBillingWard(billingWard);
         } else {
-            order.setBillingAddress(shippingAddress);
-            order.setBillingProvince(shippingProvince);
-            order.setBillingDistrict(shippingDistrict);
-            order.setBillingWard(shippingWard);
+            order.setBillingAddress(order.getShippingAddress());
+            order.setBillingProvince(order.getShippingProvince());
+            order.setBillingDistrict(order.getShippingDistrict());
+            order.setBillingWard(order.getShippingWard());
         }
 
-        // Set items
-        items.forEach(item -> item.setOrder(order));
+        if (items == null || items.isEmpty()) {
+            throw new AppException(ErrorCode.INVALID_REQUEST, "Order không có sản phẩm");
+        }
+        items.forEach(item -> {
+            if (item.getQuantity() == null || item.getQuantity() <= 0) {
+                throw new AppException(ErrorCode.INVALID_REQUEST, "Số lượng không hợp lệ");
+            }
+            item.setOrder(order);
+        });
         order.setItems(items);
 
+        Map<Long, ProductEntity> productMap = productRepository
+                .findAllById(items.stream().map(OrderItemEntity::getProductId).toList())
+                .stream()
+                .collect(Collectors.toMap(ProductEntity::getId, p -> p));
         BigDecimal total = items.stream()
-                .map(OrderItemEntity::getTotalPrice)
+                .map(item -> {
+                    ProductEntity product = productMap.get(item.getProductId());
+                    if (product == null) {
+                        throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
+                    }
+
+                    BigDecimal unitPrice = product.getPrice();
+                    BigDecimal itemTotal = unitPrice.multiply(BigDecimal.valueOf(item.getQuantity()));
+
+                    // overwrite lại cho chắc
+                    item.setUnitPrice(unitPrice);
+                    item.setTotalPrice(itemTotal);
+
+                    return itemTotal;
+                })
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
 
@@ -95,12 +179,25 @@ public class OrderService {
         order.setShippingFee(BigDecimal.ZERO);
         order.setDiscountAmount(BigDecimal.ZERO);
         order.calculateFinalAmount();
-
         // Set status
-        order.setStatus(OrderStatus.NEW);
-        order.setPaymentStatus(PaymentStatus.PENDING);
+        if (paymentMethod == null) {
+            throw new AppException(ErrorCode.INVALID_REQUEST, "Thiếu phương thức thanh toán");
+        }
+        order.setPaymentMethod(paymentMethod);
 
-        return orderRepository.save(order); // createdAt, updatedAt tự động set
+        if (paymentMethod == PaymentMethod.COD) {
+            order.setStatus(OrderStatus.PROCESSING);
+            order.setPaymentStatus(PaymentStatus.PENDING);
+        } else {
+            order.setStatus(OrderStatus.PENDING_PAYMENT);
+            order.setPaymentStatus(PaymentStatus.PENDING);
+        }
+        OrderEntity savedOrder = orderRepository.save(order);
+        orderRepository.flush();
+
+        savedOrder.setTrackingCode(generateTrackingCode(savedOrder.getId()));
+
+        return savedOrder;
     }
 
     // =============================================
@@ -151,10 +248,14 @@ public class OrderService {
         order.calculateFinalAmount();
 
 
-        order.setStatus(OrderStatus.NEW);
+        order.setStatus(OrderStatus.PENDING_PAYMENT);
         order.setPaymentStatus(PaymentStatus.PENDING);
+        order.setPaymentMethod(request.getPaymentMethod());
+        OrderEntity savedOrder = orderRepository.save(order);
 
-        return orderRepository.save(order);
+        savedOrder.setTrackingCode(generateTrackingCode(savedOrder.getId()));
+
+        return orderRepository.save(savedOrder);
     }
 
     // =============================================
@@ -178,7 +279,11 @@ public class OrderService {
         if (status == PaymentStatus.PAID) {
             order.setStatus(OrderStatus.PROCESSING);
             order.setPaymentDate(Instant.now());
-        } else if (status == PaymentStatus.REFUNDED) {
+        }
+        else if (status == PaymentStatus.FAILED) {
+            order.setStatus(OrderStatus.CANCELLED);
+        }
+        else if (status == PaymentStatus.REFUNDED) {
             order.setStatus(OrderStatus.CANCELLED);
         }
 
@@ -202,7 +307,7 @@ public class OrderService {
     }
 
     @Transactional
-    public OrderEntity updateShippingInfo(Long orderId, String shippingMethod, Instant estimatedDeliveryDate) {
+    public OrderEntity updateShippingInfo(Long orderId, String shippingMethod, LocalDateTime estimatedDeliveryDate) {
         OrderEntity order = getOrder(orderId);
 
         order.setShippingMethod(shippingMethod);
@@ -221,7 +326,7 @@ public class OrderService {
         }
 
         order.setStatus(OrderStatus.DELIVERED);
-        order.setActualDeliveryDate(Instant.now());
+        order.setActualDeliveryDate(LocalDateTime.now());
 
         return orderRepository.save(order);
     }
@@ -251,8 +356,12 @@ public class OrderService {
                 .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
     }
 
-    public Page<OrderEntity> getOrdersByUserId(Long userId,Pageable pageable) {
-        return orderRepository.findByUserId(userId,pageable);
+    public Page<OrderEntity> getOrdersByUserId(Long userId, Pageable pageable) {
+        if (userId == null) {
+            throw new AppException(ErrorCode.INVALID_REQUEST, "User ID không được null");
+        }
+
+        return orderRepository.findByUserIdWithItems(userId, pageable);
     }
 
     public Page<OrderEntity> getAllOrders(Pageable pageable) {
@@ -282,7 +391,8 @@ public class OrderService {
     }
 
     public boolean canCancelOrder(OrderEntity order) {
-        return order.getStatus() == OrderStatus.NEW || order.getStatus() == OrderStatus.CONFIRMED;
+        return order.getStatus() == OrderStatus.PENDING_PAYMENT
+                || order.getStatus() == OrderStatus.PROCESSING;
     }
 
     public OrderEntity getOrderWithPermission(Long orderId, Long userId) {
@@ -293,6 +403,13 @@ public class OrderService {
         }
 
         return order;
+    }
+
+    private String generateTrackingCode(Long orderId) {
+        String date = LocalDate.now()
+                .format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+
+        return "VN-" + date + "-" + String.format("%06d", orderId);
     }
 
     @Transactional

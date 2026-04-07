@@ -11,6 +11,7 @@ import com.datn.shopobject.dto.request.UserCreationRequest;
 import com.datn.shopobject.dto.request.UserUpdateRequest;
 import com.datn.shopobject.dto.response.UserResponse;
 import com.datn.shopdatabase.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -79,6 +80,22 @@ public class UserService {
 
         return mapToResponse(userRepository.save(user));
     }
+    @Transactional
+    public UserResponse updateMe(Long userId, UserUpdateRequest request) {
+        UserEntity user = findUserEntity(userId);
+
+        if (hasText(request.getEmail())) user.setEmail(request.getEmail());
+        if (hasText(request.getPhone())) user.setPhone(request.getPhone());
+
+        if (request.getProvinceCode() != null) user.setProvinceCode(request.getProvinceCode());
+        if (request.getDistrictCode() != null) user.setDistrictCode(request.getDistrictCode());
+        if (request.getWardCode() != null) user.setWardCode(request.getWardCode());
+
+        if (hasText(request.getAddress())) user.setAddress(request.getAddress());
+
+        return mapToResponse(userRepository.saveAndFlush(user));
+    }
+
 
     public void deleteUser(Long id) {
         userRepository.delete(findUserEntity(id));
@@ -117,6 +134,9 @@ public class UserService {
                 .email(user.getEmail())
                 .phone(user.getPhone())
                 .address(user.getAddress())
+                .provinceCode(user.getProvinceCode())
+                .districtCode(user.getDistrictCode())
+                .wardCode(user.getWardCode())
                 .roles(
                         user.getRoles() == null
                                 ? List.of()

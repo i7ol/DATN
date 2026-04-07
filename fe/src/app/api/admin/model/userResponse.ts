@@ -15,6 +15,9 @@ export interface UserResponse {
     email?: string;
     phone?: string;
     address?: string;
+    provinceCode?: number;
+    districtCode?: number;
+    wardCode?: number;
     roles?: Array<string>;
     pushToken?: string;
 }

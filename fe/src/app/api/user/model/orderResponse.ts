@@ -25,7 +25,7 @@ export interface OrderResponse {
     shippingFee?: number;
     discountAmount?: number;
     finalAmount?: number;
-    paymentMethod?: string;
+    paymentMethod?: OrderResponsePaymentMethodEnum;
     shippingMethod?: string;
     items?: Array<OrderItemResponse>;
     createdAt?: string;
@@ -46,12 +46,15 @@ export enum OrderResponseStatusEnum {
     CANCELLED = 'CANCELLED'
 };
 export enum OrderResponsePaymentStatusEnum {
-    SUCCESS = 'SUCCESS',
     PENDING = 'PENDING',
     PAID = 'PAID',
     FAILED = 'FAILED',
     REFUNDED = 'REFUNDED',
     CANCELLED = 'CANCELLED'
+};
+export enum OrderResponsePaymentMethodEnum {
+    COD = 'COD',
+    VNPAY = 'VNPAY'
 };
 
 

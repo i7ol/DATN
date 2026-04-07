@@ -143,8 +143,18 @@ public class AuthService {
                 .distinct()
                 .collect(Collectors.toList());
 
-        String accessToken = jwtService.generateAccessToken(userEntity.getUsername(), roles, permissions);
-        String refreshToken = jwtService.generateRefreshToken(userEntity.getUsername());
+        String accessToken = jwtService.generateAccessToken(
+                userEntity.getId(),
+                userEntity.getUsername(),
+                roles,
+                permissions
+        );
+
+        String refreshToken = jwtService.generateRefreshToken(
+                userEntity.getId(),
+                userEntity.getUsername()
+        );
+
 
         String sessionData = String.format("{\"roles\": %s, \"permissions\": %s}",
                 roles.toString(), permissions.toString());
@@ -186,8 +196,18 @@ public class AuthService {
                 .distinct()
                 .collect(Collectors.toList());
 
-        String newAccessToken = jwtService.generateAccessToken(username, roles, permissions);
-        String newRefreshToken = jwtService.generateRefreshToken(username);
+        String newAccessToken = jwtService.generateAccessToken(
+                userEntity.getId(),
+                username,
+                roles,
+                permissions
+        );
+
+        String newRefreshToken = jwtService.generateRefreshToken(
+                userEntity.getId(),
+                username
+        );
+
 
         String sessionData = String.format("{\"roles\": %s, \"permissions\": %s}",
                 roles.toString(), permissions.toString());
@@ -218,44 +238,87 @@ public class AuthService {
         log.info("User {} logged out successfully. Access token blacklisted.", username);
     }
 
-    public boolean validateToken(String token) {
-        return jwtService.validateToken(token);
-    }
-    public boolean checkPermission(String token, String permission) {
-        String username = jwtService.extractUsername(token);
-        UserEntity user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+    public boolean validateToken(String authorizationHeader) {
+        try {
+            if (authorizationHeader == null || authorizationHeader.isBlank()) {
+                log.warn("Authorization header is null or empty");
+                return false;
+            }
 
-        boolean hasPermission = user.getRoles().stream()
-                .flatMap(role -> role.getPermissions().stream())
-                .anyMatch(p -> p.getName().equals(permission));
+            // Clean cực mạnh
+            String token = authorizationHeader
+                    .replace("Bearer ", "")
+                    .replace("bearer ", "")
+                    .replaceAll("[,\\s]+$", "")   // bỏ dấu phẩy + space ở cuối
+                    .replaceAll("\\s+", "")       // bỏ tất cả khoảng trắng
+                    .trim();
 
-        return hasPermission;
+            log.info("Cleaned token (length={}): {}...",
+                    token.length(),
+                    token.substring(0, Math.min(100, token.length())));
+
+            if (token.isEmpty() || token.contains(",")) {
+                log.error("Token still contains comma after cleaning! Raw: {}", authorizationHeader);
+                return false;
+            }
+
+            return jwtService.validateToken(token);
+        } catch (Exception e) {
+            log.error("Token validation failed. Raw header: {}",
+                    authorizationHeader != null ? authorizationHeader.substring(0, Math.min(200, authorizationHeader.length())) : "null", e);
+            return false;
+        }
     }
 
     public UserInfoResponse getCurrentUser(String token) {
-        String username = jwtService.extractUsername(token);
-        UserEntity user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        try {
+            String username = jwtService.extractUsername(token);
 
-        List<String> roles = user.getRoles().stream()
-                .map(role -> role.getName())
-                .collect(Collectors.toList());
+            UserEntity user = userRepository.findByUsername(username)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
 
-        List<String> permissions = user.getRoles().stream()
-                .flatMap(role -> role.getPermissions().stream())
-                .map(permission -> permission.getName())
-                .distinct()
-                .collect(Collectors.toList());
+            List<String> roles = user.getRoles().stream()
+                    .map(RoleEntity::getName)
+                    .collect(Collectors.toList());
 
-        return UserInfoResponse.builder()
-                .id(user.getId())
-                .username(user.getUsername())
-                .email(user.getEmail())
-                .phone(user.getPhone())
-                .address(user.getAddress())
-                .roles(roles)
-                .permissions(permissions)
-                .build();
+            List<String> permissions = user.getRoles().stream()
+                    .flatMap(role -> role.getPermissions().stream())
+                    .map(permission -> permission.getName())
+                    .distinct()
+                    .collect(Collectors.toList());
+
+            return UserInfoResponse.builder()
+                    .id(user.getId())
+                    .username(user.getUsername())
+                    .email(user.getEmail())
+                    .phone(user.getPhone())
+                    .address(user.getAddress())
+                    .roles(roles)
+                    .permissions(permissions)
+                    .build();
+
+        } catch (Exception e) {
+            log.error("Failed to get current user from token: {}", e.getMessage());
+            // Không throw exception thô → Feign sẽ nhận 400
+            throw new RuntimeException("Invalid or expired token");
+            // Hoặc tốt hơn: trả về response có cấu trúc lỗi (nhưng tạm throw cũng được)
+        }
+    }
+
+    public boolean checkPermission(String token, String permission) {
+        try {
+            String username = jwtService.extractUsername(token);
+            UserEntity user = userRepository.findByUsername(username)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
+            boolean hasPermission = user.getRoles().stream()
+                    .flatMap(role -> role.getPermissions().stream())
+                    .anyMatch(p -> p.getName().equals(permission));
+
+            return hasPermission;
+        } catch (Exception e) {
+            log.warn("Check permission failed: {}", e.getMessage());
+            return false;
+        }
     }
 }

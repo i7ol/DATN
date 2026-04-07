@@ -1,0 +1,41 @@
+.my-order-container {
+  padding: 28px;
+  background: #f8f9fa;
+
+  .order-card {
+    border-radius: 16px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+
+    &:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 20px 40px rgba(0, 123, 255, 0.12) !important;
+    }
+
+    .card-header {
+      background: linear-gradient(135deg, #f8f9fa, #ffffff) !important;
+    }
+
+    .badge {
+      font-weight: 600;
+      border-radius: 50px;
+      padding: 8px 16px;
+      font-size: 0.9rem;
+    }
+  }
+
+  .text-success {
+    color: #10b981 !important;
+  }
+
+  .bi {
+    font-size: 1.15em;
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .my-order-container {
+    padding: 16px;
+  }
+}

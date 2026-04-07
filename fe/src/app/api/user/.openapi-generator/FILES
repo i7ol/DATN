@@ -15,6 +15,7 @@ configuration.ts
 encoder.ts
 git_push.sh
 index.ts
+model/apiResponsePageOrderResponse.ts
 model/apiResponseUserResponse.ts
 model/cartItemResponse.ts
 model/cartResponse.ts
@@ -35,6 +36,7 @@ model/shippingResponse.ts
 model/sortObject.ts
 model/userPaymentRequest.ts
 model/userResponse.ts
+model/userUpdateRequest.ts
 model/variantResponse.ts
 param.ts
 variables.ts

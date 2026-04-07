@@ -11,17 +11,20 @@ import com.datn.shopobject.dto.request.CheckoutRequest;
 import com.datn.shopobject.dto.response.OrderResponse;
 import com.datn.shoporder.mapper.OrderMapper;
 import com.datn.shoporder.service.OrderService;
+import com.datn.shopobject.security.UserPrincipal;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import java.math.BigDecimal;
 import java.util.List;
-
+@Slf4j
 @RestController
 @RequestMapping("/api/user/orders")
 @RequiredArgsConstructor
@@ -33,7 +36,7 @@ public class OrderUserController {
     // ===== CREATE =====
     @PostMapping("/checkout")
     @Transactional
-    public OrderResponse checkout(@RequestBody CheckoutRequest request) {
+    public OrderResponse checkout(@RequestBody CheckoutRequest request, @AuthenticationPrincipal UserPrincipal principal) {
 
         if (request.getItems() == null || request.getItems().isEmpty()) {
             throw new AppException(ErrorCode.INVALID_REQUEST, "Danh sách sản phẩm trống");
@@ -69,8 +72,25 @@ public class OrderUserController {
             return entity;
         }).toList();
 
+        Long userId = (principal != null) ? principal.getId() : null;
+
+        // Nếu là Guest thì kiểm tra thông tin guest
+        if (userId == null) {
+            if (request.getGuestId() == null ||
+                    request.getGuestName() == null ||
+                    request.getGuestPhone() == null) {
+                throw new AppException(ErrorCode.INVALID_REQUEST,
+                        "Khách vãng lai phải nhập đầy đủ thông tin (tên, sđt)");
+            }
+        } else {
+            // Nếu là User đã login, bỏ qua guest info
+            request.setGuestId(null);
+            request.setGuestName(null);
+            request.setGuestEmail(null);
+            request.setGuestPhone(null);
+        }
         OrderEntity order = orderService.createOrderFromCheckout(
-                request.getUserId(),
+                userId,
                 request.getGuestId(),
                 request.getGuestName(),
                 request.getGuestEmail(),
@@ -81,6 +101,7 @@ public class OrderUserController {
                 request.getShippingWard(),
                 request.getShippingNote(),
                 null, null, null, null,
+                request.getPaymentMethod(),
                 orderItems
         );
 
@@ -96,9 +117,17 @@ public class OrderUserController {
         return OrderMapper.toResponse(orderService.getOrder(orderId));
     }
 
-    @GetMapping("/my")
-    public Page<OrderResponse> myOrders(@RequestParam Long userId, Pageable pageable) {
-        return orderService.getOrdersByUserId(userId, pageable)
+    @GetMapping("/my-orders")
+    public Page<OrderResponse> myOrders(
+            @AuthenticationPrincipal UserPrincipal principal,
+            Pageable pageable) {
+
+        if (principal == null) {
+            log.error("Principal is null - Token not propagated correctly");
+            throw new AppException(ErrorCode.UNAUTHENTICATED, "Vui lòng đăng nhập lại");
+        }
+
+        return orderService.getOrdersByUserId(principal.getId(), pageable)
                 .map(OrderMapper::toResponse);
     }
 
@@ -106,10 +135,14 @@ public class OrderUserController {
     @PutMapping("/{orderId}/cancel")
     public OrderResponse cancel(
             @PathVariable Long orderId,
-            @RequestParam Long userId
+            @AuthenticationPrincipal UserPrincipal principal
     ) {
+        if (principal == null) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+
         return OrderMapper.toResponse(
-                orderService.cancelOrderWithPermission(orderId, userId)
+                orderService.cancelOrderWithPermission(orderId, principal.getId())
         );
     }
 }

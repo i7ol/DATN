@@ -13,10 +13,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PathVariable;
+
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Map;
 
 
@@ -44,6 +45,48 @@ public class PaymentServiceImpl implements PaymentService {
         return createPayment(order, userId, null, request.getMethod(), ipAddress);
     }
 
+    @Override
+    @Transactional
+    public void handlePaymentSuccess(String txnRef) {
+
+        PaymentEntity payment = paymentRepository
+                .findByTransactionId(txnRef)
+                .orElseThrow(() -> new RuntimeException("Payment not found"));
+
+        if (payment.getStatus() == PaymentStatus.PAID) {
+            return;
+        }
+
+        payment.setStatus(PaymentStatus.PAID);
+        payment.setPaidAt(LocalDateTime.now());
+
+        paymentRepository.save(payment);
+
+        orderClient.updatePaymentStatus(
+                payment.getOrderId(),
+                PaymentStatus.PAID
+        );
+    }
+
+    @Override
+    @Transactional
+    public void handlePaymentFail(String txnRef) {
+
+        PaymentEntity payment = paymentRepository
+                .findByTransactionId(txnRef)
+                .orElseThrow(() -> new RuntimeException("Payment not found"));
+
+        if (payment.getStatus() != PaymentStatus.PAID) {
+            payment.setStatus(PaymentStatus.FAILED);
+        }
+
+        paymentRepository.save(payment);
+
+        orderClient.updatePaymentStatus(
+                payment.getOrderId(),
+                PaymentStatus.FAILED
+        );
+    }
     @Override
     public PaymentResponse createGuestPayment(
             GuestPaymentRequest request,
@@ -90,7 +133,7 @@ public class PaymentServiceImpl implements PaymentService {
             VNPayPaymentResponse vnp =
                     vnPayService.createPayment(
                             order.getId(),
-                            order.getFinalAmount().longValue(),
+                            order.getFinalAmount().multiply(BigDecimal.valueOf(1)).longValue(),
                             "Payment order #" + order.getId(),
                             ip
                     );
@@ -100,7 +143,7 @@ public class PaymentServiceImpl implements PaymentService {
 
             orderClient.updatePaymentStatus(
                     order.getId(),
-                    PaymentStatus.PENDING.name()
+                    PaymentStatus.PENDING
             );
 
 
@@ -142,35 +185,51 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public PaymentResponse markPaid(Long id, String transactionId) {
+
         PaymentEntity payment = paymentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Payment not found"));
 
-        payment.setStatus(PaymentStatus.SUCCESS);
+        payment.setStatus(PaymentStatus.PAID);
         payment.setTransactionId(transactionId);
 
-        return PaymentResponse.from(paymentRepository.save(payment));
+        PaymentEntity saved = paymentRepository.save(payment);
+
+
+        orderClient.updatePaymentStatus(
+                payment.getOrderId(),
+                PaymentStatus.PAID
+        );
+
+        return PaymentResponse.from(saved);
     }
 
     @Override
     public PaymentResponse refund(Long id, String reason) {
+
         PaymentEntity payment = paymentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Payment not found"));
 
-        if (payment.getStatus() != PaymentStatus.SUCCESS) {
+        if (payment.getStatus() != PaymentStatus.PAID) {
             throw new RuntimeException("Only successful payments can be refunded");
         }
 
         payment.setStatus(PaymentStatus.REFUNDED);
 
-        return PaymentResponse.from(paymentRepository.save(payment));
-    }
+        PaymentEntity saved = paymentRepository.save(payment);
 
+        orderClient.updatePaymentStatus(
+                payment.getOrderId(),
+                PaymentStatus.REFUNDED
+        );
+
+        return PaymentResponse.from(saved);
+    }
     @Override
     public PaymentResponse cancel(Long id) {
         PaymentEntity payment = paymentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Payment not found"));
 
-        if (payment.getStatus() == PaymentStatus.SUCCESS) {
+        if (payment.getStatus() == PaymentStatus.PAID) {
             throw new RuntimeException("Cannot cancel paid payment");
         }
 
@@ -182,7 +241,7 @@ public class PaymentServiceImpl implements PaymentService {
     public Object getSummary(LocalDate fromDate, LocalDate toDate) {
 
         BigDecimal totalPaid = paymentRepository
-                .getTotalAmountByPeriodAndStatus(fromDate, toDate, PaymentStatus.SUCCESS);
+                .getTotalAmountByPeriodAndStatus(fromDate, toDate, PaymentStatus.PAID);
 
         long totalPayments = paymentRepository.count();
 

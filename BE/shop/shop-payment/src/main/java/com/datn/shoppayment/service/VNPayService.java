@@ -46,8 +46,6 @@ public class VNPayService {
     @Value("${vnpay.payment-url}")
     private String vnp_PayUrl;
 
-    @Value("${vnpay.qr-code-url}")
-    private String vnp_QrCodeUrl;
 
 
     public VNPayPaymentResponse createPayment(
@@ -58,7 +56,7 @@ public class VNPayService {
     ) {
 
         Map<String, String> vnp_Params = new HashMap<>();
-        String txnRef = String.valueOf(orderId);
+        String txnRef = orderId + "_" + System.currentTimeMillis();
 
 
         vnp_Params.put("vnp_Version", vnp_Version);
@@ -100,10 +98,7 @@ public class VNPayService {
                 String fieldValue = request.getParameter(fieldName);
 
                 if (fieldValue != null && !fieldValue.isEmpty()) {
-                    fields.put(
-                            URLEncoder.encode(fieldName, StandardCharsets.US_ASCII),
-                            URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII)
-                    );
+                    fields.put(fieldName, fieldValue);
                 }
             }
 
@@ -150,15 +145,17 @@ public class VNPayService {
             Collections.sort(fieldNames);
 
             StringBuilder sb = new StringBuilder();
+
             Iterator<String> itr = fieldNames.iterator();
             while (itr.hasNext()) {
                 String fieldName = itr.next();
                 String fieldValue = fields.get(fieldName);
 
                 if (fieldValue != null && fieldValue.length() > 0) {
+
                     sb.append(fieldName);
                     sb.append("=");
-                    sb.append(fieldValue);
+                    sb.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII.toString()));
 
                     if (itr.hasNext()) {
                         sb.append("&");
@@ -167,6 +164,7 @@ public class VNPayService {
             }
 
             return hmacSHA512(vnp_HashSecret, sb.toString());
+
         } catch (Exception e) {
             log.error("Error hashing fields: {}", e.getMessage(), e);
             return "";

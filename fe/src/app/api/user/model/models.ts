@@ -1,3 +1,4 @@
+export * from './apiResponsePageOrderResponse';
 export * from './apiResponseUserResponse';
 export * from './cartItemResponse';
 export * from './cartResponse';
@@ -17,4 +18,5 @@ export * from './shippingResponse';
 export * from './sortObject';
 export * from './userPaymentRequest';
 export * from './userResponse';
+export * from './userUpdateRequest';
 export * from './variantResponse';

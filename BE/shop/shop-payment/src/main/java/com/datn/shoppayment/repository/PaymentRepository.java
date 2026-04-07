@@ -24,6 +24,8 @@ public interface PaymentRepository extends JpaRepository<PaymentEntity, Long>, J
 
     List<PaymentEntity> findByUserId(Long userId);
     List<PaymentEntity> findByGuestId(String guestId);
+    Optional<PaymentEntity> findByOrderId(Long orderId);
+    Optional<PaymentEntity> findByTransactionId(String transactionId);
 
 
     long countByStatusAndCreatedAtBetween(PaymentStatus status, LocalDateTime start, LocalDateTime end);

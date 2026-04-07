@@ -1,6 +1,7 @@
 package com.datn.shopdatabase.entity;
 
 import com.datn.shopdatabase.enums.OrderStatus;
+import com.datn.shopdatabase.enums.PaymentMethod;
 import com.datn.shopdatabase.enums.PaymentStatus;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
@@ -10,6 +11,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,16 +38,16 @@ public class OrderEntity extends BaseEntity {
 
     // Shipping address details
     private String shippingAddress;
-    private String shippingProvince;
-    private String shippingDistrict;
-    private String shippingWard;
+    private Integer  shippingProvince;
+    private Integer  shippingDistrict;
+    private Integer  shippingWard;
     private String shippingNote;
 
     // Billing address (nếu khác shipping)
     private String billingAddress;
-    private String billingProvince;
-    private String billingDistrict;
-    private String billingWard;
+    private Integer billingProvince;
+    private Integer billingDistrict;
+    private Integer billingWard;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
@@ -63,14 +65,18 @@ public class OrderEntity extends BaseEntity {
     private PaymentStatus paymentStatus;
 
     // Thông tin thanh toán
-    private String paymentMethod;
+    @Enumerated(EnumType.STRING)
+    private PaymentMethod paymentMethod;
     private String paymentTransactionId;
-    private Instant paymentDate; // Đổi từ LocalDateTime sang Instant
+    private Instant paymentDate;
 
     // Thông tin giao hàng
     private String shippingMethod;
-    private Instant estimatedDeliveryDate; // Đổi từ LocalDateTime sang Instant
-    private Instant actualDeliveryDate; // Đổi từ LocalDateTime sang Instant
+    private LocalDateTime  estimatedDeliveryDate;
+    private LocalDateTime  actualDeliveryDate;
+
+    @Column(name = "tracking_code", unique = true)
+    private String trackingCode;
 
     // Helper methods
     public void calculateFinalAmount() {

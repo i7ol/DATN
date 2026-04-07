@@ -15,6 +15,9 @@ public class UserUpdateRequest {
     String email;
     String phone;
     String address;
+    Integer provinceCode;
+    Integer districtCode;
+    Integer wardCode;
     List<String> roles;
 
 }

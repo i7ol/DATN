@@ -3,7 +3,7 @@ package com.datn.shoporder.config;
 import com.datn.shopobject.dto.response.UserInfoResponse;
 import com.datn.shoporder.client.AuthOrderClient;
 import com.datn.shoppayment.client.AuthPaymentClient;
-import com.datn.shoppayment.config.UserPrincipal;
+import com.datn.shopobject.security.UserPrincipal;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -34,58 +34,112 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         return request.getServletPath().startsWith("/api/internal/");
     }
 
-    @Override
-    protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain)
-            throws ServletException, IOException {
+//    @Override
+//    protected void doFilterInternal(HttpServletRequest request,
+//                                    HttpServletResponse response,
+//                                    FilterChain filterChain)
+//            throws ServletException, IOException {
+//
+//        String authHeader = request.getHeader("Authorization");
+//
+//        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+//            filterChain.doFilter(request, response);
+//            return;
+//        }
+//
+//        String token = authHeader.substring(7);
+//
+//        try {
+//            boolean isValid = authClient.validateToken("Bearer " + token);
+//            if (!isValid) {
+//                filterChain.doFilter(request, response);
+//                return;
+//            }
+//
+//            UserInfoResponse userInfo = authClient.getCurrentUser("Bearer " + token);
+//
+//            List<GrantedAuthority> authorities = userInfo.getRoles()
+//                    .stream()
+//                    .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
+//                    .collect(Collectors.toList());
+//
+//            UserPrincipal principal = new UserPrincipal(
+//                    userInfo.getId(),
+//                    userInfo.getUsername(),
+//                    userInfo.getRoles()
+//            );
+//
+//            UsernamePasswordAuthenticationToken authentication =
+//                    new UsernamePasswordAuthenticationToken(
+//                            principal,
+//                            "Bearer " + token,
+//                            authorities
+//                    );
+//
+//            authentication.setDetails(
+//                    new WebAuthenticationDetailsSource().buildDetails(request)
+//            );
+//
+//            SecurityContextHolder.getContext().setAuthentication(authentication);
+//
+//        } catch (Exception e) {
+//            log.error("JWT authentication failed", e);
+//        }
+//
+//        filterChain.doFilter(request, response);
+//    }
+@Override
+protected void doFilterInternal(HttpServletRequest request,
+                                HttpServletResponse response,
+                                FilterChain filterChain) throws ServletException, IOException {
 
-        String authHeader = request.getHeader("Authorization");
+    String authHeader = request.getHeader("Authorization");
 
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+    if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        filterChain.doFilter(request, response);
+        return;
+    }
+
+    String token = authHeader.substring(7);
+
+    try {
+        // Log để debug
+        log.info("Validating token for path: {}", request.getServletPath());
+
+        boolean isValid = authClient.validateToken("Bearer " + token);
+        if (!isValid) {
+            log.warn("Token invalid for path: {}", request.getServletPath());
             filterChain.doFilter(request, response);
             return;
         }
 
-        String token = authHeader.substring(7);
+        UserInfoResponse userInfo = authClient.getCurrentUser("Bearer " + token);
 
-        try {
-            boolean isValid = authClient.validateToken("Bearer " + token);
-            if (!isValid) {
-                filterChain.doFilter(request, response);
-                return;
-            }
+        List<GrantedAuthority> authorities = userInfo.getRoles()
+                .stream()
+                .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
+                .collect(Collectors.toList());
 
-            UserInfoResponse userInfo = authClient.getCurrentUser("Bearer " + token);
+        UserPrincipal principal = new UserPrincipal(
+                userInfo.getId(),
+                userInfo.getUsername(),
+                userInfo.getRoles()
+        );
 
-            List<GrantedAuthority> authorities = userInfo.getRoles()
-                    .stream()
-                    .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
-                    .collect(Collectors.toList());
+        UsernamePasswordAuthenticationToken authentication =
+                new UsernamePasswordAuthenticationToken(principal, null, authorities);
 
-            UserPrincipal principal = new UserPrincipal(
-                    userInfo.getId(),
-                    userInfo.getUsername(),
-                    userInfo.getRoles()
-            );
+        authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
-            UsernamePasswordAuthenticationToken authentication =
-                    new UsernamePasswordAuthenticationToken(
-                            principal,
-                            null,
-                            authorities
-                    );
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        log.info("User authenticated successfully in order-service: {} (id={})",
+                userInfo.getUsername(), userInfo.getId());
 
-            authentication.setDetails(
-                    new WebAuthenticationDetailsSource().buildDetails(request)
-            );
-
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        } catch (Exception e) {
-            log.error("JWT authentication failed", e);
-        }
-
-        filterChain.doFilter(request, response);
+    } catch (Exception e) {
+        log.error("JWT authentication failed for path: {}", request.getServletPath(), e);
+        // KHÔNG throw, chỉ log để request vẫn đi tiếp (nhưng principal sẽ null)
     }
+
+    filterChain.doFilter(request, response);
+}
 }

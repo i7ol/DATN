@@ -42,7 +42,7 @@ public class OrderUserClientFallbackFactory
             }
 
             @Override
-            public Page<OrderResponse> myOrders(Long userId, Pageable pageable) {
+            public Page<OrderResponse> myOrders(int page, int size) {
                 throw new AppException(
                         ErrorCode.SERVICE_UNAVAILABLE,
                         "Không thể lấy danh sách đơn hàng"

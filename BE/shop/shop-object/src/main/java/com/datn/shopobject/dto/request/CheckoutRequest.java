@@ -1,5 +1,6 @@
 package com.datn.shopobject.dto.request;
 
+import com.datn.shopdatabase.enums.PaymentMethod;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -24,17 +25,17 @@ public class CheckoutRequest {
     @NotBlank(message = "Địa chỉ giao hàng không được để trống")
     private String shippingAddress;
 
-    private String shippingProvince;
-    private String shippingDistrict;
-    private String shippingWard;
+    private Integer shippingProvince;
+    private Integer shippingDistrict;
+    private Integer shippingWard;
     private String shippingNote;
 
     private String billingAddress;
-    private String billingProvince;
-    private String billingDistrict;
-    private String billingWard;
+    private Integer billingProvince;
+    private Integer billingDistrict;
+    private Integer billingWard;
 
-    private String paymentMethod;
+    private PaymentMethod paymentMethod;
     private String shippingMethod;
     @Valid
     private List<CheckoutItemRequest> items;

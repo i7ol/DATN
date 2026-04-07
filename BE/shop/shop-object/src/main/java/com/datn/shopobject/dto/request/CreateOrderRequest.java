@@ -1,5 +1,6 @@
 package com.datn.shopobject.dto.request;
 
+import com.datn.shopdatabase.enums.PaymentMethod;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -19,8 +20,10 @@ public class CreateOrderRequest {
     private String guestPhone;
     private String shippingAddress;
     private String billingAddress;
-
+    private  PaymentMethod paymentMethod;
     @NotEmpty
     private List<OrderItemRequest> items;
+
+
 }
 

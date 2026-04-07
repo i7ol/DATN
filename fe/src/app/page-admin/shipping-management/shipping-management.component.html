@@ -29,7 +29,7 @@
 
         <mat-form-field appearance="outline" class="w-full">
           <mat-label>Mã vận đơn</mat-label>
-          <input matInput formControlName="trackingNumber" />
+          <input matInput formControlName="trackingCode" />
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="w-full">
@@ -117,11 +117,11 @@
           </td>
         </ng-container>
 
-        <!-- Tracking Number Column -->
-        <ng-container matColumnDef="trackingNumber">
+        <!-- Tracking Code Column -->
+        <ng-container matColumnDef="trackingCode">
           <th mat-header-cell *matHeaderCellDef>Mã theo dõi</th>
           <td mat-cell *matCellDef="let shipping" class="font-mono">
-            {{ shipping.trackingNumber || "Chưa có" }}
+            {{ shipping.trackingCode || "Chưa có" }}
           </td>
         </ng-container>
 
@@ -180,7 +180,7 @@
               color="accent"
               (click)="syncWithProvider(shipping.id!)"
               matTooltip="Đồng bộ với đơn vị vận chuyển"
-              [disabled]="!shipping.trackingNumber"
+              [disabled]="!shipping.trackingCode"
             >
               <mat-icon>sync</mat-icon>
             </button>

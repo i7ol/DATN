@@ -1,11 +1,13 @@
 package com.datn.shopobject.dto.response;
 
 import com.datn.shopdatabase.enums.OrderStatus;
+import com.datn.shopdatabase.enums.PaymentMethod;
 import com.datn.shopdatabase.enums.PaymentStatus;
 import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -31,7 +33,7 @@ public class OrderResponse {
     private BigDecimal discountAmount;
     private BigDecimal finalAmount;
 
-    private String paymentMethod;
+    private PaymentMethod paymentMethod;
     private String shippingMethod;
 
     private List<OrderItemResponse> items;
@@ -39,6 +41,6 @@ public class OrderResponse {
     private Instant createdAt;
     private Instant updatedAt;
     private Instant paymentDate;
-    private Instant estimatedDeliveryDate;
-    private Instant actualDeliveryDate;
+    private LocalDateTime estimatedDeliveryDate;
+    private LocalDateTime actualDeliveryDate;
 }

@@ -33,7 +33,7 @@ public class ShippingAdminController {
 
     @GetMapping
     public ResponseEntity<PageShippingResponse> getAllShippings(
-            ShippingSearchRequest filter,
+           @ModelAttribute ShippingSearchRequest filter,
             Pageable pageable) {
         Page<ShippingOrderEntity> page = shippingService.getAllShippings(filter, pageable);
 
@@ -62,7 +62,7 @@ public class ShippingAdminController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ShippingResponse> getById(@PathVariable Long id) {
-        ShippingOrderEntity shipping = shippingService.getByIdAndUserId(id, null);
+        ShippingOrderEntity shipping = shippingService.getById(id);
         return ResponseEntity.ok(toResponse(shipping));
     }
 
@@ -73,7 +73,6 @@ public class ShippingAdminController {
         String status = request.get("status");
         String notes = request.get("notes");
 
-        // SỬA: Sử dụng StatusEnum từ package đúng
         com.datn.shopdatabase.enums.StatusEnum statusEnum =
                 com.datn.shopdatabase.enums.StatusEnum.valueOf(status);
 
@@ -115,7 +114,7 @@ public class ShippingAdminController {
                 .recipientAddress(e.getRecipientAddress())
                 .shippingCompany(e.getShippingCompany())
                 .shippingMethod(e.getShippingMethod())
-                .trackingNumber(e.getTrackingNumber())
+                .trackingCode(e.getTrackingCode())
                 .shippingFee(e.getShippingFee())
                 .estimatedDeliveryDays(e.getEstimatedDeliveryDays())
                 .estimatedDeliveryDate(e.getEstimatedDeliveryDate())

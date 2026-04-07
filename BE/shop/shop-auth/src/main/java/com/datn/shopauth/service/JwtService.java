@@ -116,22 +116,24 @@ public class JwtService {
     }
 
     // ==================== ACCESS TOKEN ====================
-    public String generateAccessToken(String username, List<String> roles, List<String> permissions) {
-        return generateToken(username, roles, permissions, accessTokenExpiration, "ACCESS");
+    public String generateAccessToken(Long userId,String username, List<String> roles, List<String> permissions) {
+        return generateToken(userId,username, roles, permissions, accessTokenExpiration, "ACCESS");
     }
 
     // ==================== REFRESH TOKEN ====================
-    public String generateRefreshToken(String username) {
+    public String generateRefreshToken(Long userId, String username) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("type", "REFRESH");
+        claims.put("userId", userId);
 
         String refreshToken = Jwts.builder()
                 .setClaims(claims)
                 .setSubject(username)
-                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + refreshTokenExpiration))
-                .signWith(secretKey, SignatureAlgorithm.HS512)  // Sử dụng secretKey object
+                .signWith(secretKey, SignatureAlgorithm.HS512)
                 .compact();
+
 
         // Lưu refresh token vào Redis với TTL
         String redisKey = "refresh_token:" + username;
@@ -146,9 +148,10 @@ public class JwtService {
         return refreshToken;
     }
 
-    private String generateToken(String username, List<String> roles, List<String> permissions,
+    private String generateToken(Long userId,String username, List<String> roles, List<String> permissions,
                                  Long expiration, String tokenType) {
         Map<String, Object> claims = new HashMap<>();
+        claims.put("userId", userId);
         claims.put("roles", roles);
         claims.put("permissions", permissions);
         claims.put("type", tokenType);
@@ -163,39 +166,62 @@ public class JwtService {
     }
 
     // ==================== TOKEN VALIDATION ====================
+    // ==================== TOKEN VALIDATION ====================
     public boolean validateToken(String token) {
         try {
-            // 1. Kiểm tra token có trong blacklist không
-            if (isTokenBlacklisted(token)) {
-                log.warn("Token is blacklisted: {}", token.substring(0, 20) + "...");
+            if (token == null || token.isBlank()) {
+                log.warn("Token is null or blank");
                 return false;
             }
 
-            // 2. Validate JWT signature và expiration
+            // === CLEAN TOKEN TRIỆT ĐỂ ===
+            String cleanToken = cleanToken(token);
+
+            log.info("Validating clean token (length={}): {}...",
+                    cleanToken.length(),
+                    cleanToken.substring(0, Math.min(80, cleanToken.length())));
+
+            // 1. Kiểm tra blacklist
+            if (isTokenBlacklisted(cleanToken)) {
+                log.warn("Token is blacklisted");
+                return false;
+            }
+
+            // 2. Parse JWT
             Jwts.parserBuilder()
-                    .setSigningKey(secretKey)  // Sử dụng secretKey object
+                    .setSigningKey(secretKey)
                     .build()
-                    .parseClaimsJws(token);
+                    .parseClaimsJws(cleanToken);
+
+            log.debug("Token validated successfully");
             return true;
-        } catch (io.jsonwebtoken.security.SecurityException e) {
-            log.error("JWT Security exception: {}", e.getMessage());
-            return false;
-        } catch (io.jsonwebtoken.MalformedJwtException e) {
-            log.error("Malformed JWT token: {}", e.getMessage());
-            return false;
-        } catch (io.jsonwebtoken.ExpiredJwtException e) {
-            log.warn("JWT token expired: {}", e.getMessage());
-            return false;
-        } catch (io.jsonwebtoken.UnsupportedJwtException e) {
-            log.error("Unsupported JWT token: {}", e.getMessage());
-            return false;
-        } catch (IllegalArgumentException e) {
-            log.error("JWT claims string is empty: {}", e.getMessage());
-            return false;
+
         } catch (Exception e) {
-            log.error("Token validation failed: {}", e.getMessage());
+            log.error("Token validation failed. Raw token: {}",
+                    token.substring(0, Math.min(120, token.length())) + "...", e);
             return false;
         }
+    }
+
+    // ==================== UTILITY CLEAN TOKEN ====================
+    private String cleanToken(String token) {
+        return token
+                .replace("Bearer ", "")
+                .replace("bearer ", "")
+                .replaceAll("[,\\s]+$", "")     // bỏ dấu phẩy + space ở cuối
+                .replaceAll("\\s+", "")         // bỏ tất cả khoảng trắng
+                .trim();
+    }
+
+    // ==================== EXTRACT CLAIMS (cũng phải clean) ====================
+    private Claims extractAllClaims(String token) {
+        String cleanToken = cleanToken(token);   // ← Quan trọng!
+
+        return Jwts.parserBuilder()
+                .setSigningKey(secretKey)
+                .build()
+                .parseClaimsJws(cleanToken)
+                .getBody();
     }
 
     public boolean validateRefreshToken(String refreshToken) {
@@ -294,14 +320,6 @@ public class JwtService {
         }
     }
 
-    private Claims extractAllClaims(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(secretKey)  // Sử dụng secretKey object
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
-    }
-
     // ==================== UTILITY METHODS ====================
     public void storeUserSession(String username, String sessionData) {
         String key = "user_session:" + username;
@@ -348,4 +366,18 @@ public class JwtService {
         return String.format("Key size: %d bits, Algorithm: %s",
                 keyBytes.length * 8, secretKey.getAlgorithm());
     }
+
+    public Long extractUserId(String token) {
+        Object value = extractAllClaims(token).get("userId");
+        if (value == null) return null;
+
+        if (value instanceof Integer) {
+            return ((Integer) value).longValue();
+        }
+        if (value instanceof Long) {
+            return (Long) value;
+        }
+        return Long.parseLong(value.toString());
+    }
+
 }

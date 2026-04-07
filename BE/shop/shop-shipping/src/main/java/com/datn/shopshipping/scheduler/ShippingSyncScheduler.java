@@ -27,7 +27,7 @@ public class ShippingSyncScheduler {
 
         for (var shipping : shippingsToSync) {
             try {
-                if (shipping.getTrackingNumber() != null && !shipping.getTrackingNumber().isEmpty()) {
+                if (shipping.getTrackingCode() != null && !shipping.getTrackingCode().isEmpty()) {
                     shippingService.syncWithShippingProvider(shipping.getId());
                     log.info("Synced shipping: {}", shipping.getId());
                 }

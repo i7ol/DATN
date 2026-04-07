@@ -1,6 +1,6 @@
 package com.datn.shopapp.client;
 
-import com.datn.shopapp.config.FeignConfig;
+import com.datn.shopclient.config.FeignClientUserConfig;
 import com.datn.shopobject.dto.request.GuestPaymentRequest;
 import com.datn.shopobject.dto.request.UserPaymentRequest;
 import com.datn.shopobject.dto.response.PaymentResponse;
@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 @FeignClient(
         name = "payment-service",
         url = "${payment.service.url}",
-        configuration = FeignConfig.class,
+        configuration = FeignClientUserConfig.class,
         fallbackFactory = PaymentClientFallbackFactory.class
 )
 public interface PaymentClient {

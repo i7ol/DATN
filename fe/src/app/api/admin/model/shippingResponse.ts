@@ -19,7 +19,7 @@ export interface ShippingResponse {
     recipientAddress?: string;
     shippingCompany?: string;
     shippingMethod?: string;
-    trackingNumber?: string;
+    trackingCode?: string;
     shippingFee?: number;
     estimatedDeliveryDays?: number;
     estimatedDeliveryDate?: string;

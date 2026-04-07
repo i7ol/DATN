@@ -12,6 +12,8 @@ import { CheckoutRequest } from 'src/app/api/user/model/checkoutRequest';
 import { CheckoutItemRequest } from 'src/app/api/user/model/checkoutItemRequest';
 import { PaymentResponse } from 'src/app/api/user/model/paymentResponse';
 import { PaymentProxyControllerService } from 'src/app/api/user/api/paymentProxyController.service';
+import { AccUserControllerService } from 'src/app/api/user/api/accUserController.service';
+import { CheckoutRequestPaymentMethodEnum } from 'src/app/api/user/model/checkoutRequest';
 @Component({
   selector: 'app-checkout',
   templateUrl: './checkout.component.html',
@@ -34,9 +36,9 @@ export class CheckoutComponent implements OnInit, OnDestroy {
   ];
 
   selectedShippingMethodId: 'STANDARD' | 'EXPRESS' = 'STANDARD';
-
+  paymentEnum = CheckoutRequestPaymentMethodEnum;
   formTouched = false;
-  selectedPaymentMethod: 'COD' | 'VNPAY' = 'VNPAY';
+  selectedPaymentMethod: CheckoutRequestPaymentMethodEnum | null = null;
 
   // ===== Add these two =====
   isFormValid(): boolean {
@@ -60,6 +62,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
     private locationApi: LocationControllerService,
     private notify: NotificationService,
     private paymentApi: PaymentProxyControllerService,
+    private accUserApi: AccUserControllerService,
   ) {}
 
   ngOnInit(): void {
@@ -67,12 +70,108 @@ export class CheckoutComponent implements OnInit, OnDestroy {
     this.bindCart();
     this.loadProvinces();
     this.listenLocationChanges();
+    this.loadUserInfo();
   }
 
   ngOnDestroy(): void {
     this.sub.unsubscribe();
   }
 
+  private loadUserInfo(): void {
+    this.isLoading = true;
+
+    this.accUserApi.me().subscribe({
+      next: async (res: any) => {
+        let user: any;
+
+        if (res instanceof Blob) {
+          const text = await res.text();
+          const data = JSON.parse(text);
+          user = data?.result || data;
+        } else {
+          user = res?.result || res;
+        }
+
+        if (!user?.id) {
+          this.isLoading = false;
+          return;
+        }
+
+        // Patch thông tin cơ bản
+        this.checkoutForm.patchValue(
+          {
+            email: user.email || '',
+            name: user.username || '',
+            phone: user.phone || '',
+            addressDetail: user.address || '',
+          },
+          { emitEvent: false },
+        );
+
+        this.loadProvinces();
+
+        if (user.provinceCode) {
+          this.locationApi.districts(user.provinceCode).subscribe({
+            next: async (dRes: any) => {
+              const dData =
+                dRes instanceof Blob ? JSON.parse(await dRes.text()) : dRes;
+              this.districts = dData?.districts || [];
+
+              this.checkoutForm.patchValue(
+                {
+                  province: user.provinceCode,
+                  district: user.districtCode || '',
+                },
+                { emitEvent: false },
+              );
+
+              this.checkoutForm.get('district')!.enable();
+
+              // Load Phường
+              if (user.districtCode) {
+                this.locationApi.wards(user.districtCode).subscribe({
+                  next: async (wRes: any) => {
+                    const wData =
+                      wRes instanceof Blob
+                        ? JSON.parse(await wRes.text())
+                        : wRes;
+                    this.wards = wData?.wards || [];
+
+                    this.checkoutForm.get('ward')!.enable();
+
+                    // === FIX QUAN TRỌNG: Delay nhỏ để options render xong ===
+                    setTimeout(() => {
+                      this.checkoutForm.patchValue(
+                        {
+                          ward: user.wardCode || '',
+                        },
+                        { emitEvent: false },
+                      );
+                    }, 500);
+
+                    console.log(
+                      `✅ Loaded ${this.wards.length} wards, selected: ${user.wardCode}`,
+                    );
+                    this.isLoading = false;
+                  },
+                  error: () => (this.isLoading = false),
+                });
+              } else {
+                this.isLoading = false;
+              }
+            },
+            error: () => (this.isLoading = false),
+          });
+        } else {
+          this.isLoading = false;
+        }
+      },
+      error: (err) => {
+        console.error('Lỗi load user:', err);
+        this.isLoading = false;
+      },
+    });
+  }
   getValidationClass(fieldName: string): string {
     const control = this.checkoutForm?.get(fieldName);
     if (!control || !this.formTouched) return '';
@@ -81,19 +180,19 @@ export class CheckoutComponent implements OnInit, OnDestroy {
       : 'is-valid';
   }
 
-  onPaymentMethodChange(paymentMethod: 'COD' | 'VNPAY'): void {
+  onPaymentMethodChange(paymentMethod: CheckoutRequestPaymentMethodEnum): void {
     this.selectedPaymentMethod = paymentMethod;
   }
 
   private buildForm(): void {
     this.checkoutForm = this.fb.group({
-      email: ['abc@gmail.com', [Validators.required, Validators.email]],
-      name: ['Lò A', Validators.required],
-      phone: ['0398287981', Validators.required],
+      email: ['', [Validators.required, Validators.email]],
+      name: ['', Validators.required],
+      phone: ['', Validators.required],
       province: ['', Validators.required],
       district: [{ value: '', disabled: true }, Validators.required],
       ward: [{ value: '', disabled: true }, Validators.required],
-      addressDetail: ['Nhà bên trái, phía bên phải', Validators.required],
+      addressDetail: ['', Validators.required],
       note: [''],
     });
   }
@@ -124,7 +223,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
     this.sub.add(
       this.checkoutForm
         .get('province')!
-        .valueChanges.subscribe((code) => this.loadDistricts(code)),
+        .valueChanges.subscribe((code) => this.loadDistricts(code, true)),
     );
     this.sub.add(
       this.checkoutForm
@@ -157,12 +256,17 @@ export class CheckoutComponent implements OnInit, OnDestroy {
     });
   }
 
-  loadDistricts(provinceCode: number): void {
+  loadDistricts(provinceCode: number, reset: boolean = true): void {
     this.districts = [];
     this.wards = [];
-    this.checkoutForm.patchValue({ district: '', ward: '' });
+
+    if (reset) {
+      this.checkoutForm.patchValue({ district: '', ward: '' });
+    }
+
     this.checkoutForm.get('district')!.disable();
     this.checkoutForm.get('ward')!.disable();
+
     if (!provinceCode) return;
 
     this.locationApi.districts(provinceCode).subscribe({
@@ -171,10 +275,8 @@ export class CheckoutComponent implements OnInit, OnDestroy {
         this.districts = data?.districts || [];
         this.checkoutForm.get('district')!.enable();
       },
-      error: () => this.notify.error('Không tải được quận/huyện'),
     });
   }
-
   loadWards(districtCode: number): void {
     this.wards = [];
     this.checkoutForm.patchValue({ ward: '' });
@@ -223,9 +325,10 @@ export class CheckoutComponent implements OnInit, OnDestroy {
       this.notify.error('Vui lòng nhập đầy đủ thông tin');
       return;
     }
-
-    if (this.isSubmitting) return;
-    this.isSubmitting = true;
+    if (!this.selectedPaymentMethod) {
+      this.notify.error('Vui lòng chọn phương thức thanh toán');
+      return;
+    }
 
     const ids = this.cartService.getCartIdentifiers();
     const isGuest = !ids.userId;
@@ -236,20 +339,23 @@ export class CheckoutComponent implements OnInit, OnDestroy {
       quantity: i.quantity!,
     }));
 
+    const formValue = this.checkoutForm.value;
+
     const payload: CheckoutRequest = {
+      // Chỉ gửi guest info nếu là guest
       ...(isGuest ? { guestId: ids.guestId } : {}),
+      guestName: isGuest ? formValue.name : undefined,
+      guestEmail: isGuest ? formValue.email : undefined,
+      guestPhone: isGuest ? formValue.phone : undefined,
 
-      guestName: isGuest ? this.checkoutForm.value.name : undefined,
-      guestEmail: isGuest ? this.checkoutForm.value.email : undefined,
-      guestPhone: isGuest ? this.checkoutForm.value.phone : undefined,
+      // Thông tin chung
+      shippingAddress: formValue.addressDetail,
+      shippingProvince: formValue.province,
+      shippingDistrict: formValue.district,
+      shippingWard: formValue.ward,
+      shippingNote: formValue.note,
 
-      shippingAddress: this.checkoutForm.value.addressDetail,
-      shippingProvince: this.checkoutForm.value.province,
-      shippingDistrict: this.checkoutForm.value.district,
-      shippingWard: this.checkoutForm.value.ward,
-      shippingNote: this.checkoutForm.value.note,
-
-      paymentMethod: this.selectedPaymentMethod,
+      paymentMethod: this.selectedPaymentMethod!,
       shippingMethod: this.selectedShippingMethodId,
       items: checkoutItems,
     };
@@ -259,7 +365,9 @@ export class CheckoutComponent implements OnInit, OnDestroy {
         const order = res instanceof Blob ? JSON.parse(await res.text()) : res;
 
         console.log('ORDER ID', order.id);
-        if (this.selectedPaymentMethod === 'VNPAY') {
+        if (
+          this.selectedPaymentMethod === CheckoutRequestPaymentMethodEnum.VNPAY
+        ) {
           this.createPayment(order.id);
           return;
         }
@@ -291,6 +399,9 @@ export class CheckoutComponent implements OnInit, OnDestroy {
       return;
     }
 
+    // clear cart trước khi redirect
+    this.cartService.clearCart().subscribe();
+
     window.location.href = data.paymentUrl;
   }
 
@@ -307,7 +418,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
       const payload: GuestPaymentRequest = {
         orderId,
         guestId: ids.guestId!,
-        method: 'VNPAY',
+        method: CheckoutRequestPaymentMethodEnum.VNPAY,
       };
 
       this.paymentApi.guestPayment(payload).subscribe({
@@ -329,7 +440,11 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 
   private completeOrder(): void {
     this.notify.success('Đặt hàng thành công!');
-    this.cartService.clearCart().subscribe();
-    this.isSubmitting = false;
+
+    this.cartService.clearCart().subscribe({
+      next: () => {
+        this.isSubmitting = false;
+      },
+    });
   }
 }

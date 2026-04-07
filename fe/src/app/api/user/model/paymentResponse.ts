@@ -20,9 +20,10 @@ export interface PaymentResponse {
     transactionId?: string;
     paidAt?: string;
     paymentUrl?: string;
+    createdAt?: string;
+    updatedAt?: string;
 }
 export enum PaymentResponseStatusEnum {
-    SUCCESS = 'SUCCESS',
     PENDING = 'PENDING',
     PAID = 'PAID',
     FAILED = 'FAILED',

@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 public class ShippingUpdateRequest {
-    private String trackingNumber;
+    private String trackingCode;
     private String shippingCompany;
     private String shippingMethod;
     private Double shippingFee;

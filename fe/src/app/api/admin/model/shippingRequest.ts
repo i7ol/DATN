@@ -13,7 +13,7 @@ export interface ShippingRequest {
     orderId: number;
     shippingCompany?: string;
     shippingMethod?: string;
-    trackingNumber?: string;
+    trackingCode?: string;
     shippingFee?: number;
     estimatedDeliveryDays?: number;
     notes?: string;

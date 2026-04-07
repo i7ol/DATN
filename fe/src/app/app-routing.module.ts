@@ -20,6 +20,7 @@ import { ShippingListComponent } from './page-admin/shipping-list/shipping-list.
 import { ShippingManagementComponent } from './page-admin/shipping-management/shipping-management.component';
 import { AdminDashboardComponent } from './page-admin/admin-dashboard/admin-dashboard.component';
 import { PaymentResultComponent } from './page-user/payment-result/payment-result.component';
+import { MyOrderComponent } from './page-user/my-order/my-order.component';
 const routes: Routes = [
   // Public routes
   { path: '', redirectTo: 'products', pathMatch: 'full' },
@@ -34,13 +35,18 @@ const routes: Routes = [
 
   // User protected routes
   {
-    path: 'checkout',
-    component: CheckoutComponent,
+    path: 'my-orders',
+    component: MyOrderComponent,
+    canActivate: [AuthGuard],
   },
   {
     path: 'profile',
     component: ProfileComponent,
     canActivate: [AuthGuard],
+  },
+  {
+    path: 'checkout',
+    component: CheckoutComponent,
   },
   // Admin protected routes
   {

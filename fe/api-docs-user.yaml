@@ -7,6 +7,35 @@ servers:
 - url: http://localhost:8080
   description: Generated server url
 paths:
+  /api/user/account/me:
+    get:
+      tags:
+      - acc-user-controller
+      operationId: me
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseUserResponse"
+    put:
+      tags:
+      - acc-user-controller
+      operationId: updateMe
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserUpdateRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseUserResponse"
   /api/cart-proxy/update:
     put:
       tags:
@@ -256,18 +285,24 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProductResponse"
-  /api/user/account/me:
+  /api/user/account/my-orders:
     get:
       tags:
       - acc-user-controller
-      operationId: me
+      operationId: myOrders
+      parameters:
+      - name: pageable
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/Pageable"
       responses:
         "200":
           description: OK
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/ApiResponseUserResponse"
+                $ref: "#/components/schemas/ApiResponsePageOrderResponse"
   /api/orders/{orderId}:
     get:
       tags:
@@ -287,24 +322,6 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/OrderResponse"
-  /api/orders/my:
-    get:
-      tags:
-      - order-proxy-controller
-      operationId: myOrders
-      parameters:
-      - name: pageable
-        in: query
-        required: true
-        schema:
-          $ref: "#/components/schemas/Pageable"
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/PageOrderResponse"
   /api/location/wards/{districtCode}:
     get:
       tags:
@@ -446,6 +463,69 @@ paths:
           description: OK
 components:
   schemas:
+    UserUpdateRequest:
+      type: object
+      properties:
+        password:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        address:
+          type: string
+        provinceCode:
+          type: integer
+          format: int32
+        districtCode:
+          type: integer
+          format: int32
+        wardCode:
+          type: integer
+          format: int32
+        roles:
+          type: array
+          items:
+            type: string
+    ApiResponseUserResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+        result:
+          $ref: "#/components/schemas/UserResponse"
+    UserResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        username:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        address:
+          type: string
+        provinceCode:
+          type: integer
+          format: int32
+        districtCode:
+          type: integer
+          format: int32
+        wardCode:
+          type: integer
+          format: int32
+        roles:
+          type: array
+          items:
+            type: string
+        pushToken:
+          type: string
     CartItemResponse:
       type: object
       properties:
@@ -499,26 +579,6 @@ components:
           format: int64
         url:
           type: string
-    UserResponse:
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int64
-        username:
-          type: string
-        email:
-          type: string
-        phone:
-          type: string
-        address:
-          type: string
-        roles:
-          type: array
-          items:
-            type: string
-        pushToken:
-          type: string
     ShippingResponse:
       type: object
       properties:
@@ -543,7 +603,7 @@ components:
           type: string
         shippingMethod:
           type: string
-        trackingNumber:
+        trackingCode:
           type: string
         shippingFee:
           type: number
@@ -614,7 +674,6 @@ components:
         status:
           type: string
           enum:
-          - SUCCESS
           - PENDING
           - PAID
           - FAILED
@@ -634,6 +693,12 @@ components:
           format: date-time
         paymentUrl:
           type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
     GuestPaymentRequest:
       required:
       - guestId
@@ -683,23 +748,32 @@ components:
         shippingAddress:
           type: string
         shippingProvince:
-          type: string
+          type: integer
+          format: int32
         shippingDistrict:
-          type: string
+          type: integer
+          format: int32
         shippingWard:
-          type: string
+          type: integer
+          format: int32
         shippingNote:
           type: string
         billingAddress:
           type: string
         billingProvince:
-          type: string
+          type: integer
+          format: int32
         billingDistrict:
-          type: string
+          type: integer
+          format: int32
         billingWard:
-          type: string
+          type: integer
+          format: int32
         paymentMethod:
           type: string
+          enum:
+          - COD
+          - VNPAY
         shippingMethod:
           type: string
         items:
@@ -773,7 +847,6 @@ components:
         paymentStatus:
           type: string
           enum:
-          - SUCCESS
           - PENDING
           - PAID
           - FAILED
@@ -789,6 +862,9 @@ components:
           type: number
         paymentMethod:
           type: string
+          enum:
+          - COD
+          - VNPAY
         shippingMethod:
           type: string
         items:
@@ -813,12 +889,12 @@ components:
     PageProductResponse:
       type: object
       properties:
-        totalPages:
-          type: integer
-          format: int32
         totalElements:
           type: integer
           format: int64
+        totalPages:
+          type: integer
+          format: int32
         size:
           type: integer
           format: int32
@@ -854,14 +930,14 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/SortObject"
-        paged:
-          type: boolean
-        pageSize:
-          type: integer
-          format: int32
         pageNumber:
           type: integer
           format: int32
+        pageSize:
+          type: integer
+          format: int32
+        paged:
+          type: boolean
         unpaged:
           type: boolean
     ProductResponse:
@@ -939,16 +1015,6 @@ components:
           type: number
         thumbnail:
           type: string
-    ApiResponseUserResponse:
-      type: object
-      properties:
-        code:
-          type: integer
-          format: int32
-        message:
-          type: string
-        result:
-          $ref: "#/components/schemas/UserResponse"
     Pageable:
       type: object
       properties:
@@ -964,15 +1030,25 @@ components:
           type: array
           items:
             type: string
+    ApiResponsePageOrderResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+        result:
+          $ref: "#/components/schemas/PageOrderResponse"
     PageOrderResponse:
       type: object
       properties:
-        totalPages:
-          type: integer
-          format: int32
         totalElements:
           type: integer
           format: int64
+        totalPages:
+          type: integer
+          format: int32
         size:
           type: integer
           format: int32

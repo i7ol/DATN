@@ -50,11 +50,14 @@ export class OrderListComponent implements OnInit, AfterViewInit {
   ) {}
 
   ngOnInit(): void {
+    this.dataSource.filterPredicate = (data, filter) => {
+      if (!filter) return true;
+      return data.status === filter;
+    };
+
     this.loadOrders();
   }
-
   ngAfterViewInit(): void {
-    this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
   }
 
@@ -71,12 +74,9 @@ export class OrderListComponent implements OnInit, AfterViewInit {
 
     this.orderService.getAll(pageable).subscribe({
       next: async (resp: any) => {
-        console.log('📥 RAW response:', resp);
-
         try {
           if (resp instanceof Blob) {
             const text = await resp.text();
-            console.log('📄 BLOB text:', text);
 
             const body: PageResponseOrderResponse = JSON.parse(text);
             this.applyPage(body);
@@ -112,7 +112,6 @@ export class OrderListComponent implements OnInit, AfterViewInit {
 
     this.dataSource.data = body?.data ?? [];
     this.totalElements = body?.totalElements ?? 0;
-
     console.log(' SET orders:', this.dataSource.data);
     console.log(' TOTAL:', this.totalElements);
   }
@@ -189,6 +188,7 @@ export class OrderListComponent implements OnInit, AfterViewInit {
 
   // ================= PAGINATION =================
   onPageChange(event: PageEvent): void {
+    console.log('PAGE:', event.pageIndex);
     this.page = event.pageIndex;
     this.size = event.pageSize;
     this.loadOrders();

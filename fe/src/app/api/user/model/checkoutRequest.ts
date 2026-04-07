@@ -17,16 +17,22 @@ export interface CheckoutRequest {
     guestEmail?: string;
     guestPhone?: string;
     shippingAddress: string;
-    shippingProvince?: string;
-    shippingDistrict?: string;
-    shippingWard?: string;
+    shippingProvince?: number;
+    shippingDistrict?: number;
+    shippingWard?: number;
     shippingNote?: string;
     billingAddress?: string;
-    billingProvince?: string;
-    billingDistrict?: string;
-    billingWard?: string;
-    paymentMethod?: string;
+    billingProvince?: number;
+    billingDistrict?: number;
+    billingWard?: number;
+    paymentMethod?: CheckoutRequestPaymentMethodEnum;
     shippingMethod?: string;
     items?: Array<CheckoutItemRequest>;
 }
+export enum CheckoutRequestPaymentMethodEnum {
+    COD = 'COD',
+    VNPAY = 'VNPAY'
+};
+
+
 

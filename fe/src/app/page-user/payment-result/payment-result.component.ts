@@ -19,7 +19,7 @@ export class PaymentResultComponent implements OnInit, OnDestroy {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private cartService: CartService
+    private cartService: CartService,
   ) {}
 
   ngOnInit(): void {
@@ -69,7 +69,7 @@ export class PaymentResultComponent implements OnInit, OnDestroy {
 
   viewOrder(): void {
     if (this.orderId) {
-      this.router.navigate(['/orders', this.orderId]);
+      this.router.navigate(['/my-orders', this.orderId]);
     }
   }
 

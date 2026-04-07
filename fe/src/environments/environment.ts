@@ -7,7 +7,7 @@ export const environment = {
 
     shopAdmin: 'http://localhost:8081/api',
 
-    shopAuth: 'http://localhost:8082/auth',
+    shopAuth: 'http://localhost:8082/api/auth',
   },
 
   vnpay: {

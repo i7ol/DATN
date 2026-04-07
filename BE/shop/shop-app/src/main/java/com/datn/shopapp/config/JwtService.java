@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
+import java.util.Base64;
 import java.util.List;
 
 @Service
@@ -17,8 +18,10 @@ public class JwtService {
     private String secret;
 
     private SecretKey getKey() {
-        return Keys.hmacShaKeyFor(secret.getBytes());
+        byte[] decodedKey = Base64.getDecoder().decode(secret);
+        return Keys.hmacShaKeyFor(decodedKey);
     }
+
 
     private Claims extractAllClaims(String token) {
         return Jwts.parserBuilder()

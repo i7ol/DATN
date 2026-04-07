@@ -10,6 +10,15 @@
 
 
 export interface PaymentUpdateRequest { 
-    paymentStatus?: string;
+    paymentStatus?: PaymentUpdateRequestPaymentStatusEnum;
 }
+export enum PaymentUpdateRequestPaymentStatusEnum {
+    PENDING = 'PENDING',
+    PAID = 'PAID',
+    FAILED = 'FAILED',
+    REFUNDED = 'REFUNDED',
+    CANCELLED = 'CANCELLED'
+};
+
+
 

@@ -4,6 +4,7 @@ package com.datn.shopobject.client;
 import com.datn.shopobject.dto.response.UserInfoResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -14,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 )
 public interface AuthClient {
 
-    @GetMapping("/api/auth/validate")
+    @PostMapping("/api/auth/validate")
     boolean validateToken(@RequestHeader("Authorization") String token);
 
     @GetMapping("/api/auth/me")

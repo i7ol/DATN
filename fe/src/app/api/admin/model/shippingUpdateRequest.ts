@@ -10,7 +10,7 @@
 
 
 export interface ShippingUpdateRequest { 
-    trackingNumber?: string;
+    trackingCode?: string;
     shippingCompany?: string;
     shippingMethod?: string;
     shippingFee?: number;

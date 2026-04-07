@@ -11,7 +11,7 @@ public class ShippingRequest {
 
     private String shippingCompany;
     private String shippingMethod;
-    private String trackingNumber;
+    private String trackingCode;
     private Double shippingFee;
     private Integer estimatedDeliveryDays;
     private String notes;

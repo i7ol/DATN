@@ -24,7 +24,7 @@ public class ShippingOrderEntity {
 
     private String shippingCompany;
     private String shippingMethod;
-    private String trackingNumber;
+    private String trackingCode;
     private Double shippingFee;
     private Integer estimatedDeliveryDays;
     private LocalDate estimatedDeliveryDate;
@@ -34,9 +34,9 @@ public class ShippingOrderEntity {
     private String recipientPhone;
     private String recipientEmail;
     private String recipientAddress;
-    private String recipientProvince;
-    private String recipientDistrict;
-    private String recipientWard;
+    private Integer recipientProvince;
+    private Integer recipientDistrict;
+    private Integer recipientWard;
 
     // Trạng thái
     @Enumerated(EnumType.STRING)

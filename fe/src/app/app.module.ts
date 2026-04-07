@@ -33,6 +33,13 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
+//NG-Zoro
+import { NzDropDownModule } from 'ng-zorro-antd/dropdown';
+import { NzBadgeModule } from 'ng-zorro-antd/badge';
+import { NzMenuModule } from 'ng-zorro-antd/menu';
+import { NzSpinModule } from 'ng-zorro-antd/spin';
+import { NzButtonModule } from 'ng-zorro-antd/button';
+import { NzIconModule } from 'ng-zorro-antd/icon';
 // Components-admin
 import { HeaderComponent } from './shared/header/header.component';
 import { AdminDashboardComponent } from './page-admin/admin-dashboard/admin-dashboard.component';
@@ -65,6 +72,8 @@ import { ConfirmDialogComponent } from './shared/confirm-dialog/confirm-dialog.c
 import { ProductUserControllerService } from 'src/app/api/user/api/productUserController.service';
 import { ProfileComponent } from './page-user/profile/profile.component';
 import { GuestIdInterceptor } from './core/interceptors/guest-id.interceptor';
+import { MyOrderComponent } from './page-user/my-order/my-order.component';
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -88,6 +97,7 @@ import { GuestIdInterceptor } from './core/interceptors/guest-id.interceptor';
     PaymentResultComponent,
     ConfirmDialogComponent,
     ProfileComponent,
+    MyOrderComponent,
   ],
   imports: [
     BrowserModule,
@@ -121,6 +131,12 @@ import { GuestIdInterceptor } from './core/interceptors/guest-id.interceptor';
     MatDatepickerModule,
     MatNativeDateModule,
     MatTooltipModule,
+    NzIconModule,
+    NzDropDownModule,
+    NzBadgeModule,
+    NzMenuModule,
+    NzSpinModule,
+    NzButtonModule,
     ToastrModule.forRoot({
       positionClass: 'toast-top-right',
       timeOut: 3000,

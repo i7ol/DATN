@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, throwError } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 import { Router } from '@angular/router';
-import { jwtDecode } from 'jwt-decode';
+import jwtDecode from 'jwt-decode';
 import { environment } from 'src/environments/environment';
 import {
   AuthResponse,
@@ -19,7 +19,10 @@ export class AuthService {
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   currentUser$ = this.currentUserSubject.asObservable();
 
-  constructor(private http: HttpClient, private router: Router) {
+  constructor(
+    private http: HttpClient,
+    private router: Router,
+  ) {
     this.restoreUser();
   }
 
@@ -47,7 +50,7 @@ export class AuthService {
         localStorage.setItem('refresh_token', res.refreshToken);
       }),
       tap(() => this.loadUser()),
-      catchError(() => throwError(() => new Error('Đăng nhập thất bại')))
+      catchError(() => throwError(() => new Error('Đăng nhập thất bại'))),
     );
   }
 
@@ -82,7 +85,7 @@ export class AuthService {
         catchError(() => {
           this.logout();
           return throwError(() => new Error('Refresh token failed'));
-        })
+        }),
       );
   }
 

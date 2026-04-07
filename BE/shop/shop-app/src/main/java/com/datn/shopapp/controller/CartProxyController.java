@@ -1,7 +1,7 @@
 package com.datn.shopapp.controller;
 
 
-import com.datn.shopapp.config.UserPrincipal;
+import com.datn.shopobject.security.UserPrincipal;
 import com.datn.shopclient.client.CartClient;
 import com.datn.shopobject.dto.response.CartResponse;
 import lombok.RequiredArgsConstructor;

@@ -7,6 +7,8 @@ import {
   StatusUpdateRequest,
   PaymentUpdateRequest,
   ShippingResponse,
+  PaymentUpdateRequestPaymentStatusEnum,
+  StatusUpdateRequestStatusEnum,
 } from 'src/app/api/admin';
 import { ShippingAdminControllerService } from 'src/app/api/admin/api/shippingAdminController.service';
 import { OrderAdminControllerService } from 'src/app/api/admin/api/orderAdminController.service';
@@ -135,7 +137,9 @@ export class OrderDetailComponent implements OnInit {
   updateOrderStatus(status: string): void {
     if (!this.order) return;
 
-    const req: StatusUpdateRequest = { status };
+    const req: StatusUpdateRequest = {
+      status: status as StatusUpdateRequestStatusEnum,
+    };
     this.orderApi.updateOrderStatus(this.order.id!, req).subscribe({
       next: (res) => {
         this.order = res;
@@ -151,7 +155,9 @@ export class OrderDetailComponent implements OnInit {
   updatePaymentStatus(paymentStatus: string): void {
     if (!this.order) return;
 
-    const req: PaymentUpdateRequest = { paymentStatus };
+    const req: PaymentUpdateRequest = {
+      paymentStatus: paymentStatus as PaymentUpdateRequestPaymentStatusEnum,
+    };
     this.orderApi.updatePaymentStatus(this.order.id!, req).subscribe({
       next: (res) => {
         this.order = res;
@@ -170,9 +176,9 @@ export class OrderDetailComponent implements OnInit {
     const dialogRef = this.dialog.open(PaymentUpdateDialogComponent, {
       width: '420px',
       data: {
-        paymentId: this.order.id,
+        orderId: this.order.id,
         currentStatus: this.order.paymentStatus,
-        targetStatus: 'PAID',
+        targetStatus: PaymentUpdateRequestPaymentStatusEnum.PAID,
         currentAmount: this.order.totalPrice,
       },
     });
@@ -187,8 +193,8 @@ export class OrderDetailComponent implements OnInit {
   updatePaymentStatusFromDialog(formValue: { amount: number }): void {
     if (!this.order) return;
 
-    const req: PaymentUpdateRequest = {
-      paymentStatus: 'PAID',
+    const req = {
+      paymentStatus: PaymentUpdateRequestPaymentStatusEnum.PAID,
     };
 
     console.log('📤 PAYMENT UPDATE REQUEST:', req);

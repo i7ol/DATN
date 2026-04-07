@@ -3,6 +3,9 @@ package com.datn.shopshipping.service;
 import com.datn.shopdatabase.entity.ShippingOrderEntity;
 import com.datn.shopdatabase.entity.OrderEntity;
 import com.datn.shopdatabase.entity.UserEntity;
+import com.datn.shopdatabase.enums.OrderStatus;
+import com.datn.shopdatabase.enums.PaymentMethod;
+import com.datn.shopdatabase.enums.PaymentStatus;
 import com.datn.shopdatabase.enums.StatusEnum;
 import com.datn.shopobject.dto.request.ShippingRequest;
 import com.datn.shopobject.dto.request.ShippingSearchRequest;
@@ -33,18 +36,19 @@ public class ShippingService {
     // ADMIN tạo đơn vận chuyển
     @Transactional
     public ShippingOrderEntity create(ShippingRequest request) {
+
         OrderEntity order = orderRepository.findById(request.getOrderId())
                 .orElseThrow(() -> new RuntimeException("Order not found"));
 
-        // Kiểm tra order đã có shipping chưa
-        List<ShippingOrderEntity> existingShippings = shippingRepository.findByOrderId(order.getId());
-        if (!existingShippings.isEmpty()) {
-            throw new RuntimeException("Order already has shipping");
+        if (order.getPaymentMethod() == PaymentMethod.VNPAY
+                && order.getPaymentStatus() != PaymentStatus.PAID) {
+
+            throw new RuntimeException("Order must be paid before shipping");
         }
 
-        // Kiểm tra order đã thanh toán chưa
-        if (!"PAID".equals(order.getPaymentStatus())) {
-            throw new RuntimeException("Order must be paid before shipping");
+        List<ShippingOrderEntity> existing = shippingRepository.findByOrderId(order.getId());
+        if (!existing.isEmpty()) {
+            throw new RuntimeException("Order already has shipping");
         }
 
         ShippingOrderEntity shippingOrder = ShippingOrderEntity.builder()
@@ -52,25 +56,25 @@ public class ShippingService {
                 .userId(order.getUserId())
                 .shippingCompany(request.getShippingCompany())
                 .shippingMethod(request.getShippingMethod())
-                .trackingNumber(request.getTrackingNumber())
+                .trackingCode(order.getTrackingCode())
                 .shippingFee(request.getShippingFee())
                 .estimatedDeliveryDays(request.getEstimatedDeliveryDays())
-                .status(com.datn.shopdatabase.enums.StatusEnum.PREPARING) // SỬA: Sử dụng StatusEnum
+                .status(StatusEnum.PREPARING)
                 .notes(request.getNotes())
                 .build();
 
-        // Lấy thông tin người nhận
         setRecipientInfo(shippingOrder, order);
 
-        // Lưu trước khi đồng bộ
-        ShippingOrderEntity savedShipping = shippingRepository.save(shippingOrder);
+        ShippingOrderEntity saved = shippingRepository.save(shippingOrder);
 
-        // Gọi API hãng vận chuyển (nếu có tracking number)
-        if (request.getTrackingNumber() != null && !request.getTrackingNumber().isEmpty()) {
-            savedShipping = syncWithShippingProvider(savedShipping.getId());
+        if (saved.getTrackingCode() != null) {
+            saved = syncWithShippingProvider(saved.getId());
         }
 
-        return savedShipping;
+        order.setStatus(OrderStatus.SHIPPING);
+        orderRepository.save(order);
+
+        return saved;
     }
 
     // USER xem shipping của mình
@@ -81,23 +85,42 @@ public class ShippingService {
 
     // ADMIN cập nhật trạng thái
     @Transactional
-    public ShippingOrderEntity updateStatus(Long id, com.datn.shopdatabase.enums.StatusEnum status, String notes) { // SỬA: Sử dụng StatusEnum
+    public ShippingOrderEntity updateStatus(Long id, StatusEnum status, String notes) {
+
         ShippingOrderEntity shippingOrder = shippingRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Shipping not found"));
 
         shippingOrder.setStatus(status);
 
-        if (status == com.datn.shopdatabase.enums.StatusEnum.SHIPPED) { // SỬA
+        OrderEntity order = orderRepository.findById(shippingOrder.getOrderId())
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        if (status == StatusEnum.SHIPPED) {
             shippingOrder.setShippedAt(LocalDateTime.now());
-        } else if (status == com.datn.shopdatabase.enums.StatusEnum.DELIVERED) { // SỬA
+            order.setStatus(OrderStatus.SHIPPING);
+        }
+
+        if (status == StatusEnum.DELIVERED) {
+
             shippingOrder.setDeliveredAt(LocalDateTime.now());
-        } else if (status == com.datn.shopdatabase.enums.StatusEnum.CANCELLED) { // SỬA
+
+            order.setStatus(OrderStatus.COMPLETED);
+
+            if(order.getPaymentMethod() == PaymentMethod.COD){
+                order.setPaymentStatus(PaymentStatus.PAID);
+            }
+        }
+
+        if (status == StatusEnum.CANCELLED) {
             shippingOrder.setCancelledAt(LocalDateTime.now());
+            order.setStatus(OrderStatus.CANCELLED);
         }
 
         if (notes != null) {
             shippingOrder.setNotes(notes);
         }
+
+        orderRepository.save(order);
 
         return shippingRepository.save(shippingOrder);
     }
@@ -108,8 +131,8 @@ public class ShippingService {
         ShippingOrderEntity shippingOrder = shippingRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Shipping not found"));
 
-        if (request.getTrackingNumber() != null) {
-            shippingOrder.setTrackingNumber(request.getTrackingNumber());
+        if (request.getTrackingCode() != null) {
+            shippingOrder.setTrackingCode(request.getTrackingCode());
         }
         if (request.getShippingCompany() != null) {
             shippingOrder.setShippingCompany(request.getShippingCompany());
@@ -128,6 +151,11 @@ public class ShippingService {
         }
 
         return shippingRepository.save(shippingOrder);
+    }
+
+    public ShippingOrderEntity getById(Long id) {
+        return shippingRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Shipping not found"));
     }
 
     // Lấy shipping theo order
@@ -163,17 +191,51 @@ public class ShippingService {
         ShippingOrderEntity shipping = shippingRepository.findById(shippingId)
                 .orElseThrow(() -> new RuntimeException("Shipping not found"));
 
-        if (shipping.getTrackingNumber() == null || shipping.getTrackingNumber().isEmpty()) {
+        if (shipping.getTrackingCode() == null || shipping.getTrackingCode().isEmpty()) {
             throw new RuntimeException("Tracking number is required");
         }
 
         // Gọi API hãng vận chuyển
         ShippingProviderService.TrackingInfo trackingInfo =
-                shippingProviderService.getTrackingInfo(shipping.getTrackingNumber(),
+                shippingProviderService.getTrackingInfo(shipping.getTrackingCode(),
                         shipping.getShippingCompany());
 
         // Cập nhật trạng thái
         shipping.setStatus(mapProviderStatus(trackingInfo.getStatus()));
+        if (shipping.getStatus() == StatusEnum.SHIPPED) {
+            shipping.setShippedAt(LocalDateTime.now());
+        }
+
+        if (shipping.getStatus() == StatusEnum.DELIVERED) {
+            shipping.setDeliveredAt(LocalDateTime.now());
+        }
+
+        if (shipping.getStatus() == StatusEnum.CANCELLED) {
+            shipping.setCancelledAt(LocalDateTime.now());
+        }
+        OrderEntity order = orderRepository.findById(shipping.getOrderId()).orElseThrow();
+
+        if (shipping.getStatus() == StatusEnum.SHIPPED
+                || shipping.getStatus() == StatusEnum.IN_TRANSIT
+                || shipping.getStatus() == StatusEnum.OUT_FOR_DELIVERY) {
+
+            order.setStatus(OrderStatus.SHIPPING);
+        }
+
+        if (shipping.getStatus() == StatusEnum.DELIVERED) {
+
+            order.setStatus(OrderStatus.COMPLETED);
+
+            if(order.getPaymentMethod() == PaymentMethod.COD){
+                order.setPaymentStatus(PaymentStatus.PAID);
+            }
+        }
+
+        if (shipping.getStatus() == StatusEnum.CANCELLED) {
+            order.setStatus(OrderStatus.CANCELLED);
+        }
+
+        orderRepository.save(order);
         shipping.setCurrentLocation(trackingInfo.getCurrentLocation());
         shipping.setEstimatedDeliveryDate(trackingInfo.getEstimatedDeliveryDate());
         shipping.setLastSyncAt(LocalDateTime.now());
@@ -181,23 +243,6 @@ public class ShippingService {
         return shippingRepository.save(shipping);
     }
 
-    // Thêm phương thức đồng bộ với đối tượng ShippingOrderEntity (cho nội bộ)
-    private void syncWithShippingProvider(ShippingOrderEntity shipping) {
-        if (shipping.getTrackingNumber() == null || shipping.getTrackingNumber().isEmpty()) {
-            return;
-        }
-
-        // Gọi API hãng vận chuyển
-        ShippingProviderService.TrackingInfo trackingInfo =
-                shippingProviderService.getTrackingInfo(shipping.getTrackingNumber(),
-                        shipping.getShippingCompany());
-
-        // Cập nhật trạng thái
-        shipping.setStatus(mapProviderStatus(trackingInfo.getStatus()));
-        shipping.setCurrentLocation(trackingInfo.getCurrentLocation());
-        shipping.setEstimatedDeliveryDate(trackingInfo.getEstimatedDeliveryDate());
-        shipping.setLastSyncAt(LocalDateTime.now());
-    }
 
     // Thống kê
     public ShippingSummaryResponse getShippingSummary() {
@@ -222,8 +267,8 @@ public class ShippingService {
             UserEntity user = userRepository.findById(order.getUserId())
                     .orElseThrow(() -> new RuntimeException("User not found"));
             // Sửa: Lấy fullName nếu có, nếu không dùng username
-            String recipientName = user.getFullName() != null ? user.getFullName() : user.getUsername();
-            shippingOrder.setRecipientName(recipientName);
+//            String recipientName = user.getFullName() != null ? user.getFullName() : user.getUsername();
+            shippingOrder.setRecipientName(user.getUsername() );
             shippingOrder.setRecipientPhone(user.getPhone());
             shippingOrder.setRecipientEmail(user.getEmail());
         } else {
@@ -233,24 +278,9 @@ public class ShippingService {
         }
         shippingOrder.setRecipientAddress(order.getShippingAddress());
 
-        // Cập nhật thông tin địa chỉ chi tiết
-        try {
-            shippingOrder.setRecipientProvince(order.getShippingProvince());
-        } catch (Exception e) {
-            shippingOrder.setRecipientProvince(parseProvinceFromAddress(order.getShippingAddress()));
-        }
-
-        try {
-            shippingOrder.setRecipientDistrict(order.getShippingDistrict());
-        } catch (Exception e) {
-            shippingOrder.setRecipientDistrict(parseDistrictFromAddress(order.getShippingAddress()));
-        }
-
-        try {
-            shippingOrder.setRecipientWard(order.getShippingWard());
-        } catch (Exception e) {
-            shippingOrder.setRecipientWard(parseWardFromAddress(order.getShippingAddress()));
-        }
+        shippingOrder.setRecipientProvince(order.getShippingProvince());
+        shippingOrder.setRecipientDistrict(order.getShippingDistrict());
+        shippingOrder.setRecipientWard(order.getShippingWard());
     }
 
     private StatusEnum mapProviderStatus(String providerStatus) { // SỬA: Trả về StatusEnum
@@ -266,32 +296,5 @@ public class ShippingService {
         };
     }
 
-    // Helper methods để parse địa chỉ
-    private String parseProvinceFromAddress(String address) {
-        if (address == null) return null;
-        String[] provinces = {"Hà Nội", "Hồ Chí Minh", "Đà Nẵng", "Hải Phòng", "Cần Thơ"};
-        for (String province : provinces) {
-            if (address.contains(province)) {
-                return province;
-            }
-        }
-        return null;
-    }
 
-    private String parseDistrictFromAddress(String address) {
-        // Logic parse quận/huyện từ địa chỉ
-        if (address == null) return null;
-        String[] districts = {"Quận 1", "Quận 2", "Quận 3", "Huyện Củ Chi", "Huyện Bình Chánh"};
-        for (String district : districts) {
-            if (address.contains(district)) {
-                return district;
-            }
-        }
-        return null;
-    }
-
-    private String parseWardFromAddress(String address) {
-        // Logic parse phường/xã từ địa chỉ
-        return null;
-    }
 }

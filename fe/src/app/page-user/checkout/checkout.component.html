@@ -252,8 +252,8 @@
                 type="radio"
                 name="paymentMethod"
                 id="payment-cod"
-                [checked]="selectedPaymentMethod === 'COD'"
-                (change)="onPaymentMethodChange('COD')"
+                [checked]="selectedPaymentMethod === paymentEnum.COD"
+                (change)="onPaymentMethodChange(paymentEnum.COD)"
                 class="mt-1 h-4 w-4 text-black focus:ring-black border-gray-300"
               />
               <label for="payment-cod" class="ml-3 flex-1 cursor-pointer">
@@ -275,8 +275,8 @@
                 type="radio"
                 name="paymentMethod"
                 id="payment-qr"
-                [checked]="selectedPaymentMethod === 'VNPAY'"
-                (change)="onPaymentMethodChange('VNPAY')"
+                [checked]="selectedPaymentMethod === paymentEnum.VNPAY"
+                (change)="onPaymentMethodChange(paymentEnum.VNPAY)"
                 class="mt-1 h-4 w-4 text-black focus:ring-black border-gray-300"
               />
               <label for="payment-qr" class="ml-3 flex-1 cursor-pointer">
@@ -499,7 +499,8 @@
               isSubmitting ||
               cartItemsCount === 0 ||
               !isFormValid() ||
-              isProcessingPayment
+              isProcessingPayment ||
+              !selectedPaymentMethod
             "
             class="w-full mt-6 py-3.5 bg-black text-white rounded-xl font-semibold hover:bg-gray-900 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
           >

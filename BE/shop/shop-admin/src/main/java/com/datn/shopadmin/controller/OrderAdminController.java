@@ -59,28 +59,11 @@ public class OrderAdminController {
             @PathVariable Long orderId,
             @RequestBody PaymentUpdateRequest request
     ) {
-        try {
-            PaymentStatus status =
-                    PaymentStatus.valueOf(
-                            request.getPaymentStatus().trim().toUpperCase()
-                    );
-
-            return orderClient.updatePaymentStatus(
-                    orderId,
-                    status
-            );
-
-        } catch (IllegalArgumentException e) {
-            String valid = Arrays.stream(PaymentStatus.values())
-                    .map(Enum::name)
-                    .collect(Collectors.joining(", "));
-            throw new AppException(
-                    ErrorCode.INVALID_REQUEST,
-                    "PaymentStatus không hợp lệ. Hợp lệ: " + valid
-            );
-        }
+        return orderClient.updatePaymentStatus(
+                orderId,
+                request.getPaymentStatus()
+        );
     }
-
 
     /**
      * Admin cập nhật trạng thái đơn hàng
@@ -91,9 +74,9 @@ public class OrderAdminController {
             @PathVariable Long orderId,
             @RequestBody StatusUpdateRequest request
     ) {
-        throw new AppException(
-                ErrorCode.INVALID_REQUEST,
-                "Admin updateStatus cần endpoint riêng trong order-service"
+        return orderClient.updateStatus(
+                orderId,
+                request.getStatus()
         );
     }
 

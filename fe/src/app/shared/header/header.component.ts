@@ -37,38 +37,38 @@ export class HeaderComponent implements OnInit, OnDestroy {
     private cartService: CartService,
     private authService: AuthService,
     private dialog: MatDialog,
-    private router: Router
+    private router: Router,
   ) {}
 
   ngOnInit(): void {
     this.cartCount$ = this.cartService.totalQuantity$;
 
     this.sub.add(
-      this.cartService.items$.subscribe((i) => (this.cartItems = i || []))
+      this.cartService.items$.subscribe((i) => (this.cartItems = i || [])),
     );
     this.sub.add(
-      this.cartService.totalPrice$.subscribe((p) => (this.cartTotalPrice = p))
+      this.cartService.totalPrice$.subscribe((p) => (this.cartTotalPrice = p)),
     );
     this.sub.add(
       this.cartService.totalQuantity$.subscribe(
-        (q) => (this.cartTotalQuantity = q)
-      )
+        (q) => (this.cartTotalQuantity = q),
+      ),
     );
     this.sub.add(
-      this.cartService.loading$.subscribe((l) => (this.cartLoading = l))
+      this.cartService.loading$.subscribe((l) => (this.cartLoading = l)),
     );
 
     this.sub.add(
       this.authService.currentUser$.subscribe((user) => {
         this.currentUser = user;
         this.isAdmin = this.authService.isAdmin();
-      })
+      }),
     );
 
     this.sub.add(
       this.router.events
         .pipe(filter((e) => e instanceof NavigationEnd))
-        .subscribe((e: any) => (this.currentRoute = e.url))
+        .subscribe((e: any) => (this.currentRoute = e.url)),
     );
   }
 
@@ -107,7 +107,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   onAccountMouseLeave() {
     this.hideAccountTimeout = setTimeout(
       () => (this.isAccountDropdownOpen = false),
-      300
+      300,
     );
   }
   onAccountDropdownMouseEnter() {
@@ -117,7 +117,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   onAccountDropdownMouseLeave() {
     this.hideAccountTimeout = setTimeout(
       () => (this.isAccountDropdownOpen = false),
-      150
+      150,
     );
   }
 

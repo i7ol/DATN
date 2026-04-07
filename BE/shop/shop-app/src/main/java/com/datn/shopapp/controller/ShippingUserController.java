@@ -78,7 +78,7 @@ public class ShippingUserController {
                 .recipientAddress(e.getRecipientAddress())
                 .shippingCompany(e.getShippingCompany())
                 .shippingMethod(e.getShippingMethod())
-                .trackingNumber(e.getTrackingNumber())
+                .trackingCode(e.getTrackingCode())
                 .shippingFee(e.getShippingFee())
                 .estimatedDeliveryDays(e.getEstimatedDeliveryDays())
                 .estimatedDeliveryDate(e.getEstimatedDeliveryDate())

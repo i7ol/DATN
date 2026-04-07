@@ -1,10 +1,11 @@
 package com.datn.shopobject.dto.request;
 
 
+import com.datn.shopdatabase.enums.PaymentStatus;
 import lombok.Data;
 
 @Data
 public class PaymentUpdateRequest {
-    private String paymentStatus;
+    private PaymentStatus paymentStatus;
 }
 

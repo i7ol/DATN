@@ -13,8 +13,8 @@ import { OrderResponse } from './orderResponse';
 
 
 export interface PageOrderResponse { 
-    totalPages?: number;
     totalElements?: number;
+    totalPages?: number;
     size?: number;
     content?: Array<OrderResponse>;
     number?: number;

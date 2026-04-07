@@ -30,7 +30,8 @@ public class PaymentResponse {
     private LocalDateTime paidAt;
 
     private String paymentUrl;
-
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
     public static PaymentResponse from(PaymentEntity p) {
         return PaymentResponse.builder()
                 .id(p.getId())
@@ -42,6 +43,8 @@ public class PaymentResponse {
                 .method(p.getMethod())
                 .transactionId(p.getTransactionId())
                 .paidAt(p.getPaidAt())
+                .updatedAt(p.getUpdatedAt())
+                .createdAt(p.getCreatedAt())
                 .build();
     }
 }

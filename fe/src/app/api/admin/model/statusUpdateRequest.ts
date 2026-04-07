@@ -10,6 +10,19 @@
 
 
 export interface StatusUpdateRequest { 
-    status?: string;
+    status?: StatusUpdateRequestStatusEnum;
 }
+export enum StatusUpdateRequestStatusEnum {
+    NEW = 'NEW',
+    PENDING_PAYMENT = 'PENDING_PAYMENT',
+    CONFIRMED = 'CONFIRMED',
+    PROCESSING = 'PROCESSING',
+    PACKING = 'PACKING',
+    SHIPPING = 'SHIPPING',
+    DELIVERED = 'DELIVERED',
+    COMPLETED = 'COMPLETED',
+    CANCELLED = 'CANCELLED'
+};
+
+
 

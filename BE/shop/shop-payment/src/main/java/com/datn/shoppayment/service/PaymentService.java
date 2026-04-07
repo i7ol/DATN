@@ -43,4 +43,8 @@ public interface PaymentService {
     PaymentResponse cancel(Long id);
 
     Object getSummary(LocalDate fromDate, LocalDate toDate);
+
+    void handlePaymentSuccess(String orderId);
+
+    void handlePaymentFail(String orderId);
 }

@@ -14,7 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 @Slf4j
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/auth")
 @RequiredArgsConstructor
 public class AuthController {
 
@@ -70,20 +70,31 @@ public class AuthController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/validate")
+    @PostMapping("/validate")
     public ResponseEntity<Boolean> validateToken(
             @RequestHeader("Authorization") String authorizationHeader) {
-        String token = authorizationHeader.replace("Bearer ", "");
-        boolean isValid = authService.validateToken(token);
-        return ResponseEntity.ok(isValid);
+
+        try {
+            String token = authorizationHeader.replace("Bearer ", "").trim();
+            boolean isValid = authService.validateToken(token);
+            return ResponseEntity.ok(isValid);
+        } catch (Exception e) {
+            log.error("Validate token error", e);
+            return ResponseEntity.ok(false);
+        }
     }
 
     @GetMapping("/me")
     public ResponseEntity<UserInfoResponse> getCurrentUser(
             @RequestHeader("Authorization") String authorizationHeader) {
-        String token = authorizationHeader.replace("Bearer ", "");
-        UserInfoResponse userInfo = authService.getCurrentUser(token);
-        return ResponseEntity.ok(userInfo);
+        try {
+            String token = authorizationHeader.replace("Bearer ", "").trim();
+            UserInfoResponse userInfo = authService.getCurrentUser(token);
+            return ResponseEntity.ok(userInfo);
+        } catch (Exception e) {
+            log.error("Get current user failed", e);
+            return ResponseEntity.status(401).build();   // Trả về 401 thay vì 500/400
+        }
     }
     @GetMapping("/check-permission")
     public ResponseEntity<Boolean> checkPermission(
