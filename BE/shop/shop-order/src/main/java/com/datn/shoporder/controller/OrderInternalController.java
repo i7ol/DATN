@@ -5,6 +5,7 @@ import com.datn.shopobject.dto.response.OrderResponse;
 import com.datn.shoporder.mapper.OrderMapper;
 import com.datn.shoporder.service.OrderService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -14,12 +15,12 @@ public class OrderInternalController {
 
     private final OrderService orderService;
 
-    @GetMapping("/{orderId}")
+    @GetMapping(value = "/{orderId}",produces = MediaType.APPLICATION_JSON_VALUE)
     public OrderResponse getOrder(@PathVariable Long orderId) {
         return OrderMapper.toResponse(orderService.getOrder(orderId));
     }
 
-    @PutMapping("/{orderId}/payment-status")
+    @PutMapping(value = "/{orderId}/payment-status",produces = MediaType.APPLICATION_JSON_VALUE)
     public OrderResponse updatePayment(
             @PathVariable Long orderId,
             @RequestParam PaymentStatus paymentStatus

@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { AccUserControllerService } from 'src/app/api/user';
 import { Pageable } from 'src/app/api/user/model/pageable';
 import { OrderResponse } from 'src/app/api/user/model/orderResponse';
@@ -11,7 +12,6 @@ import { OrderResponse } from 'src/app/api/user/model/orderResponse';
 export class MyOrderComponent implements OnInit {
   orders: OrderResponse[] = [];
 
-  // Phân trang
   currentPage: number = 0;
   pageSize: number = 10;
   totalPages: number = 0;
@@ -20,7 +20,10 @@ export class MyOrderComponent implements OnInit {
   isLoading: boolean = false;
   errorMessage: string = '';
 
-  constructor(private accUserService: AccUserControllerService) {}
+  constructor(
+    private accUserService: AccUserControllerService,
+    private router: Router,
+  ) {}
 
   ngOnInit(): void {
     this.loadMyOrders(0);
@@ -30,29 +33,23 @@ export class MyOrderComponent implements OnInit {
     this.isLoading = true;
     this.errorMessage = '';
 
-    const pageable: Pageable = {
-      page: page,
-      size: this.pageSize,
-      sort: [],
-    };
+    const pageable: Pageable = { page, size: this.pageSize, sort: [] };
 
     this.accUserService.myOrders(pageable).subscribe({
       next: (response: any) => {
         if (response instanceof Blob) {
-          response.text().then((text) => {
-            const json = JSON.parse(text);
-            this.processResponse(json);
-          });
+          response
+            .text()
+            .then((text) => this.processResponse(JSON.parse(text)));
         } else {
           this.processResponse(response);
         }
       },
-      error: (error: any) => {
-        console.error('Lỗi tải đơn hàng:', error);
+      error: (error) => {
         this.errorMessage =
           error.status === 401
             ? 'Phiên đăng nhập hết hạn, vui lòng đăng nhập lại.'
-            : 'Không thể tải danh sách đơn hàng. Vui lòng thử lại sau.';
+            : 'Không thể tải danh sách đơn hàng.';
         this.isLoading = false;
       },
     });
@@ -60,13 +57,15 @@ export class MyOrderComponent implements OnInit {
 
   private processResponse(response: any): void {
     const result = response?.result || response;
-    this.orders = Array.isArray(result?.content) ? result.content : [];
-
+    this.orders = result?.content || [];
     this.currentPage = result?.number ?? 0;
     this.totalPages = result?.totalPages ?? 0;
     this.totalElements = result?.totalElements ?? 0;
-
     this.isLoading = false;
+  }
+
+  viewOrderDetail(orderId: number): void {
+    this.router.navigate(['/my-orders', orderId]);
   }
 
   goToPage(page: number): void {
@@ -78,10 +77,11 @@ export class MyOrderComponent implements OnInit {
     this.loadMyOrders(this.currentPage);
   }
 
-  // ==================== Helper methods ====================
+  // Helper
   getStatusText(status: string | undefined): string {
     if (!status) return 'Không xác định';
-    switch (status.toUpperCase()) {
+    const s = status.toUpperCase();
+    switch (s) {
       case 'PENDING':
         return 'Chờ xác nhận';
       case 'PENDING_PAYMENT':
@@ -101,45 +101,12 @@ export class MyOrderComponent implements OnInit {
     }
   }
 
-  getStatusClass(status: string | undefined): string {
-    if (!status) return 'bg-secondary';
-    switch (status.toUpperCase()) {
-      case 'PENDING':
-      case 'PENDING_PAYMENT':
-        return 'bg-warning text-dark';
-      case 'PROCESSING':
-        return 'bg-info text-white';
-      case 'SHIPPED':
-        return 'bg-primary text-white';
-      case 'DELIVERED':
-      case 'COMPLETED':
-        return 'bg-success text-white';
-      case 'CANCELLED':
-        return 'bg-danger text-white';
-      default:
-        return 'bg-secondary text-white';
-    }
-  }
-
-  getPageRange(): number[] {
-    const range: number[] = [];
-    const maxVisible = 5;
-    let start = Math.max(0, this.currentPage - Math.floor(maxVisible / 2));
-    let end = Math.min(this.totalPages - 1, start + maxVisible - 1);
-
-    if (end - start + 1 < maxVisible) {
-      start = Math.max(0, end - maxVisible + 1);
-    }
-
-    for (let i = start; i <= end; i++) {
-      range.push(i);
-    }
-    return range;
-  }
-
-  viewOrderDetail(orderId: number): void {
-    console.log('Xem chi tiết đơn hàng #', orderId);
-    alert(`Đang xem chi tiết đơn hàng #${orderId}`);
-    // TODO: Sau này thay bằng modal đẹp
+  getStatusColor(status: string | undefined): string {
+    if (!status) return 'default';
+    const s = status.toUpperCase();
+    if (['PAID', 'COMPLETED', 'DELIVERED'].includes(s)) return 'success';
+    if (['PENDING', 'PENDING_PAYMENT'].includes(s)) return 'warning';
+    if (['FAILED', 'CANCELLED'].includes(s)) return 'error';
+    return 'processing';
   }
 }

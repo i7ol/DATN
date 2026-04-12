@@ -3,6 +3,7 @@ package com.datn.shopcart.controller;
 import com.datn.shopcart.service.CartService;
 import com.datn.shopobject.dto.response.CartResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -14,7 +15,7 @@ public class CartUserController {
 
     /* ====================== GET CART ====================== */
 
-    @GetMapping
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public CartResponse getCart(
             @RequestParam(name = "userId", required = false) Long userId,
             @RequestParam(name = "guestId", required = false) String guestId
@@ -24,7 +25,7 @@ public class CartUserController {
 
     /* ====================== ADD ITEM ====================== */
 
-    @PostMapping("/add")
+    @PostMapping(value = "/add",produces = MediaType.APPLICATION_JSON_VALUE)
     public CartResponse addItem(
             @RequestParam("variantId") Long variantId,
             @RequestParam("quantity") int quantity,
@@ -36,7 +37,7 @@ public class CartUserController {
 
     /* ====================== UPDATE ITEM ====================== */
 
-    @PutMapping("/update")
+    @PutMapping(value = "/update",produces = MediaType.APPLICATION_JSON_VALUE)
     public CartResponse updateItem(
             @RequestParam(name = "userId", required = false) Long userId,
             @RequestParam(name = "guestId", required = false) String guestId,
@@ -48,7 +49,7 @@ public class CartUserController {
 
     /* ====================== REMOVE ITEM ====================== */
 
-    @DeleteMapping("/remove")
+    @DeleteMapping(value = "/remove",produces = MediaType.APPLICATION_JSON_VALUE)
     public CartResponse removeItem(
             @RequestParam(name = "userId", required = false) Long userId,
             @RequestParam(name = "guestId", required = false) String guestId,
@@ -59,7 +60,7 @@ public class CartUserController {
 
     /* ====================== MERGE CART ====================== */
 
-    @PostMapping("/merge")
+    @PostMapping(value = "/merge",produces = MediaType.APPLICATION_JSON_VALUE)
     public CartResponse mergeGuestCart(
             @RequestParam(name = "guestId") String guestId,
             @RequestParam(name = "userId") Long userId
@@ -70,7 +71,7 @@ public class CartUserController {
 
 
     /* ====================== CLEAR CART ====================== */
-    @DeleteMapping("/clear")
+    @DeleteMapping(value = "/clear",produces = MediaType.APPLICATION_JSON_VALUE)
     public CartResponse clearCart(
             @RequestParam(name = "userId", required = false) Long userId,
             @RequestParam(name = "guestId", required = false) String guestId
@@ -79,12 +80,12 @@ public class CartUserController {
     }
 
 
-    @DeleteMapping("/clear/user/{userId}")
+    @DeleteMapping(value = "/clear/user/{userId}",produces = MediaType.APPLICATION_JSON_VALUE)
     public void clearUserCart(@PathVariable("userId") Long userId) {
         cartService.clearUserCart(userId);
     }
 
-    @DeleteMapping("/clear/guest/{guestId}")
+    @DeleteMapping(value = "/clear/guest/{guestId}",produces = MediaType.APPLICATION_JSON_VALUE)
     public void clearGuestCart(@PathVariable("guestId") String guestId) {
         cartService.clearGuestCart(guestId);
     }

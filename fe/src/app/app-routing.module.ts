@@ -21,6 +21,7 @@ import { ShippingManagementComponent } from './page-admin/shipping-management/sh
 import { AdminDashboardComponent } from './page-admin/admin-dashboard/admin-dashboard.component';
 import { PaymentResultComponent } from './page-user/payment-result/payment-result.component';
 import { MyOrderComponent } from './page-user/my-order/my-order.component';
+import { MyOrderDetailComponent } from './page-user/my-order-detail/my-order-detail.component';
 const routes: Routes = [
   // Public routes
   { path: '', redirectTo: 'products', pathMatch: 'full' },
@@ -37,6 +38,11 @@ const routes: Routes = [
   {
     path: 'my-orders',
     component: MyOrderComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'my-orders/:id',
+    component: MyOrderDetailComponent,
     canActivate: [AuthGuard],
   },
   {

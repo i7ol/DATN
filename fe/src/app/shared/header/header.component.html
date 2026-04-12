@@ -28,8 +28,98 @@
       <!-- RIGHT -->
       <div class="flex items-center gap-6 text-sm text-gray-600">
         <!-- SEARCH -->
-        <div class="cursor-pointer hover:text-black transition">
-          <img src="./assets/img/search.png" class="w-4 h-4 opacity-70" />
+        <div
+          class="relative"
+          (mouseenter)="onSearchMouseEnter()"
+          (mouseleave)="onSearchMouseLeave()"
+        >
+          <!-- Icon Search -->
+          <div
+            class="cursor-pointer hover:text-black transition p-1"
+            (click)="isSearchOpen = !isSearchOpen"
+          >
+            <img src="./assets/img/search.png" class="w-5 h-5 opacity-70" />
+          </div>
+
+          <!-- SEARCH DROPDOWN -->
+          <div
+            *ngIf="isSearchOpen"
+            class="absolute right-0 top-full mt-3 w-96 bg-white shadow-2xl rounded-2xl border border-gray-100 z-50 overflow-hidden"
+          >
+            <!-- Input -->
+            <div class="p-4 border-b">
+              <div class="relative">
+                <input
+                  type="text"
+                  [(ngModel)]="searchQuery"
+                  (ngModelChange)="performSearch()"
+                  (keyup.enter)="onSearchSubmit()"
+                  (focus)="onSearchInputFocus()"
+                  placeholder="Tìm kiếm sản phẩm..."
+                  class="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 pl-4 pr-10 focus:outline-none focus:border-black text-sm"
+                />
+                <button
+                  *ngIf="searchQuery"
+                  (click)="searchQuery = ''; searchResults = []"
+                  class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+
+            <!-- Loading -->
+            <div *ngIf="searchLoading" class="py-8 text-center">
+              <div
+                class="animate-spin rounded-full h-6 w-6 border-b-2 border-black mx-auto"
+              ></div>
+              <p class="text-xs text-gray-500 mt-2">Đang tìm kiếm...</p>
+            </div>
+
+            <!-- Results  -->
+            <div
+              *ngIf="!searchLoading && searchResults.length > 0"
+              class="max-h-96 overflow-y-auto"
+            >
+              <div
+                *ngFor="let product of searchResults"
+                (click)="selectProduct(product, $event)"
+                class="flex gap-3 px-4 py-3 hover:bg-gray-50 cursor-pointer border-b last:border-0 transition-colors"
+              >
+                <img
+                  [src]="product.images?.[0]?.url || '/assets/img/demo.webp'"
+                  class="w-12 h-12 object-cover rounded"
+                  onerror="this.src = '/assets/img/demo.webp'"
+                />
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-medium line-clamp-2">
+                    {{ product.name }}
+                  </p>
+                  <p class="text-red-600 font-semibold text-sm mt-1">
+                    {{ product.price | number: "1.0-0" }}đ
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- No result -->
+            <div
+              *ngIf="
+                !searchLoading && searchQuery && searchResults.length === 0
+              "
+              class="py-10 text-center text-gray-500 text-sm"
+            >
+              Không tìm thấy sản phẩm nào
+            </div>
+
+            <!-- Hint -->
+            <div
+              *ngIf="!searchQuery"
+              class="px-4 py-3 text-xs text-gray-400 text-center"
+            >
+              Nhập từ khóa để tìm kiếm...
+            </div>
+          </div>
         </div>
 
         <!-- ACCOUNT -->
@@ -295,12 +385,10 @@
                   <!-- Product Image -->
                   <div class="flex-shrink-0">
                     <img
-                      [src]="
-                        item.images?.[0]?.url || '/assets/img/no-image.png'
-                      "
+                      [src]="item.images?.[0]?.url || '/assets/img/demo.webp'"
                       [alt]="item.productName"
                       class="w-16 h-16 object-cover rounded border"
-                      onerror="this.src = '/assets/img/no-image.png'"
+                      onerror="this.src = '/assets/img/demo.webp'"
                     />
                   </div>
 

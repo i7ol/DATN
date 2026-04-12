@@ -5,6 +5,7 @@ import com.datn.shoppayment.service.VNPayService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,7 +21,7 @@ public class VNPayCallbackController {
     private final PaymentService paymentService;
     private final VNPayService vnPayService;
 
-    @GetMapping("/return")
+    @GetMapping(value = "/return",produces = MediaType.APPLICATION_JSON_VALUE)
     public void handleReturn(
             HttpServletRequest request,
             HttpServletResponse response

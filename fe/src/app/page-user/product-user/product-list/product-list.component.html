@@ -1,12 +1,65 @@
+<!-- FULL WIDTH BANNER -->
+<div class="w-full overflow-hidden">
+  <owl-carousel-o [options]="carouselOptions" class="owl-theme banner-slider">
+    <ng-container *ngFor="let banner of banners">
+      <ng-template carouselSlide>
+        <div class="relative cursor-pointer" (click)="viewBanner(banner)">
+          <img
+            [src]="banner.image"
+            class="w-full h-[400px] md:h-[400px] lg:h-[400px] object-cover"
+            alt="{{ banner.title }}"
+          />
+
+          <!-- Overlay -->
+          <div
+            class="absolute bottom-8 left-8 md:left-12 text-white drop-shadow-lg"
+          >
+            <h2 class="text-4xl md:text-5xl font-bold">
+              {{ banner.title }}
+            </h2>
+            <p class="text-lg md:text-xl mt-2">
+              {{ banner.subtitle }}
+            </p>
+          </div>
+        </div>
+      </ng-template>
+    </ng-container>
+  </owl-carousel-o>
+</div>
+
 <div class="min-h-screen px-4 md:px-8 py-8 poppins-regular">
-  <h1 class="text-2xl font-bold mb-6">Danh sách sản phẩm</h1>
+  <!-- Tiêu đề động + Nút quay lại -->
+  <h1 class="text-2xl font-bold mb-6">
+    {{
+      isSearchMode
+        ? 'Kết quả tìm kiếm cho: "' + keyword + '"'
+        : "Danh sách sản phẩm"
+    }}
+  </h1>
 
-  <div *ngIf="loading" class="text-center py-10">Đang tải sản phẩm...</div>
+  <!-- Nút quay lại khi đang tìm kiếm -->
+  <button
+    *ngIf="isSearchMode"
+    (click)="router.navigate(['/products'])"
+    class="mb-6 text-sm flex items-center gap-2 text-gray-600 hover:text-black transition-colors"
+  >
+    ← Quay lại tất cả sản phẩm
+  </button>
 
+  <!-- Loading -->
+  <div *ngIf="loading" class="text-center py-10">
+    <div
+      class="animate-spin rounded-full h-8 w-8 border-b-2 border-black mx-auto"
+    ></div>
+    <p class="text-sm text-gray-500 mt-3">Đang tải sản phẩm...</p>
+  </div>
+
+  <!-- Danh sách sản phẩm -->
   <div
     class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
-    *ngIf="!loading"
+    *ngIf="!loading && products.length > 0"
   >
+    <!-- === GIỮ NGUYÊN PHẦN PRODUCT CARD CỦA BẠN TỪ ĐÂY === -->
     <div
       *ngFor="let product of products"
       class="product-card"
@@ -51,6 +104,7 @@
           </button>
         </ng-container>
 
+        <!-- NHIỀU VARIANT -->
         <ng-container *ngIf="product.variants?.length > 1">
           <button
             (click)="viewProductDetail(product); $event.stopPropagation()"
@@ -60,7 +114,7 @@
           </button>
         </ng-container>
 
-        <!-- Trường hợp không có biến thể nào -->
+        <!-- Không có variant -->
         <ng-container
           *ngIf="!product.variants || product.variants.length === 0"
         >
@@ -70,5 +124,51 @@
         </ng-container>
       </div>
     </div>
+    <!-- === KẾT THÚC PHẦN PRODUCT CARD === -->
+  </div>
+
+  <!-- Không tìm thấy sản phẩm -->
+  <div
+    *ngIf="!loading && products.length === 0 && isSearchMode"
+    class="text-center py-20 text-gray-500"
+  >
+    <p class="text-xl">
+      Không tìm thấy sản phẩm nào phù hợp với từ khóa "<strong>{{
+        keyword
+      }}</strong
+      >"
+    </p>
+    <button
+      (click)="router.navigate(['/products'])"
+      class="mt-6 px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition"
+    >
+      Xem tất cả sản phẩm
+    </button>
+  </div>
+
+  <!-- Phân trang -->
+  <div
+    class="flex justify-center items-center gap-4 mt-12"
+    *ngIf="!loading && totalItems > pageSize"
+  >
+    <button
+      (click)="prevPage()"
+      [disabled]="currentPage === 0"
+      class="px-5 py-2 border rounded-lg hover:bg-gray-100 disabled:opacity-50"
+    >
+      Trước
+    </button>
+
+    <span class="px-4 py-2">
+      Trang <strong>{{ currentPage + 1 }}</strong> / {{ totalPages }}
+    </span>
+
+    <button
+      (click)="nextPage()"
+      [disabled]="currentPage >= totalPages - 1"
+      class="px-5 py-2 border rounded-lg hover:bg-gray-100 disabled:opacity-50"
+    >
+      Sau
+    </button>
   </div>
 </div>

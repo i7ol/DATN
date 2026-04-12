@@ -5,6 +5,7 @@ import com.datn.shopobject.security.UserPrincipal;
 import com.datn.shopclient.client.CartClient;
 import com.datn.shopobject.dto.response.CartResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,7 +16,7 @@ public class CartProxyController {
 
     private final CartClient cartClient;
 
-    @GetMapping
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public CartResponse getCart(
             @RequestHeader(value = "X-Guest-Id", required = false) String guestId
     ) {
@@ -30,7 +31,7 @@ public class CartProxyController {
     }
 
 
-    @PostMapping("/add")
+    @PostMapping(value = "/add",produces = MediaType.APPLICATION_JSON_VALUE)
     public CartResponse addItem(
             @RequestHeader(value = "X-Guest-Id", required = false) String guestId,
             @RequestParam("variantId") Long variantId,
@@ -41,7 +42,7 @@ public class CartProxyController {
     }
 
 
-    @PutMapping("/update")
+    @PutMapping(value = "/update",produces = MediaType.APPLICATION_JSON_VALUE)
     public CartResponse updateItem(
             @RequestHeader(value = "X-Guest-Id", required = false) String guestId,
             @RequestParam("variantId") Long variantId,
@@ -51,7 +52,7 @@ public class CartProxyController {
         return cartClient.updateItem(userId, guestId, variantId, quantity);
     }
 
-    @DeleteMapping("/remove")
+    @DeleteMapping(value = "/remove",produces = MediaType.APPLICATION_JSON_VALUE)
     public CartResponse removeItem(
             @RequestHeader(value = "X-Guest-Id", required = false) String guestId,
             @RequestParam("variantId") Long variantId
@@ -61,7 +62,7 @@ public class CartProxyController {
     }
 
 
-    @PostMapping("/merge")
+    @PostMapping(value = "/merge",produces = MediaType.APPLICATION_JSON_VALUE)
     public CartResponse mergeGuestCart(
             @RequestHeader("X-Guest-Id") String guestId
     ) {
@@ -73,7 +74,7 @@ public class CartProxyController {
     }
 
 
-    @DeleteMapping("/clear")
+    @DeleteMapping(value = "/clear",produces = MediaType.APPLICATION_JSON_VALUE)
     public CartResponse clearCart(
             @RequestHeader(value = "X-Guest-Id", required = false) String guestId
     ) {
@@ -81,12 +82,12 @@ public class CartProxyController {
         return cartClient.clearCart(userId, guestId);
     }
 
-    @DeleteMapping("/clear/user/{userId}")
+    @DeleteMapping(value = "/clear/user/{userId}",produces = MediaType.APPLICATION_JSON_VALUE)
     public void clearUserCart(@PathVariable("userId") Long userId) {
         cartClient.clearUserCart(userId);
     }
 
-    @DeleteMapping("/clear/guest/{guestId}")
+    @DeleteMapping(value = "/clear/guest/{guestId}",produces = MediaType.APPLICATION_JSON_VALUE)
     public void clearGuestCart(@PathVariable("guestId") String guestId) {
         cartClient.clearGuestCart(guestId);
     }

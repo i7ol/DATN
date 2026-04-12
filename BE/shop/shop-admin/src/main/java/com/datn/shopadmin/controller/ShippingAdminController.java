@@ -11,6 +11,7 @@ import com.datn.shopshipping.service.ShippingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,13 +26,13 @@ public class ShippingAdminController {
 
     private final ShippingService shippingService;
 
-    @PostMapping
+    @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ShippingResponse> create(@RequestBody ShippingRequest request) {
         ShippingOrderEntity shipping = shippingService.create(request);
         return ResponseEntity.ok(toResponse(shipping));
     }
 
-    @GetMapping
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<PageShippingResponse> getAllShippings(
            @ModelAttribute ShippingSearchRequest filter,
             Pageable pageable) {
@@ -54,19 +55,19 @@ public class ShippingAdminController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/summary")
+    @GetMapping(value = "/summary",produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ShippingSummaryResponse> getSummary() {
         ShippingSummaryResponse summary = shippingService.getShippingSummary();
         return ResponseEntity.ok(summary);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping(value = "/{id}",produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ShippingResponse> getById(@PathVariable Long id) {
         ShippingOrderEntity shipping = shippingService.getById(id);
         return ResponseEntity.ok(toResponse(shipping));
     }
 
-    @PutMapping("/{id}/status")
+    @PutMapping(value = "/{id}/status",produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ShippingResponse> updateStatus(
             @PathVariable Long id,
             @RequestBody Map<String, String> request) {
@@ -80,7 +81,7 @@ public class ShippingAdminController {
         return ResponseEntity.ok(toResponse(shipping));
     }
 
-    @PutMapping("/{id}")
+    @PutMapping(value = "/{id}",produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ShippingResponse> updateShippingInfo(
             @PathVariable Long id,
             @RequestBody ShippingUpdateRequest request) {
@@ -88,13 +89,13 @@ public class ShippingAdminController {
         return ResponseEntity.ok(toResponse(shipping));
     }
 
-    @PostMapping("/{id}/sync")
+    @PostMapping(value = "/{id}/sync",produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ShippingResponse> syncWithProvider(@PathVariable Long id) {
         ShippingOrderEntity shipping = shippingService.syncWithShippingProvider(id);
         return ResponseEntity.ok(toResponse(shipping));
     }
 
-    @GetMapping("/order/{orderId}")
+    @GetMapping(value = "/order/{orderId}",produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<ShippingResponse>> getByOrderId(@PathVariable Long orderId) {
         List<ShippingOrderEntity> shippings = shippingService.getByOrderId(orderId);
         List<ShippingResponse> responses = shippings.stream()

@@ -10,6 +10,7 @@ import com.datn.shopauth.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 @Slf4j
@@ -19,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
-    @PostMapping("/register")
+    @PostMapping(value = "/register",produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<RegisterResponse> register(
             @Valid @RequestBody RegisterRequest request) {
         log.info("Register endpoint called for username: {}", request.getUsername());
@@ -32,35 +33,35 @@ public class AuthController {
         }
     }
 
-    @GetMapping("/check-username")
+    @GetMapping(value = "/check-username",produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Boolean> checkUsernameAvailability(
             @RequestParam String username) {
         boolean isAvailable = authService.checkUsernameAvailability(username);
         return ResponseEntity.ok(isAvailable);
     }
 
-    @GetMapping("/check-email")
+    @GetMapping(value = "/check-email",produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Boolean> checkEmailAvailability(
             @RequestParam String email) {
         boolean isAvailable = authService.checkEmailAvailability(email);
         return ResponseEntity.ok(isAvailable);
     }
 
-    @PostMapping("/login")
+    @PostMapping(value = "/login",produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<AuthResponse> login(
             @Valid @RequestBody LoginRequest request) {
         AuthResponse response = authService.login(request);
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/refresh-token")
+    @PostMapping(value = "/refresh-token",produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<AuthResponse> refreshToken(
             @Valid @RequestBody RefreshTokenRequest request) {
         AuthResponse response = authService.refreshToken(request);
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/logout")
+    @PostMapping(value = "/logout",produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> logout(
             @RequestHeader("Authorization") String authorizationHeader,
             @RequestHeader(value = "Refresh-Token", required = false) String refreshToken) {
@@ -70,7 +71,7 @@ public class AuthController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/validate")
+    @PostMapping(value = "/validate",produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Boolean> validateToken(
             @RequestHeader("Authorization") String authorizationHeader) {
 
@@ -84,7 +85,7 @@ public class AuthController {
         }
     }
 
-    @GetMapping("/me")
+    @GetMapping(value = "/me",produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<UserInfoResponse> getCurrentUser(
             @RequestHeader("Authorization") String authorizationHeader) {
         try {
@@ -96,7 +97,7 @@ public class AuthController {
             return ResponseEntity.status(401).build();   // Trả về 401 thay vì 500/400
         }
     }
-    @GetMapping("/check-permission")
+    @GetMapping(value = "/check-permission",produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Boolean> checkPermission(
             @RequestHeader("Authorization") String authorizationHeader,
             @RequestParam String permission) {

@@ -8,6 +8,7 @@ import com.datn.shopobject.dto.request.UserPaymentRequest;
 import com.datn.shopobject.dto.response.PaymentResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,7 +22,7 @@ public class PaymentProxyController {
 
     private final PaymentClient paymentClient;
 
-    @PostMapping("/user")
+    @PostMapping(value = "/user",produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<PaymentResponse> userPayment(@Valid
             @RequestBody UserPaymentRequest request
     ) {
@@ -30,7 +31,7 @@ public class PaymentProxyController {
         );
     }
 
-    @PostMapping("/guest")
+    @PostMapping(value = "/guest",produces = MediaType.APPLICATION_JSON_VALUE)
     public PaymentResponse guestPayment(@RequestBody @Valid GuestPaymentRequest req) {
 
         if (req.getOrderId() == null) {

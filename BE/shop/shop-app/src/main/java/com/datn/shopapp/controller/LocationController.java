@@ -1,6 +1,7 @@
 package com.datn.shopapp.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
@@ -17,7 +18,7 @@ public class LocationController {
     private static final String BASE_URL = "https://provinces.open-api.vn/api";
 
     /** Tỉnh / Thành */
-    @GetMapping("/provinces")
+    @GetMapping(value = "/provinces",produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> provinces() {
         return ResponseEntity.ok(
                 restTemplate.getForObject(BASE_URL + "/p/", Object.class)
@@ -25,7 +26,7 @@ public class LocationController {
     }
 
     /** Quận / Huyện theo tỉnh */
-    @GetMapping("/districts/{provinceCode}")
+    @GetMapping(value = "/districts/{provinceCode}",produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> districts(@PathVariable int provinceCode) {
         return ResponseEntity.ok(
                 restTemplate.getForObject(
@@ -36,7 +37,7 @@ public class LocationController {
     }
 
     /** Phường / Xã theo quận */
-    @GetMapping("/wards/{districtCode}")
+    @GetMapping(value = "/wards/{districtCode}",produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> wards(@PathVariable int districtCode) {
         return ResponseEntity.ok(
                 restTemplate.getForObject(

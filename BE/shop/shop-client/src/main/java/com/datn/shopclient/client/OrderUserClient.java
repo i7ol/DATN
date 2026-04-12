@@ -7,6 +7,7 @@
     import org.springframework.cloud.openfeign.FeignClient;
     import org.springframework.data.domain.Page;
 
+    import org.springframework.http.MediaType;
     import org.springframework.web.bind.annotation.*;
 
     @FeignClient(
@@ -17,14 +18,14 @@
     )
     public interface OrderUserClient {
 
-        @PostMapping("/api/user/orders/checkout")
+        @PostMapping(value = "/api/user/orders/checkout",produces = MediaType.APPLICATION_JSON_VALUE)
         OrderResponse checkout(@RequestBody CheckoutRequest request);
 
-        @GetMapping("/api/user/orders/{orderId}")
+        @GetMapping(value = "/api/user/orders/{orderId}",produces = MediaType.APPLICATION_JSON_VALUE)
         OrderResponse getOrder(@PathVariable("orderId") Long orderId);
 
 
-        @GetMapping("/api/user/orders/my-orders")
+        @GetMapping(value = "/api/user/orders/my-orders",produces = MediaType.APPLICATION_JSON_VALUE)
         Page<OrderResponse> myOrders(
                 @RequestParam(value = "page", defaultValue = "0") int page,
                 @RequestParam(value = "size", defaultValue = "10") int size

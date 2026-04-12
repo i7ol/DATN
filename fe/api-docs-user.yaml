@@ -16,7 +16,7 @@ paths:
         "200":
           description: OK
           content:
-            '*/*':
+            application/json:
               schema:
                 $ref: "#/components/schemas/ApiResponseUserResponse"
     put:
@@ -33,7 +33,7 @@ paths:
         "200":
           description: OK
           content:
-            '*/*':
+            application/json:
               schema:
                 $ref: "#/components/schemas/ApiResponseUserResponse"
   /api/cart-proxy/update:
@@ -63,7 +63,7 @@ paths:
         "200":
           description: OK
           content:
-            '*/*':
+            application/json:
               schema:
                 $ref: "#/components/schemas/CartResponse"
   /api/user/shipping/{id}/sync:
@@ -82,7 +82,7 @@ paths:
         "200":
           description: OK
           content:
-            '*/*':
+            application/json:
               schema:
                 $ref: "#/components/schemas/ShippingResponse"
   /api/payments/user:
@@ -100,7 +100,7 @@ paths:
         "200":
           description: OK
           content:
-            '*/*':
+            application/json:
               schema:
                 $ref: "#/components/schemas/PaymentResponse"
   /api/payments/guest:
@@ -118,7 +118,7 @@ paths:
         "200":
           description: OK
           content:
-            '*/*':
+            application/json:
               schema:
                 $ref: "#/components/schemas/PaymentResponse"
   /api/orders/checkout:
@@ -136,7 +136,7 @@ paths:
         "200":
           description: OK
           content:
-            '*/*':
+            application/json:
               schema:
                 $ref: "#/components/schemas/OrderResponse"
   /api/cart-proxy/merge:
@@ -154,7 +154,7 @@ paths:
         "200":
           description: OK
           content:
-            '*/*':
+            application/json:
               schema:
                 $ref: "#/components/schemas/CartResponse"
   /api/cart-proxy/add:
@@ -184,7 +184,7 @@ paths:
         "200":
           description: OK
           content:
-            '*/*':
+            application/json:
               schema:
                 $ref: "#/components/schemas/CartResponse"
   /api/user/shipping/{id}:
@@ -203,7 +203,7 @@ paths:
         "200":
           description: OK
           content:
-            '*/*':
+            application/json:
               schema:
                 $ref: "#/components/schemas/ShippingResponse"
   /api/user/shipping/order/{orderId}:
@@ -222,7 +222,7 @@ paths:
         "200":
           description: OK
           content:
-            '*/*':
+            application/json:
               schema:
                 $ref: "#/components/schemas/ShippingResponse"
   /api/user/shipping/my-shippings:
@@ -234,7 +234,7 @@ paths:
         "200":
           description: OK
           content:
-            '*/*':
+            application/json:
               schema:
                 type: array
                 items:
@@ -263,7 +263,7 @@ paths:
         "200":
           description: OK
           content:
-            '*/*':
+            application/json:
               schema:
                 $ref: "#/components/schemas/PageProductResponse"
   /api/user/products/{id}:
@@ -282,9 +282,38 @@ paths:
         "200":
           description: OK
           content:
-            '*/*':
+            application/json:
               schema:
                 $ref: "#/components/schemas/ProductResponse"
+  /api/user/products/api/products/search:
+    get:
+      tags:
+      - product-user-controller
+      operationId: search
+      parameters:
+      - name: keyword
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: categoryId
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+      - name: pageable
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/Pageable"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PageProductResponse"
   /api/user/account/my-orders:
     get:
       tags:
@@ -300,7 +329,7 @@ paths:
         "200":
           description: OK
           content:
-            '*/*':
+            application/json:
               schema:
                 $ref: "#/components/schemas/ApiResponsePageOrderResponse"
   /api/orders/{orderId}:
@@ -319,7 +348,7 @@ paths:
         "200":
           description: OK
           content:
-            '*/*':
+            application/json:
               schema:
                 $ref: "#/components/schemas/OrderResponse"
   /api/location/wards/{districtCode}:
@@ -338,7 +367,7 @@ paths:
         "200":
           description: OK
           content:
-            '*/*':
+            application/json:
               schema:
                 type: object
   /api/location/provinces:
@@ -350,7 +379,7 @@ paths:
         "200":
           description: OK
           content:
-            '*/*':
+            application/json:
               schema:
                 type: object
   /api/location/districts/{provinceCode}:
@@ -369,7 +398,7 @@ paths:
         "200":
           description: OK
           content:
-            '*/*':
+            application/json:
               schema:
                 type: object
   /api/cart-proxy:
@@ -387,7 +416,7 @@ paths:
         "200":
           description: OK
           content:
-            '*/*':
+            application/json:
               schema:
                 $ref: "#/components/schemas/CartResponse"
   /api/cart-proxy/remove:
@@ -411,7 +440,7 @@ paths:
         "200":
           description: OK
           content:
-            '*/*':
+            application/json:
               schema:
                 $ref: "#/components/schemas/CartResponse"
   /api/cart-proxy/clear:
@@ -429,7 +458,7 @@ paths:
         "200":
           description: OK
           content:
-            '*/*':
+            application/json:
               schema:
                 $ref: "#/components/schemas/CartResponse"
   /api/cart-proxy/clear/user/{userId}:
@@ -889,12 +918,16 @@ components:
     PageProductResponse:
       type: object
       properties:
-        totalElements:
-          type: integer
-          format: int64
         totalPages:
           type: integer
           format: int32
+        totalElements:
+          type: integer
+          format: int64
+        first:
+          type: boolean
+        last:
+          type: boolean
         size:
           type: integer
           format: int32
@@ -909,10 +942,6 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/SortObject"
-        first:
-          type: boolean
-        last:
-          type: boolean
         numberOfElements:
           type: integer
           format: int32
@@ -1043,12 +1072,16 @@ components:
     PageOrderResponse:
       type: object
       properties:
-        totalElements:
-          type: integer
-          format: int64
         totalPages:
           type: integer
           format: int32
+        totalElements:
+          type: integer
+          format: int64
+        first:
+          type: boolean
+        last:
+          type: boolean
         size:
           type: integer
           format: int32
@@ -1063,10 +1096,6 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/SortObject"
-        first:
-          type: boolean
-        last:
-          type: boolean
         numberOfElements:
           type: integer
           format: int32

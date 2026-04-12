@@ -7,6 +7,7 @@ import com.datn.shopobject.dto.response.InventoryResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,7 +22,7 @@ public class InventoryAdminController {
     // ============================
     // GET ALL (PAGE)
     // ============================
-    @GetMapping
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public Page<InventoryResponse> getAllInventory(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
@@ -32,7 +33,7 @@ public class InventoryAdminController {
     // ============================
     // CREATE / UPDATE
     // ============================
-    @PostMapping
+    @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public InventoryResponse createOrUpdate(
             @RequestBody InventoryRequest req
     ) {
@@ -42,7 +43,7 @@ public class InventoryAdminController {
     // ============================
     // GET BY VARIANT
     // ============================
-    @GetMapping("/{variantId}")
+    @GetMapping(value = "/{variantId}",produces = MediaType.APPLICATION_JSON_VALUE)
     public InventoryResponse getByVariant(
             @PathVariable Long variantId
     ) {
@@ -52,7 +53,7 @@ public class InventoryAdminController {
     // ============================
     // IMPORT
     // ============================
-    @PostMapping("/import")
+    @PostMapping(value = "/import",produces = MediaType.APPLICATION_JSON_VALUE)
     public InventoryResponse importStock(
             @RequestBody ImportRequest req
     ) {
@@ -67,7 +68,7 @@ public class InventoryAdminController {
     // ============================
     // EXPORT
     // ============================
-    @PostMapping("/export")
+    @PostMapping(value = "/export",produces = MediaType.APPLICATION_JSON_VALUE)
     public InventoryResponse exportStock(
             @RequestBody ExportRequest req
     ) {
@@ -81,7 +82,7 @@ public class InventoryAdminController {
     // ============================
     // RESERVE
     // ============================
-    @PostMapping("/reserve")
+    @PostMapping(value = "/reserve",produces = MediaType.APPLICATION_JSON_VALUE)
     public void reserve(
             @RequestParam Long variantId,
             @RequestParam Integer quantity
@@ -92,7 +93,7 @@ public class InventoryAdminController {
     // ============================
     // RELEASE
     // ============================
-    @PostMapping("/release")
+    @PostMapping(value = "/release",produces = MediaType.APPLICATION_JSON_VALUE)
     public void release(
             @RequestParam Long variantId,
             @RequestParam Integer quantity
@@ -103,7 +104,7 @@ public class InventoryAdminController {
     // ============================
     // DEDUCT
     // ============================
-    @PostMapping("/deduct")
+    @PostMapping(value = "/deduct",produces = MediaType.APPLICATION_JSON_VALUE)
     public void deduct(
             @RequestParam Long variantId,
             @RequestParam Integer quantity
@@ -114,7 +115,7 @@ public class InventoryAdminController {
     // ============================
     // ADJUST
     // ============================
-    @PostMapping("/adjust/{variantId}")
+    @PostMapping(value = "/adjust/{variantId}",produces = MediaType.APPLICATION_JSON_VALUE)
     public InventoryResponse adjust(
             @PathVariable Long variantId,
             @RequestBody AdjustRequest req

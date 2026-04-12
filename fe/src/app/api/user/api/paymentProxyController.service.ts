@@ -45,10 +45,10 @@ export class PaymentProxyControllerService extends BaseService {
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public guestPayment(guestPaymentRequest: GuestPaymentRequest, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<PaymentResponse>;
-    public guestPayment(guestPaymentRequest: GuestPaymentRequest, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpResponse<PaymentResponse>>;
-    public guestPayment(guestPaymentRequest: GuestPaymentRequest, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpEvent<PaymentResponse>>;
-    public guestPayment(guestPaymentRequest: GuestPaymentRequest, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<any> {
+    public guestPayment(guestPaymentRequest: GuestPaymentRequest, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext}): Observable<PaymentResponse>;
+    public guestPayment(guestPaymentRequest: GuestPaymentRequest, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext}): Observable<HttpResponse<PaymentResponse>>;
+    public guestPayment(guestPaymentRequest: GuestPaymentRequest, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext}): Observable<HttpEvent<PaymentResponse>>;
+    public guestPayment(guestPaymentRequest: GuestPaymentRequest, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext}): Observable<any> {
         if (guestPaymentRequest === null || guestPaymentRequest === undefined) {
             throw new Error('Required parameter guestPaymentRequest was null or undefined when calling guestPayment.');
         }
@@ -56,7 +56,7 @@ export class PaymentProxyControllerService extends BaseService {
         let localVarHeaders = this.defaultHeaders;
 
         const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
-            '*/*'
+            'application/json'
         ]);
         if (localVarHttpHeaderAcceptSelected !== undefined) {
             localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
@@ -106,10 +106,10 @@ export class PaymentProxyControllerService extends BaseService {
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public userPayment(userPaymentRequest: UserPaymentRequest, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<PaymentResponse>;
-    public userPayment(userPaymentRequest: UserPaymentRequest, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpResponse<PaymentResponse>>;
-    public userPayment(userPaymentRequest: UserPaymentRequest, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<HttpEvent<PaymentResponse>>;
-    public userPayment(userPaymentRequest: UserPaymentRequest, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: '*/*', context?: HttpContext}): Observable<any> {
+    public userPayment(userPaymentRequest: UserPaymentRequest, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext}): Observable<PaymentResponse>;
+    public userPayment(userPaymentRequest: UserPaymentRequest, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext}): Observable<HttpResponse<PaymentResponse>>;
+    public userPayment(userPaymentRequest: UserPaymentRequest, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext}): Observable<HttpEvent<PaymentResponse>>;
+    public userPayment(userPaymentRequest: UserPaymentRequest, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext}): Observable<any> {
         if (userPaymentRequest === null || userPaymentRequest === undefined) {
             throw new Error('Required parameter userPaymentRequest was null or undefined when calling userPayment.');
         }
@@ -117,7 +117,7 @@ export class PaymentProxyControllerService extends BaseService {
         let localVarHeaders = this.defaultHeaders;
 
         const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
-            '*/*'
+            'application/json'
         ]);
         if (localVarHttpHeaderAcceptSelected !== undefined) {
             localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);

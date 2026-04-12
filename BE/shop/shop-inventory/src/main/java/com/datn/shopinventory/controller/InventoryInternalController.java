@@ -7,6 +7,7 @@ import com.datn.shopobject.dto.response.InventoryResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -22,7 +23,7 @@ public class InventoryInternalController {
     // =============================
     // CREATE / UPDATE
     // =============================
-    @PostMapping
+    @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public InventoryResponse createOrUpdate(
             @RequestBody InventoryRequest request
     ) {
@@ -32,7 +33,7 @@ public class InventoryInternalController {
     // =============================
     // GET BY VARIANT
     // =============================
-    @GetMapping("/{variantId}")
+    @GetMapping(value = "/{variantId}",produces = MediaType.APPLICATION_JSON_VALUE)
     public InventoryResponse getByVariantId(
             @PathVariable Long variantId
     ) {
@@ -42,7 +43,7 @@ public class InventoryInternalController {
     // =============================
     // RESERVE
     // =============================
-    @PostMapping("/reserve")
+    @PostMapping(value = "/reserve",produces = MediaType.APPLICATION_JSON_VALUE)
     public void reserve(
             @RequestParam Long variantId,
             @RequestParam Integer qty
@@ -53,7 +54,7 @@ public class InventoryInternalController {
     // =============================
     // RELEASE
     // =============================
-    @PostMapping("/release")
+    @PostMapping(value = "/release",produces = MediaType.APPLICATION_JSON_VALUE)
     public void release(
             @RequestParam Long variantId,
             @RequestParam Integer qty
@@ -64,7 +65,7 @@ public class InventoryInternalController {
     // =============================
     // DEDUCT
     // =============================
-    @PostMapping("/deduct")
+    @PostMapping(value = "/deduct",produces = MediaType.APPLICATION_JSON_VALUE)
     public void deduct(
             @RequestParam Long variantId,
             @RequestParam Integer qty
@@ -75,7 +76,7 @@ public class InventoryInternalController {
     // =============================
     // IMPORT
     // =============================
-    @PostMapping("/import")
+    @PostMapping(value = "/import",produces = MediaType.APPLICATION_JSON_VALUE)
     public InventoryResponse importStock(
             @RequestParam Long variantId,
             @RequestParam Integer qty,
@@ -88,7 +89,7 @@ public class InventoryInternalController {
     // =============================
     // EXPORT
     // =============================
-    @PostMapping("/export")
+    @PostMapping(value = "/export",produces = MediaType.APPLICATION_JSON_VALUE)
     public InventoryResponse exportStock(
             @RequestParam Long variantId,
             @RequestParam Integer qty,
@@ -100,7 +101,7 @@ public class InventoryInternalController {
     // =============================
     // ADJUST
     // =============================
-    @PostMapping("/adjust")
+    @PostMapping(value = "/adjust",produces = MediaType.APPLICATION_JSON_VALUE)
     public InventoryResponse adjust(
             @RequestParam Long variantId,
             @RequestParam Integer newStock,
@@ -112,7 +113,7 @@ public class InventoryInternalController {
     // =============================
     // TRANSACTION LOGS
     // =============================
-    @GetMapping("/{variantId}/transactions")
+    @GetMapping(value = "/{variantId}/transactions",produces = MediaType.APPLICATION_JSON_VALUE)
     public List<InventoryTransactionDTO> getTransactions(
             @PathVariable Long variantId
     ) {
@@ -122,7 +123,7 @@ public class InventoryInternalController {
     // =============================
     // LIST (PAGE)
     // =============================
-    @GetMapping
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public Page<InventoryResponse> getAllInventory(Pageable pageable) {
         return inventoryService.getAllInventory(pageable);
     }

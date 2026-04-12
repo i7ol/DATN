@@ -37,9 +37,12 @@ export class ProductDetailComponent implements OnInit {
   /* ================= INIT ================= */
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));
-
     if (!id) return;
 
+    this.loadProduct(id);
+  }
+
+  private loadProduct(id: number): void {
     this.productApi.getProduct(id, 'response').subscribe({
       next: (resp) => {
         if (resp.body instanceof Blob) {
@@ -58,10 +61,8 @@ export class ProductDetailComponent implements OnInit {
   addToCart(): void {
     if (!this.product) return;
 
-    // Nếu đã chọn variant → dùng luôn
     let variant = this.selectedVariant;
 
-    // Nếu chưa chọn nhưng chỉ có 1 variant
     if (!variant && this.product.variants?.length === 1) {
       variant = this.product.variants[0];
     }
@@ -76,6 +77,7 @@ export class ProductDetailComponent implements OnInit {
     this.cartService.addItem(variant.id, 1).subscribe({
       next: () => {
         this.notify.success('Đã thêm vào giỏ hàng');
+        this.refreshProductStock(); // Cập nhật tồn kho sau khi thêm giỏ
         this.isAddingToCart = false;
       },
       error: () => {
@@ -129,6 +131,20 @@ export class ProductDetailComponent implements OnInit {
     }
   }
 
+  /* ================= REFRESH STOCK ================= */
+  private refreshProductStock(): void {
+    if (!this.product?.id) return;
+
+    this.productApi.getProduct(this.product.id).subscribe({
+      next: (updatedProduct) => {
+        this.mapProduct(updatedProduct); // Cập nhật lại dữ liệu
+        this.selectColor(this.selectedColor!); // Giữ lại lựa chọn màu nếu có
+        if (this.selectedSize) this.selectSize(this.selectedSize);
+      },
+      error: () => console.warn('Không cập nhật được tồn kho mới'),
+    });
+  }
+
   /* ================= IMAGE ================= */
   selectImage(url: string): void {
     this.selectedImage = url;
@@ -141,7 +157,6 @@ export class ProductDetailComponent implements OnInit {
     const variant = this.product.variants.find(
       (v) => v.color === color && v.sizeName === size,
     );
-
     return (variant?.stock || 0) > 0;
   }
 

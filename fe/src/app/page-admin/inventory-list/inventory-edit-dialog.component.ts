@@ -14,7 +14,7 @@ export class InventoryEditDialogComponent {
   constructor(
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<InventoryEditDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: InventoryResponse | null
+    @Inject(MAT_DIALOG_DATA) public data: InventoryResponse | null,
   ) {
     this.form = this.fb.group({
       variantId: [data?.variantId ?? null, Validators.required],

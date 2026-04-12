@@ -15,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.stream.Collectors;
@@ -27,7 +28,7 @@ import java.util.stream.Collectors;
 public class AccountController {
     final UserService userService;
 
-    @PostMapping
+    @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ApiResponse<UserResponse>> createUser(@RequestBody @Valid UserCreationRequest request) {
         UserEntity createdUser = userService.createUser(request);
 
@@ -44,14 +45,14 @@ public class AccountController {
 
 
 
-    @GetMapping
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     Page<UserResponse> getAllUsers(Pageable pageable){
         return userService.getAllUsers(pageable);
     }
 
 
 
-    @GetMapping("/{id}")
+    @GetMapping(value="/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ApiResponse<UserResponse> getUser(@PathVariable Long id) {
         return ApiResponse.<UserResponse>builder()
                 .result(userService.getUserById(id))
@@ -59,14 +60,14 @@ public class AccountController {
     }
 
 
-    @PutMapping("/{id}")
+    @PutMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     UserResponse updateUser(@PathVariable("id") Long id , @RequestBody UserUpdateRequest request){
         return userService.updateUser(id, request);
     }
 
 
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping(value = "/{id}",produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ApiResponse<Void>> deleteUser(@PathVariable("id") Long id) {
         userService.deleteUser(id);
         ApiResponse<Void> response = ApiResponse.<Void>builder()

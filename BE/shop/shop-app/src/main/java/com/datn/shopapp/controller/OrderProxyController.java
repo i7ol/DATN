@@ -8,6 +8,7 @@ import com.datn.shopobject.dto.request.CheckoutRequest;
 import com.datn.shopobject.dto.response.OrderResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,7 +21,7 @@ public class OrderProxyController {
     private final OrderUserClient orderUserClient;
 
 
-    @PostMapping("/checkout")
+    @PostMapping(value = "/checkout",produces = MediaType.APPLICATION_JSON_VALUE)
     public OrderResponse checkout(
             @AuthenticationPrincipal UserPrincipal principal,
             @RequestBody CheckoutRequest request
@@ -32,7 +33,7 @@ public class OrderProxyController {
 
 
 
-    @GetMapping("/{orderId:\\d+}")
+    @GetMapping(value = "/{orderId:\\d+}",produces = MediaType.APPLICATION_JSON_VALUE)
     public OrderResponse getOrder(@PathVariable Long orderId) {
         return orderUserClient.getOrder(orderId);
     }

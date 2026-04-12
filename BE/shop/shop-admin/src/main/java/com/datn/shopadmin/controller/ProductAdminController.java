@@ -24,7 +24,7 @@ public class ProductAdminController {
 
     private final ProductService productService;
 
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE,produces = MediaType.APPLICATION_JSON_VALUE)
     public ProductResponse createProduct(
             @RequestPart("product") ProductCreateRequest req,
             @RequestPart(value = "files", required = false) List<MultipartFile> files,
@@ -34,7 +34,7 @@ public class ProductAdminController {
         return productService.createProduct(req, files);
     }
 
-    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE,produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ProductResponse> updateProduct(
             @PathVariable("id") Long id,
             @RequestPart("product") ProductUpdateRequest request,
@@ -45,7 +45,7 @@ public class ProductAdminController {
         return ResponseEntity.ok(productService.updateProduct(id, request, files));
     }
 
-    @GetMapping
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public Page<ProductResponse> getAllProducts(
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size
@@ -54,12 +54,12 @@ public class ProductAdminController {
         return productService.getAllProducts(p);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping(value = "/{id}",produces = MediaType.APPLICATION_JSON_VALUE)
     public ProductResponse getProduct(@PathVariable("id") Long id) {
         return productService.getProduct(id);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping(value = "/{id}",produces = MediaType.APPLICATION_JSON_VALUE)
     public void deleteProduct(@PathVariable("id") Long id) {
         productService.deleteProduct(id);
     }

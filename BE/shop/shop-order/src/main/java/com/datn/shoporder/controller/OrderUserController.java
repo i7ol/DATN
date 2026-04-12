@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import java.util.Map;
@@ -34,7 +35,7 @@ public class OrderUserController {
     private final ProductRepository productRepository;
 
     // ===== CREATE =====
-    @PostMapping("/checkout")
+    @PostMapping(value = "/checkout",produces = MediaType.APPLICATION_JSON_VALUE)
     @Transactional
     public OrderResponse checkout(@RequestBody CheckoutRequest request, @AuthenticationPrincipal UserPrincipal principal) {
 
@@ -112,12 +113,12 @@ public class OrderUserController {
 
 
     // ===== READ =====
-    @GetMapping("/{orderId}")
+    @GetMapping(value = "/{orderId}",produces = MediaType.APPLICATION_JSON_VALUE)
     public OrderResponse getOrder(@PathVariable Long orderId) {
         return OrderMapper.toResponse(orderService.getOrder(orderId));
     }
 
-    @GetMapping("/my-orders")
+    @GetMapping(value = "/my-orders",produces = MediaType.APPLICATION_JSON_VALUE)
     public Page<OrderResponse> myOrders(
             @AuthenticationPrincipal UserPrincipal principal,
             Pageable pageable) {
@@ -132,7 +133,7 @@ public class OrderUserController {
     }
 
     // ===== CANCEL =====
-    @PutMapping("/{orderId}/cancel")
+    @PutMapping(value = "/{orderId}/cancel",produces = MediaType.APPLICATION_JSON_VALUE)
     public OrderResponse cancel(
             @PathVariable Long orderId,
             @AuthenticationPrincipal UserPrincipal principal

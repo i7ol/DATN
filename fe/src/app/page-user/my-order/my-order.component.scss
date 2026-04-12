@@ -1,41 +1,17 @@
-.my-order-container {
-  padding: 28px;
-  background: #f8f9fa;
-
-  .order-card {
-    border-radius: 16px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    overflow: hidden;
-
-    &:hover {
-      transform: translateY(-6px);
-      box-shadow: 0 20px 40px rgba(0, 123, 255, 0.12) !important;
-    }
-
-    .card-header {
-      background: linear-gradient(135deg, #f8f9fa, #ffffff) !important;
-    }
-
-    .badge {
-      font-weight: 600;
-      border-radius: 50px;
-      padding: 8px 16px;
-      font-size: 0.9rem;
-    }
-  }
-
-  .text-success {
-    color: #10b981 !important;
-  }
-
-  .bi {
-    font-size: 1.15em;
-  }
+.order-card {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  height: 100%;
 }
 
-// Responsive
-@media (max-width: 768px) {
-  .my-order-container {
-    padding: 16px;
-  }
+.order-card:hover {
+  transform: translateY(-8px);
+  box-shadow:
+    0 20px 25px -5px rgb(0 0 0 / 0.3),
+    0 8px 10px -6px rgb(0 0 0 / 0.3);
+  border-color: rgb(239 68 68);
+}
+
+.order-card .nz-badge {
+  font-size: 13px;
+  padding: 4px 12px;
 }

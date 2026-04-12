@@ -16,6 +16,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -28,7 +29,7 @@ public class AccUserController {
     final UserService userService;
     final OrderUserClient orderUserClient;
 
-    @GetMapping("/me")
+    @GetMapping(value = "/me",produces = MediaType.APPLICATION_JSON_VALUE)
     public ApiResponse<UserResponse> me() {
         Long userId = SecurityUtils.getCurrentUserId();
 
@@ -46,7 +47,7 @@ public class AccUserController {
                 .build();
     }
 
-    @PutMapping("/me")
+    @PutMapping(value = "/me",produces = MediaType.APPLICATION_JSON_VALUE)
     public ApiResponse<UserResponse> updateMe(@Valid @RequestBody UserUpdateRequest request) {
         Long userId = SecurityUtils.getCurrentUserId();
 
@@ -61,7 +62,7 @@ public class AccUserController {
                 .build();
     }
 
-    @GetMapping("/my-orders")
+    @GetMapping(value = "/my-orders",produces = MediaType.APPLICATION_JSON_VALUE)
     public ApiResponse<Page<OrderResponse>> myOrders(Pageable pageable) {
         Page<OrderResponse> orders = orderUserClient.myOrders(
                 pageable.getPageNumber(),

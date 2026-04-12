@@ -242,4 +242,9 @@ public class ProductServiceImpl implements ProductService {
 
         return res;
     }
+    @Override
+    public Page<ProductResponse> searchProducts(String keyword, Long categoryId, Pageable pageable) {
+        return productRepository.search(keyword, categoryId, pageable)
+                .map(this::toResponse);
+    }
 }

@@ -102,7 +102,7 @@
                   <span *ngIf="item.size">, Size: {{ item.size }}</span>
                 </div>
                 <div class="text-sm font-semibold text-gray-700 mt-1">
-                  {{ item.price | number : "1.0-0" }} đ
+                  {{ item.price | number: "1.0-0" }} đ
                 </div>
               </div>
             </div>
@@ -138,9 +138,7 @@
           <!-- TOTAL -->
           <div class="col-span-4 md:col-span-2 text-right">
             <div class="font-semibold text-lg">
-              {{
-                (item.quantity ?? 0) * (item.price ?? 0) | number : "1.0-0"
-              }}
+              {{ (item.quantity ?? 0) * (item.price ?? 0) | number: "1.0-0" }}
               đ
             </div>
           </div>
@@ -181,7 +179,7 @@
           <div class="flex justify-between text-sm">
             <span class="text-gray-600">Tạm tính</span>
             <span class="font-medium"
-              >{{ totalPrice$ | async | number : "1.0-0" }} đ</span
+              >{{ totalPrice$ | async | number: "1.0-0" }} đ</span
             >
           </div>
 
@@ -200,7 +198,7 @@
           <div class="border-t pt-3 flex justify-between">
             <span class="font-bold text-lg">Tổng cộng</span>
             <span class="font-bold text-lg text-red-600">
-              {{ totalPrice$ | async | number : "1.0-0" }} đ
+              {{ totalPrice$ | async | number: "1.0-0" }} đ
             </span>
           </div>
         </div>

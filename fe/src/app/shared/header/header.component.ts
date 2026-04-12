@@ -8,7 +8,9 @@ import { AuthModalComponent } from '../components/auth-modal/auth-modal.componen
 import { CartService } from 'src/app/page-user/cart/cart.service';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { User } from 'src/app/core/models/user.model';
-
+import { ProductUserControllerService } from 'src/app/api/user';
+import { ProductResponse, PageProductResponse } from 'src/app/api/user';
+import { Pageable } from 'src/app/api/user';
 @Component({
   selector: 'app-header',
   templateUrl: './header.component.html',
@@ -33,10 +35,17 @@ export class HeaderComponent implements OnInit, OnDestroy {
   private sub = new Subscription();
   cartCount$!: Observable<number>;
 
+  isSearchOpen = false;
+  searchQuery = '';
+  searchResults: ProductResponse[] = [];
+  searchLoading = false;
+  private searchTimeout: any;
+
   constructor(
     private cartService: CartService,
     private authService: AuthService,
     private dialog: MatDialog,
+    private productService: ProductUserControllerService,
     private router: Router,
   ) {}
 
@@ -68,7 +77,10 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.sub.add(
       this.router.events
         .pipe(filter((e) => e instanceof NavigationEnd))
-        .subscribe((e: any) => (this.currentRoute = e.url)),
+        .subscribe((e: any) => {
+          this.currentRoute = e.url;
+          this.closeAllDropdowns();
+        }),
     );
   }
 
@@ -83,6 +95,87 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.isScrolled = window.scrollY > 10;
   }
 
+  // ==================== SEARCH METHODS ====================
+
+  onSearchMouseEnter() {
+    clearTimeout(this.searchTimeout);
+    this.isSearchOpen = true;
+  }
+
+  onSearchMouseLeave() {
+    this.searchTimeout = setTimeout(() => {
+      this.isSearchOpen = false;
+    }, 500);
+  }
+
+  onSearchInputFocus() {
+    this.isSearchOpen = true;
+  }
+
+  performSearch() {
+    if (!this.searchQuery?.trim()) {
+      this.searchResults = [];
+      return;
+    }
+
+    this.searchLoading = true;
+
+    this.productService
+      .search(
+        { page: 0, size: 8 } as Pageable,
+        this.searchQuery.trim(),
+        undefined,
+      )
+      .subscribe({
+        next: (response: PageProductResponse) => {
+          this.searchResults = response.content || [];
+          this.searchLoading = false;
+        },
+        error: (err) => {
+          console.error('Search error:', err);
+          this.searchResults = [];
+          this.searchLoading = false;
+        },
+      });
+  }
+
+  onSearchSubmit() {
+    if (this.searchQuery?.trim()) {
+      this.router.navigate(['/products'], {
+        queryParams: { keyword: this.searchQuery.trim() },
+      });
+      this.closeSearch();
+    }
+  }
+
+  // ←←← SỬA QUAN TRỌNG Ở ĐÂY ←←←
+  selectProduct(product: ProductResponse, event?: Event) {
+    if (event) {
+      event.stopImmediatePropagation(); // Ngăn chặn mọi event khác
+      event.preventDefault();
+    }
+
+    this.router
+      .navigate(['/product', product.id])
+      .then((success) => {
+        if (success) {
+          this.closeSearch();
+        }
+      })
+      .catch((err) => console.error('Navigation error:', err));
+  }
+
+  closeSearch() {
+    this.isSearchOpen = false;
+    this.searchQuery = '';
+    this.searchResults = [];
+  }
+
+  closeAllDropdowns() {
+    this.isCartHover = false;
+    this.isAccountDropdownOpen = false;
+    this.closeSearch();
+  }
   // CART
   onCartMouseEnter() {
     clearTimeout(this.hideCartTimeout);
@@ -139,11 +232,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   getDisplayName(): string {
     return this.currentUser?.username || 'Tài khoản';
-  }
-
-  closeAllDropdowns() {
-    this.isCartHover = false;
-    this.isAccountDropdownOpen = false;
   }
 
   isAdminRoute(route: string): boolean {

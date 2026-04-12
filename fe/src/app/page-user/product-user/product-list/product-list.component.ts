@@ -1,12 +1,13 @@
 import { ProductUserControllerService } from 'src/app/api/user/api/productUserController.service';
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
-
+import { Router, ActivatedRoute } from '@angular/router';
+import { CarouselModule } from 'ngx-owl-carousel-o';
 import { PageProductResponse } from 'src/app/api/user/model/pageProductResponse';
 import { ProductResponse } from 'src/app/api/user/model/productResponse';
 
 import { CartService } from 'src/app/page-user/cart/cart.service';
 import { NotificationService } from 'src/app/shared/services/notification.service';
+import { Pageable } from 'src/app/api/admin/model/models';
 
 @Component({
   selector: 'product-list',
@@ -18,6 +19,9 @@ export class ProductListComponent implements OnInit {
   products: ProductResponse[] = [];
   loading = false;
 
+  keyword: string = '';
+  isSearchMode = false;
+
   /* ================= PAGINATION ================= */
   currentPage = 0;
   pageSize = 20;
@@ -26,15 +30,21 @@ export class ProductListComponent implements OnInit {
   constructor(
     private productApi: ProductUserControllerService,
     private router: Router,
+    private route: ActivatedRoute,
     private cartService: CartService,
     private notify: NotificationService,
   ) {}
 
   /* ================= INIT ================= */
   ngOnInit(): void {
-    this.loadProducts();
-  }
+    this.route.queryParams.subscribe((params) => {
+      this.keyword = params['keyword'] || '';
+      this.isSearchMode = !!this.keyword;
 
+      this.currentPage = 0;
+      this.loadProducts();
+    });
+  }
   /* ================= ADD TO CART ================= */
 
   /**
@@ -111,58 +121,67 @@ export class ProductListComponent implements OnInit {
 
   /* ================= LOAD PRODUCTS ================= */
 
-  loadProducts(page: number = 0, size: number = this.pageSize): void {
+  loadProducts(page: number = 0): void {
     this.loading = true;
 
-    this.productApi.getAllProducts(page, size, 'response').subscribe({
-      next: (resp: any) => {
-        const handleBody = (body: any) => {
-          const data: PageProductResponse = body;
+    if (this.isSearchMode && this.keyword) {
+      // Tìm kiếm theo keyword
+      this.productApi
+        .search(
+          { page: page, size: this.pageSize } as Pageable,
+          this.keyword,
+          undefined,
+        )
+        .subscribe({
+          next: (response: PageProductResponse) => {
+            this.handleProductResponse(response);
+          },
+          error: (err) => this.handleError(err),
+        });
+    } else {
+      // Load tất cả sản phẩm
+      this.productApi
+        .getAllProducts(page, this.pageSize, 'response')
+        .subscribe({
+          next: (resp: any) => this.handleHttpResponse(resp),
+          error: (err) => this.handleError(err),
+        });
+    }
+  }
+  private handleProductResponse(data: PageProductResponse) {
+    this.products = data.content || [];
+    this.totalItems = data.totalElements || 0;
+    this.currentPage = data.number || 0;
+    this.loading = false;
+  }
 
-          this.products = data.content || [];
-          this.totalItems = data.totalElements || this.products.length;
-          this.currentPage = data.number || 0;
-          this.pageSize = data.size || this.pageSize;
+  private handleHttpResponse(resp: any) {
+    const body = resp.body || resp;
+    this.handleProductResponse(body);
+  }
 
-          this.loading = false;
-        };
-
-        if (resp.body instanceof Blob) {
-          resp.body.text().then((text: string) => {
-            handleBody(JSON.parse(text));
-          });
-        } else {
-          handleBody(resp.body);
-        }
-      },
-      error: (err) => {
-        console.error('Load products error:', err);
-        this.loading = false;
-
-        if (err.status === 404) {
-          this.notify.error('Không tìm thấy API sản phẩm');
-        } else {
-          this.notify.error('Không tải được danh sách sản phẩm');
-        }
-      },
-    });
+  private handleError(err: any) {
+    console.error(err);
+    this.loading = false;
+    this.notify.error('Không tải được dữ liệu');
   }
 
   /* ================= PAGINATION ================= */
 
   get totalPages(): number {
-    return Math.ceil(this.totalItems / this.pageSize);
+    return Math.ceil(this.totalItems / this.pageSize) || 1;
   }
-
-  prevPage(): void {
-    if (this.currentPage > 0) {
-      this.loadProducts(this.currentPage - 1);
+  nextPage() {
+    if (this.currentPage < Math.ceil(this.totalItems / this.pageSize) - 1) {
+      this.currentPage++;
+      this.loadProducts(this.currentPage);
     }
   }
 
-  nextPage(): void {
-    if (this.currentPage < this.totalPages - 1) {
-      this.loadProducts(this.currentPage + 1);
+  prevPage() {
+    if (this.currentPage > 0) {
+      this.currentPage--;
+      this.loadProducts(this.currentPage);
     }
   }
 
@@ -189,5 +208,52 @@ export class ProductListComponent implements OnInit {
 
   isOutOfStock(product: ProductResponse): boolean {
     return !this.hasStock(product);
+  }
+  banners = [
+    {
+      id: 1,
+      image: 'assets/img/banner.webp',
+      title: 'Collection Mới 2026',
+      subtitle: 'Streetwear chính hãng',
+    },
+    {
+      id: 2,
+      image: 'assets/img/banner2.webp',
+      title: 'Sale lên đến 50%',
+      subtitle: 'Chỉ trong tuần này',
+    },
+    {
+      id: 3,
+      image: 'assets/img/banner3.webp',
+      title: 'Clownz x Loudzone',
+      subtitle: 'Limited Edition',
+    },
+  ];
+
+  carouselOptions = {
+    loop: true,
+    mouseDrag: true,
+    items: 1,
+    touchDrag: true,
+    pullDrag: false,
+    dots: true,
+    navSpeed: 700,
+    autoplay: true,
+    center: true,
+    autoplayTimeout: 4000,
+    autoplayHoverPause: true,
+    navText: ['‹', '›'],
+    responsive: {
+      0: { items: 1 },
+      768: { items: 1 },
+      1024: { items: 1 },
+    },
+    nav: true,
+  };
+
+  // Method click banner (tùy chọn)
+  viewBanner(banner: any) {
+    console.log('Clicked banner:', banner);
+    // this.router.navigate(['/collection', banner.id]); // nếu bạn có route collection
   }
 }

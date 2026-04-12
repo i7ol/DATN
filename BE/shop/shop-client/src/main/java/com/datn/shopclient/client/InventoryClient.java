@@ -6,6 +6,7 @@ import com.datn.shopobject.dto.response.InventoryResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -20,7 +21,7 @@ public interface InventoryClient {
     // =============================
     // CREATE / UPDATE
     // =============================
-    @PostMapping("/internal/inventory")
+    @PostMapping(value = "/internal/inventory",produces = MediaType.APPLICATION_JSON_VALUE)
     InventoryResponse createOrUpdate(
             @RequestBody InventoryRequest request
     );
@@ -28,7 +29,7 @@ public interface InventoryClient {
     // =============================
     // GET BY VARIANT
     // =============================
-    @GetMapping("/internal/inventory/{variantId}")
+    @GetMapping(value = "/internal/inventory/{variantId}",produces = MediaType.APPLICATION_JSON_VALUE)
     InventoryResponse getByVariantId(
             @PathVariable Long variantId
     );
@@ -36,7 +37,7 @@ public interface InventoryClient {
     // =============================
     // LIST (PAGE)
     // =============================
-    @GetMapping("/internal/inventory")
+    @GetMapping(value = "/internal/inventory",produces = MediaType.APPLICATION_JSON_VALUE)
     Page<InventoryResponse> getAllInventory(
             Pageable pageable
     );
@@ -44,7 +45,7 @@ public interface InventoryClient {
     // =============================
     // RESERVE
     // =============================
-    @PostMapping("/internal/inventory/reserve")
+    @PostMapping(value = "/internal/inventory/reserve",produces = MediaType.APPLICATION_JSON_VALUE)
     void reserve(
             @RequestParam Long variantId,
             @RequestParam Integer qty
@@ -53,7 +54,7 @@ public interface InventoryClient {
     // =============================
     // RELEASE
     // =============================
-    @PostMapping("/internal/inventory/release")
+    @PostMapping(value = "/internal/inventory/release",produces = MediaType.APPLICATION_JSON_VALUE)
     void release(
             @RequestParam Long variantId,
             @RequestParam Integer qty
@@ -62,7 +63,7 @@ public interface InventoryClient {
     // =============================
     // DEDUCT
     // =============================
-    @PostMapping("/internal/inventory/deduct")
+    @PostMapping(value = "/internal/inventory/deduct",produces = MediaType.APPLICATION_JSON_VALUE)
     void deduct(
             @RequestParam Long variantId,
             @RequestParam Integer qty
@@ -71,7 +72,7 @@ public interface InventoryClient {
     // =============================
     // IMPORT
     // =============================
-    @PostMapping("/internal/inventory/import")
+    @PostMapping(value = "/internal/inventory/import",produces = MediaType.APPLICATION_JSON_VALUE)
     InventoryResponse importStock(
             @RequestParam Long variantId,
             @RequestParam Integer qty,
@@ -82,7 +83,7 @@ public interface InventoryClient {
     // =============================
     // EXPORT
     // =============================
-    @PostMapping("/internal/inventory/export")
+    @PostMapping(value = "/internal/inventory/export",produces = MediaType.APPLICATION_JSON_VALUE)
     InventoryResponse exportStock(
             @RequestParam Long variantId,
             @RequestParam Integer qty,
@@ -92,7 +93,7 @@ public interface InventoryClient {
     // =============================
     // ADJUST
     // =============================
-    @PostMapping("/internal/inventory/adjust")
+    @PostMapping(value = "/internal/inventory/adjust",produces = MediaType.APPLICATION_JSON_VALUE)
     InventoryResponse adjust(
             @RequestParam Long variantId,
             @RequestParam Integer newStock,
@@ -102,7 +103,7 @@ public interface InventoryClient {
     // =============================
     // TRANSACTION LOGS
     // =============================
-    @GetMapping("/internal/inventory/{variantId}/transactions")
+    @GetMapping(value = "/internal/inventory/{variantId}/transactions",produces = MediaType.APPLICATION_JSON_VALUE)
     List<InventoryTransactionDTO> getTransactions(
             @PathVariable Long variantId
     );

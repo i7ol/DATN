@@ -33,6 +33,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
+import { CarouselModule } from 'ngx-owl-carousel-o';
 //NG-Zoro
 import { NzDropDownModule } from 'ng-zorro-antd/dropdown';
 import { NzBadgeModule } from 'ng-zorro-antd/badge';
@@ -40,6 +41,13 @@ import { NzMenuModule } from 'ng-zorro-antd/menu';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
+import { NzTableModule } from 'ng-zorro-antd/table';
+import { NzGridModule } from 'ng-zorro-antd/grid';
+import { NzResultModule } from 'ng-zorro-antd/result';
+import { NzTagModule } from 'ng-zorro-antd/tag';
+import { NzCardModule } from 'ng-zorro-antd/card';
+import { NzTypographyModule } from 'ng-zorro-antd/typography';
+import { NzDividerModule } from 'ng-zorro-antd/divider';
 // Components-admin
 import { HeaderComponent } from './shared/header/header.component';
 import { AdminDashboardComponent } from './page-admin/admin-dashboard/admin-dashboard.component';
@@ -73,6 +81,7 @@ import { ProductUserControllerService } from 'src/app/api/user/api/productUserCo
 import { ProfileComponent } from './page-user/profile/profile.component';
 import { GuestIdInterceptor } from './core/interceptors/guest-id.interceptor';
 import { MyOrderComponent } from './page-user/my-order/my-order.component';
+import { MyOrderDetailComponent } from './page-user/my-order-detail/my-order-detail.component';
 
 @NgModule({
   declarations: [
@@ -98,6 +107,7 @@ import { MyOrderComponent } from './page-user/my-order/my-order.component';
     ConfirmDialogComponent,
     ProfileComponent,
     MyOrderComponent,
+    MyOrderDetailComponent,
   ],
   imports: [
     BrowserModule,
@@ -131,12 +141,21 @@ import { MyOrderComponent } from './page-user/my-order/my-order.component';
     MatDatepickerModule,
     MatNativeDateModule,
     MatTooltipModule,
+    CarouselModule,
     NzIconModule,
     NzDropDownModule,
     NzBadgeModule,
     NzMenuModule,
     NzSpinModule,
     NzButtonModule,
+    NzTableModule,
+    NzGridModule,
+    NzResultModule,
+    NzTagModule,
+    NzCardModule,
+    NzTypographyModule,
+    NzDividerModule,
+
     ToastrModule.forRoot({
       positionClass: 'toast-top-right',
       timeOut: 3000,

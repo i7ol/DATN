@@ -23,7 +23,7 @@ export class CartComponent implements OnInit, OnDestroy {
   constructor(
     private cartService: CartService,
     private router: Router,
-    private dialog: MatDialog
+    private dialog: MatDialog,
   ) {}
 
   ngOnInit(): void {
@@ -66,7 +66,7 @@ export class CartComponent implements OnInit, OnDestroy {
         if (confirmed) {
           this.cartService.removeItem(item.variantId!).subscribe();
         }
-      })
+      }),
     );
   }
 
@@ -86,7 +86,7 @@ export class CartComponent implements OnInit, OnDestroy {
         if (confirmed) {
           this.cartService.clearCart().subscribe();
         }
-      })
+      }),
     );
   }
 

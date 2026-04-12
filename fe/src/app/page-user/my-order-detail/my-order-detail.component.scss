@@ -1,0 +1,31 @@
+.header-gradient {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+}
+
+.status-badge {
+  border-radius: 20px;
+  font-weight: 500;
+}
+
+.product-img {
+  width: 55px;
+  height: 55px;
+  object-fit: cover;
+}
+
+.product-row {
+  transition: all 0.2s ease;
+}
+
+.product-row:hover {
+  background: #f8f9fa;
+  transform: scale(1.01);
+}
+
+.card {
+  transition: 0.3s;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+}

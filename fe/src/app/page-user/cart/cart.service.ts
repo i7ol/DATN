@@ -1,10 +1,11 @@
 import { Injectable, OnDestroy } from '@angular/core';
-import { BehaviorSubject, Observable, Subscription } from 'rxjs';
+import { BehaviorSubject, Observable, Subscription, throwError } from 'rxjs';
 import {
   tap,
   finalize,
-  distinctUntilChanged,
+  catchError,
   shareReplay,
+  distinctUntilChanged,
 } from 'rxjs/operators';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -12,10 +13,8 @@ import { CartProxyControllerService } from 'src/app/api/user';
 import { CartItemResponse } from 'src/app/api/user/model/cartItemResponse';
 import { CartResponse } from 'src/app/api/user/model/cartResponse';
 import { AuthService } from 'src/app/core/services/auth.service';
-import { of } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
 
-export type CartItemView = CartItemResponse & { imageUrl: string };
+export type CartItemView = CartItemResponse & { imageUrl?: string };
 
 @Injectable({
   providedIn: 'root',
@@ -48,7 +47,6 @@ export class CartService implements OnDestroy {
     this.initGuestId();
     this.refreshCart().subscribe();
 
-    // Lắng nghe login/logout
     this.sub.add(
       this.authService.currentUser$
         .pipe(distinctUntilChanged())
@@ -57,7 +55,6 @@ export class CartService implements OnDestroy {
           this.isLoggedIn = !!user;
 
           if (!wasLoggedIn && user && this.guestId) {
-            // login lần đầu → merge cart
             this.mergeGuestToUser();
           } else {
             this.refreshCart().subscribe();
@@ -73,53 +70,47 @@ export class CartService implements OnDestroy {
   // ================= GUEST =================
   private initGuestId(): void {
     this.guestId = localStorage.getItem('guestId');
-
     if (!this.guestId) {
       this.guestId = uuidv4();
       localStorage.setItem('guestId', this.guestId);
     }
-
-    console.log('[Cart] guestId:', this.guestId);
   }
 
-  /**
-   * Chỉ gửi X-Guest-Id khi CHƯA login
-   */
   private get guestHeader(): string | undefined {
     return this.isLoggedIn ? undefined : (this.guestId ?? undefined);
   }
 
-  refreshCart(): Observable<CartResponse> {
+  // ================= OPTIMISTIC UPDATE =================
+  addItem(variantId: number, quantity: number = 1): Observable<CartResponse> {
     this.loadingSubject.next(true);
 
-    return this.cartApi.getCart(this.guestHeader).pipe(
-      switchMap((res: any) => {
-        if (res instanceof Blob) {
-          return this.blobToJson<CartResponse>(res);
-        }
-        return of(res);
-      }),
-      tap((cart) => {
-        console.log('[Cart] refreshCart parsed', cart);
-        this.setCart(cart);
-      }),
-      finalize(() => this.loadingSubject.next(false)),
-    );
-  }
+    const currentItems = [...this.itemsSubject.getValue()];
+    const existing = currentItems.find((i) => i.variantId === variantId);
 
-  addItem(variantId: number, quantity: number): Observable<CartResponse> {
-    this.loadingSubject.next(true);
+    if (existing) {
+      existing.quantity = (existing.quantity || 0) + quantity;
+    } else {
+      currentItems.push({
+        variantId: variantId,
+        quantity: quantity,
+        productName: 'Đang tải...',
+        price: 0,
+        unitPrice: 0,
+        color: '',
+        size: '',
+        images: [],
+      } as CartItemView);
+    }
+
+    this.itemsSubject.next(currentItems);
+    this.recalculateTotals();
 
     return this.cartApi.addItem(variantId, quantity, this.guestHeader).pipe(
-      switchMap((res: any) => {
-        if (res instanceof Blob) {
-          return this.blobToJson<CartResponse>(res);
-        }
-        return of(res);
-      }),
-      tap((cart) => {
-        console.log('[Cart] addItem parsed', cart);
-        this.setCart(cart);
+      tap((cart: CartResponse) => this.setCart(cart)),
+      catchError((err) => {
+        console.error('Add item error', err);
+        this.refreshCart().subscribe(); // rollback
+        return throwError(err);
       }),
       finalize(() => this.loadingSubject.next(false)),
     );
@@ -128,8 +119,19 @@ export class CartService implements OnDestroy {
   updateItem(variantId: number, quantity: number): Observable<CartResponse> {
     this.loadingSubject.next(true);
 
+    const currentItems = [...this.itemsSubject.getValue()];
+    const item = currentItems.find((i) => i.variantId === variantId);
+    if (item) item.quantity = quantity;
+
+    this.itemsSubject.next(currentItems);
+    this.recalculateTotals();
+
     return this.cartApi.updateItem(variantId, quantity, this.guestHeader).pipe(
       tap((cart) => this.setCart(cart)),
+      catchError((err) => {
+        this.refreshCart().subscribe();
+        return throwError(err);
+      }),
       finalize(() => this.loadingSubject.next(false)),
     );
   }
@@ -137,14 +139,27 @@ export class CartService implements OnDestroy {
   removeItem(variantId: number): Observable<CartResponse> {
     this.loadingSubject.next(true);
 
+    const currentItems = this.itemsSubject
+      .getValue()
+      .filter((i) => i.variantId !== variantId);
+    this.itemsSubject.next(currentItems);
+    this.recalculateTotals();
+
     return this.cartApi.removeItem(variantId, this.guestHeader).pipe(
       tap((cart) => this.setCart(cart)),
+      catchError((err) => {
+        this.refreshCart().subscribe();
+        return throwError(err);
+      }),
       finalize(() => this.loadingSubject.next(false)),
     );
   }
 
   clearCart(): Observable<CartResponse> {
     this.loadingSubject.next(true);
+    this.itemsSubject.next([]);
+    this.totalPriceSubject.next(0);
+    this.totalQuantitySubject.next(0);
 
     return this.cartApi.clearCart(this.guestHeader).pipe(
       tap((cart) => this.setCart(cart)),
@@ -152,70 +167,66 @@ export class CartService implements OnDestroy {
     );
   }
 
-  // ================= MERGE =================
-  private mergeGuestToUser(): void {
-    if (!this.guestId) return;
-
+  refreshCart(): Observable<CartResponse> {
     this.loadingSubject.next(true);
 
-    this.cartApi.mergeGuestCart(this.guestId, 'body').subscribe({
-      next: (cart) => {
-        console.log('[Cart] merged guest → user');
-        localStorage.removeItem('guestId');
-        this.guestId = null;
-        this.setCart(cart);
-      },
-      error: (err) => console.error('[Cart] merge error', err),
-      complete: () => this.loadingSubject.next(false),
-    });
+    return this.cartApi.getCart(this.guestHeader).pipe(
+      tap((cart) => this.setCart(cart)),
+      finalize(() => this.loadingSubject.next(false)),
+    );
+  }
+
+  private mergeGuestToUser(): void {
+    if (!this.guestId) return;
+    this.loadingSubject.next(true);
+
+    this.cartApi
+      .mergeGuestCart(this.guestId)
+      .pipe(
+        tap((cart) => {
+          localStorage.removeItem('guestId');
+          this.guestId = null;
+          this.setCart(cart);
+        }),
+        finalize(() => this.loadingSubject.next(false)),
+      )
+      .subscribe();
   }
 
   // ================= HELPER =================
   private setCart(cart: CartResponse): void {
-    const items: CartItemView[] =
-      cart.items?.map((item) => ({
-        ...item,
-        imageUrl: item.images?.[0]?.url ?? 'assets/no-image.png',
-      })) ?? [];
+    const items: CartItemView[] = (cart.items || []).map((item) => ({
+      ...item,
+      imageUrl: item.images?.[0]?.url ?? 'assets/img/no-image.png',
+      size: item.size || '',
+      color: item.color || '',
+    }));
 
     this.itemsSubject.next(items);
-    this.totalPriceSubject.next(cart.totalPrice ?? 0);
-    this.totalQuantitySubject.next(
-      cart.quantity ?? items.reduce((s, i) => s + (i.quantity ?? 0), 0),
-    );
-  }
-  getCartIdentifiers(): {
-    guestId?: string;
-    userId?: number;
-  } {
-    const user = this.authService.getCurrentUser?.();
-
-    if (user?.id) {
-      return {
-        userId: user.id,
-      };
-    }
-
-    return {
-      guestId: this.guestId ?? undefined,
-    };
+    this.totalPriceSubject.next(cart.totalPrice ? Number(cart.totalPrice) : 0);
+    this.totalQuantitySubject.next(cart.quantity || 0);
   }
 
-  private blobToJson<T>(blob: Blob): Observable<T> {
-    return new Observable<T>((observer) => {
-      const reader = new FileReader();
+  private recalculateTotals(): void {
+    const items = this.itemsSubject.getValue();
+    let qty = 0;
+    let price = 0;
 
-      reader.onload = () => {
-        try {
-          observer.next(JSON.parse(reader.result as string));
-          observer.complete();
-        } catch (e) {
-          observer.error(e);
-        }
-      };
-
-      reader.onerror = (e) => observer.error(e);
-      reader.readAsText(blob);
+    items.forEach((i) => {
+      qty += i.quantity || 0;
+      price += (i.quantity || 0) * (Number(i.price) || 0);
     });
+
+    this.totalQuantitySubject.next(qty);
+    this.totalPriceSubject.next(price);
+  }
+
+  // ================= METHOD ĐƯỢC SỬ DỤNG Ở CHECKOUT =================
+  getCartIdentifiers(): { guestId?: string; userId?: number } {
+    const user = this.authService.getCurrentUser?.();
+    if (user?.id) {
+      return { userId: user.id };
+    }
+    return { guestId: this.guestId ?? undefined };
   }
 }

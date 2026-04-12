@@ -23,7 +23,7 @@ paths:
         "200":
           description: OK
           content:
-            '*/*':
+            application/json:
               schema:
                 $ref: "#/components/schemas/ShippingResponse"
     put:
@@ -47,7 +47,7 @@ paths:
         "200":
           description: OK
           content:
-            '*/*':
+            application/json:
               schema:
                 $ref: "#/components/schemas/ShippingResponse"
   /api/admin/shipping/{id}/status:
@@ -74,7 +74,7 @@ paths:
         "200":
           description: OK
           content:
-            '*/*':
+            application/json:
               schema:
                 $ref: "#/components/schemas/ShippingResponse"
   /api/admin/products/{id}:
@@ -93,7 +93,7 @@ paths:
         "200":
           description: OK
           content:
-            '*/*':
+            application/json:
               schema:
                 $ref: "#/components/schemas/ProductResponse"
     put:
@@ -130,7 +130,7 @@ paths:
         "200":
           description: OK
           content:
-            '*/*':
+            application/json:
               schema:
                 $ref: "#/components/schemas/ProductResponse"
     delete:
@@ -171,7 +171,7 @@ paths:
         "200":
           description: OK
           content:
-            '*/*':
+            application/json:
               schema:
                 $ref: "#/components/schemas/PaymentResponse"
   /api/admin/payments/{id}/mark-paid:
@@ -195,7 +195,7 @@ paths:
         "200":
           description: OK
           content:
-            '*/*':
+            application/json:
               schema:
                 $ref: "#/components/schemas/PaymentResponse"
   /api/admin/payments/{id}/cancel:
@@ -214,7 +214,7 @@ paths:
         "200":
           description: OK
           content:
-            '*/*':
+            application/json:
               schema:
                 $ref: "#/components/schemas/PaymentResponse"
   /api/admin/orders/{orderId}/status:
@@ -239,7 +239,7 @@ paths:
         "200":
           description: OK
           content:
-            '*/*':
+            application/json:
               schema:
                 $ref: "#/components/schemas/OrderResponse"
   /api/admin/orders/{orderId}/payment-status:
@@ -264,7 +264,7 @@ paths:
         "200":
           description: OK
           content:
-            '*/*':
+            application/json:
               schema:
                 $ref: "#/components/schemas/OrderResponse"
   /api/admin/categories/{id}:
@@ -289,7 +289,7 @@ paths:
         "200":
           description: OK
           content:
-            '*/*':
+            application/json:
               schema:
                 $ref: "#/components/schemas/CategoryResponse"
     delete:
@@ -322,7 +322,7 @@ paths:
         "200":
           description: OK
           content:
-            '*/*':
+            application/json:
               schema:
                 $ref: "#/components/schemas/ApiResponseUserResponse"
     put:
@@ -346,7 +346,7 @@ paths:
         "200":
           description: OK
           content:
-            '*/*':
+            application/json:
               schema:
                 $ref: "#/components/schemas/UserResponse"
     delete:
@@ -364,7 +364,7 @@ paths:
         "200":
           description: OK
           content:
-            '*/*':
+            application/json:
               schema:
                 $ref: "#/components/schemas/ApiResponseVoid"
   /api/admin/shipping:
@@ -387,7 +387,7 @@ paths:
         "200":
           description: OK
           content:
-            '*/*':
+            application/json:
               schema:
                 $ref: "#/components/schemas/PageShippingResponse"
     post:
@@ -404,7 +404,7 @@ paths:
         "200":
           description: OK
           content:
-            '*/*':
+            application/json:
               schema:
                 $ref: "#/components/schemas/ShippingResponse"
   /api/admin/shipping/{id}/sync:
@@ -423,7 +423,7 @@ paths:
         "200":
           description: OK
           content:
-            '*/*':
+            application/json:
               schema:
                 $ref: "#/components/schemas/ShippingResponse"
   /api/admin/products:
@@ -450,7 +450,7 @@ paths:
         "200":
           description: OK
           content:
-            '*/*':
+            application/json:
               schema:
                 $ref: "#/components/schemas/PageProductResponse"
     post:
@@ -480,7 +480,7 @@ paths:
         "200":
           description: OK
           content:
-            '*/*':
+            application/json:
               schema:
                 $ref: "#/components/schemas/ProductResponse"
   /api/admin/inventory:
@@ -507,7 +507,7 @@ paths:
         "200":
           description: OK
           content:
-            '*/*':
+            application/json:
               schema:
                 $ref: "#/components/schemas/PageInventoryResponse"
     post:
@@ -524,7 +524,7 @@ paths:
         "200":
           description: OK
           content:
-            '*/*':
+            application/json:
               schema:
                 $ref: "#/components/schemas/InventoryResponse"
   /api/admin/inventory/reserve:
@@ -584,7 +584,7 @@ paths:
         "200":
           description: OK
           content:
-            '*/*':
+            application/json:
               schema:
                 $ref: "#/components/schemas/InventoryResponse"
   /api/admin/inventory/export:
@@ -602,7 +602,7 @@ paths:
         "200":
           description: OK
           content:
-            '*/*':
+            application/json:
               schema:
                 $ref: "#/components/schemas/InventoryResponse"
   /api/admin/inventory/deduct:
@@ -648,7 +648,7 @@ paths:
         "200":
           description: OK
           content:
-            '*/*':
+            application/json:
               schema:
                 $ref: "#/components/schemas/InventoryResponse"
   /api/admin/categories:
@@ -660,7 +660,7 @@ paths:
         "200":
           description: OK
           content:
-            '*/*':
+            application/json:
               schema:
                 type: array
                 items:
@@ -679,7 +679,7 @@ paths:
         "200":
           description: OK
           content:
-            '*/*':
+            application/json:
               schema:
                 $ref: "#/components/schemas/CategoryResponse"
   /api/admin/account:
@@ -697,7 +697,7 @@ paths:
         "200":
           description: OK
           content:
-            '*/*':
+            application/json:
               schema:
                 $ref: "#/components/schemas/PageUserResponse"
     post:
@@ -714,7 +714,7 @@ paths:
         "200":
           description: OK
           content:
-            '*/*':
+            application/json:
               schema:
                 $ref: "#/components/schemas/ApiResponseUserResponse"
   /api/admin/shipping/summary:
@@ -726,7 +726,7 @@ paths:
         "200":
           description: OK
           content:
-            '*/*':
+            application/json:
               schema:
                 $ref: "#/components/schemas/ShippingSummaryResponse"
   /api/admin/shipping/order/{orderId}:
@@ -745,7 +745,7 @@ paths:
         "200":
           description: OK
           content:
-            '*/*':
+            application/json:
               schema:
                 type: array
                 items:
@@ -770,7 +770,7 @@ paths:
         "200":
           description: OK
           content:
-            '*/*':
+            application/json:
               schema:
                 $ref: "#/components/schemas/PagePaymentResponse"
   /api/admin/payments/{id}:
@@ -789,7 +789,7 @@ paths:
         "200":
           description: OK
           content:
-            '*/*':
+            application/json:
               schema:
                 $ref: "#/components/schemas/PaymentResponse"
   /api/admin/payments/summary:
@@ -814,7 +814,7 @@ paths:
         "200":
           description: OK
           content:
-            '*/*':
+            application/json:
               schema:
                 type: object
   /api/admin/orders:
@@ -832,7 +832,7 @@ paths:
         "200":
           description: OK
           content:
-            '*/*':
+            application/json:
               schema:
                 $ref: "#/components/schemas/PageResponseOrderResponse"
   /api/admin/orders/{orderId}:
@@ -851,7 +851,7 @@ paths:
         "200":
           description: OK
           content:
-            '*/*':
+            application/json:
               schema:
                 $ref: "#/components/schemas/OrderResponse"
   /api/admin/inventory/{variantId}:
@@ -870,7 +870,7 @@ paths:
         "200":
           description: OK
           content:
-            '*/*':
+            application/json:
               schema:
                 $ref: "#/components/schemas/InventoryResponse"
   /api/admin/inventory/transactions/{variantId}:
@@ -1635,14 +1635,14 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/SortObject"
-        paged:
-          type: boolean
         pageSize:
           type: integer
           format: int32
         pageNumber:
           type: integer
           format: int32
+        paged:
+          type: boolean
         unpaged:
           type: boolean
     SortObject:

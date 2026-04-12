@@ -5,6 +5,7 @@ import com.datn.shopdatabase.entity.ShippingOrderEntity;
 import com.datn.shopobject.dto.response.ShippingResponse;
 import com.datn.shopshipping.service.ShippingService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,7 +20,7 @@ public class ShippingUserController {
 
     private final ShippingService shippingService;
 
-    @GetMapping("/my-shippings")
+    @GetMapping(value = "/my-shippings",produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<ShippingResponse>> getMyShippings(
             @AuthenticationPrincipal UserDetails userDetails) {
         Long userId = Long.parseLong(userDetails.getUsername());
@@ -30,7 +31,7 @@ public class ShippingUserController {
         return ResponseEntity.ok(responses);
     }
 
-    @GetMapping("/order/{orderId}")
+    @GetMapping(value = "/order/{orderId}",produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ShippingResponse> getShippingByOrder(
             @PathVariable Long orderId,
             @AuthenticationPrincipal UserDetails userDetails) {
@@ -49,7 +50,7 @@ public class ShippingUserController {
         return ResponseEntity.ok(toResponse(shipping));
     }
 
-    @GetMapping("/{id}")
+    @GetMapping(value = "/{id}",produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ShippingResponse> getShippingById(
             @PathVariable Long id,
             @AuthenticationPrincipal UserDetails userDetails) {
@@ -58,7 +59,7 @@ public class ShippingUserController {
         return ResponseEntity.ok(toResponse(shipping));
     }
 
-    @PostMapping("/{id}/sync")
+    @PostMapping(value = "/{id}/sync",produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ShippingResponse> syncShipping(
             @PathVariable Long id,
             @AuthenticationPrincipal UserDetails userDetails) {
