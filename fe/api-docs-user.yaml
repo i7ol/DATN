@@ -834,6 +834,10 @@ components:
           format: int32
         totalPrice:
           type: number
+        images:
+          type: array
+          items:
+            type: string
         createdAt:
           type: string
           format: date-time
@@ -918,16 +922,12 @@ components:
     PageProductResponse:
       type: object
       properties:
-        totalPages:
-          type: integer
-          format: int32
         totalElements:
           type: integer
           format: int64
-        first:
-          type: boolean
-        last:
-          type: boolean
+        totalPages:
+          type: integer
+          format: int32
         size:
           type: integer
           format: int32
@@ -942,6 +942,10 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/SortObject"
+        first:
+          type: boolean
+        last:
+          type: boolean
         numberOfElements:
           type: integer
           format: int32
@@ -1072,16 +1076,12 @@ components:
     PageOrderResponse:
       type: object
       properties:
-        totalPages:
-          type: integer
-          format: int32
         totalElements:
           type: integer
           format: int64
-        first:
-          type: boolean
-        last:
-          type: boolean
+        totalPages:
+          type: integer
+          format: int32
         size:
           type: integer
           format: int32
@@ -1096,6 +1096,10 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/SortObject"
+        first:
+          type: boolean
+        last:
+          type: boolean
         numberOfElements:
           type: integer
           format: int32

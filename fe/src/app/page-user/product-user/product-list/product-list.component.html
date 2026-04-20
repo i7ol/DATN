@@ -1,25 +1,19 @@
-<!-- FULL WIDTH BANNER -->
-<div class="w-full overflow-hidden">
+<!-- BANNER TRÀN HEADER -->
+<div class="w-full overflow-hidden -mt-[85px]">
   <owl-carousel-o [options]="carouselOptions" class="owl-theme banner-slider">
     <ng-container *ngFor="let banner of banners">
       <ng-template carouselSlide>
         <div class="relative cursor-pointer" (click)="viewBanner(banner)">
           <img
             [src]="banner.image"
-            class="w-full h-[400px] md:h-[400px] lg:h-[400px] object-cover"
+            class="w-full h-[400px] md:h-[520px] lg:h-[520px] object-cover"
             alt="{{ banner.title }}"
           />
-
-          <!-- Overlay -->
           <div
             class="absolute bottom-8 left-8 md:left-12 text-white drop-shadow-lg"
           >
-            <h2 class="text-4xl md:text-5xl font-bold">
-              {{ banner.title }}
-            </h2>
-            <p class="text-lg md:text-xl mt-2">
-              {{ banner.subtitle }}
-            </p>
+            <h2 class="text-4xl md:text-5xl font-bold">{{ banner.title }}</h2>
+            <p class="text-lg md:text-xl mt-2">{{ banner.subtitle }}</p>
           </div>
         </div>
       </ng-template>
@@ -29,7 +23,7 @@
 
 <div class="min-h-screen px-4 md:px-8 py-8 poppins-regular">
   <!-- Tiêu đề động + Nút quay lại -->
-  <h1 class="text-2xl font-bold mb-6">
+  <h1 class="text-2xl font-bold mb-6 text-center">
     {{
       isSearchMode
         ? 'Kết quả tìm kiếm cho: "' + keyword + '"'
@@ -59,7 +53,6 @@
     class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
     *ngIf="!loading && products.length > 0"
   >
-    <!-- === GIỮ NGUYÊN PHẦN PRODUCT CARD CỦA BẠN TỪ ĐÂY === -->
     <div
       *ngFor="let product of products"
       class="product-card"
@@ -171,4 +164,158 @@
       Sau
     </button>
   </div>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="bg-[#111111] text-white pt-16 pb-8 mt-20">
+    <div class="max-w-screen-xl mx-auto px-4 md:px-8">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+        <!-- CỘT 1: Logo + Giới thiệu -->
+        <div>
+          <div class="flex items-center gap-3 mb-4">
+            <span class="text-3xl font-bold tracking-widest">WUKONG</span>
+          </div>
+          <a
+            href="/products"
+            class="text-gray-400 hover:text-white transition-colors"
+          >
+            <img src="./assets/img/logo.webp" />
+          </a>
+          <br />
+          <p class="text-gray-400 text-sm leading-relaxed mb-6">
+            Streetwear chính hãng Việt Nam.<br />
+            Chất lượng - Phong cách - Giới hạn.
+          </p>
+          <div class="flex gap-4">
+            <!-- <a
+              href="#"
+              class="text-gray-400 hover:text-white transition-colors"
+            >
+              <img
+                src="./assets/img/logo.webp"
+                class="w-5 h-5"
+                alt="Facebook"
+              />
+            </a> -->
+            <!-- <a
+              href="#"
+              class="text-gray-400 hover:text-white transition-colors"
+            >
+              <img
+                src="./assets/img/instagram.png"
+                class="w-5 h-5"
+                alt="Instagram"
+              />
+            </a>
+            <a
+              href="#"
+              class="text-gray-400 hover:text-white transition-colors"
+            >
+              <img src="./assets/img/tiktok.png" class="w-5 h-5" alt="TikTok" />
+            </a> -->
+          </div>
+        </div>
+
+        <!-- CỘT 2: Sản phẩm -->
+        <div>
+          <h3
+            class="text-sm font-semibold uppercase tracking-widest mb-5 text-gray-300"
+          >
+            SẢN PHẨM
+          </h3>
+          <ul class="space-y-3 text-sm text-gray-400">
+            <li>
+              <a href="/products" class="hover:text-white transition-colors"
+                >Áo Thun</a
+              >
+            </li>
+            <li>
+              <a href="/products" class="hover:text-white transition-colors"
+                >Hoodie &amp; Sweatshirt</a
+              >
+            </li>
+            <li>
+              <a href="/products" class="hover:text-white transition-colors"
+                >Quần Jogger</a
+              >
+            </li>
+            <li>
+              <a href="/products" class="hover:text-white transition-colors"
+                >Áo Khoác</a
+              >
+            </li>
+            <li>
+              <a href="/products" class="hover:text-white transition-colors"
+                >Phụ Kiện</a
+              >
+            </li>
+            <li>
+              <a href="/products" class="hover:text-white transition-colors"
+                >Collection Đặc Biệt</a
+              >
+            </li>
+          </ul>
+        </div>
+
+        <!-- CỘT 3: Hỗ trợ &amp; Chính sách -->
+        <div>
+          <h3
+            class="text-sm font-semibold uppercase tracking-widest mb-5 text-gray-300"
+          >
+            HỖ TRỢ
+          </h3>
+          <ul class="space-y-3 text-sm text-gray-400">
+            <li>
+              <a href="/contact" class="hover:text-white transition-colors"
+                >Liên hệ chúng tôi</a
+              >
+            </li>
+            <li>
+              <a href="#" class="hover:text-white transition-colors"
+                >Chính sách vận chuyển</a
+              >
+            </li>
+            <li>
+              <a href="#" class="hover:text-white transition-colors"
+                >Chính sách đổi trả</a
+              >
+            </li>
+            <li>
+              <a href="#" class="hover:text-white transition-colors"
+                >Hướng dẫn thanh toán</a
+              >
+            </li>
+            <li>
+              <a href="#" class="hover:text-white transition-colors"
+                >Câu hỏi thường gặp</a
+              >
+            </li>
+            <li>
+              <a href="/my-orders" class="hover:text-white transition-colors"
+                >Tra cứu đơn hàng</a
+              >
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Bottom Bar -->
+      <div
+        class="border-t border-gray-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center text-xs text-gray-500"
+      >
+        <div>© 2026 WUKONG. All Rights Reserved.</div>
+        <div class="flex items-center gap-6 mt-4 md:mt-0">
+          <span>Chấp nhận thanh toán:</span>
+          <img src="./assets/img/payment/visa.png" class="h-4" alt="Visa" />
+          <img
+            src="./assets/img/payment/mastercard.png"
+            class="h-4"
+            alt="Mastercard"
+          />
+          <img src="./assets/img/payment/momo.png" class="h-5" alt="Momo" />
+          <img src="./assets/img/payment/vnpay.png" class="h-4" alt="VNPay" />
+        </div>
+        <div class="mt-4 md:mt-0">Made with ❤️ in Việt Nam</div>
+      </div>
+    </div>
+  </footer>
 </div>

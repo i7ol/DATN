@@ -20,7 +20,6 @@ export type CartItemView = CartItemResponse & { imageUrl?: string };
   providedIn: 'root',
 })
 export class CartService implements OnDestroy {
-  // ================= STATE =================
   private itemsSubject = new BehaviorSubject<CartItemView[]>([]);
   items$ = this.itemsSubject.asObservable().pipe(shareReplay(1));
 
@@ -67,7 +66,6 @@ export class CartService implements OnDestroy {
     this.sub.unsubscribe();
   }
 
-  // ================= GUEST =================
   private initGuestId(): void {
     this.guestId = localStorage.getItem('guestId');
     if (!this.guestId) {
@@ -80,42 +78,35 @@ export class CartService implements OnDestroy {
     return this.isLoggedIn ? undefined : (this.guestId ?? undefined);
   }
 
-  // ================= OPTIMISTIC UPDATE =================
+  // ================= SỬA Ở ĐÂY: BỎ OPTIMISTIC CHO ITEM MỚI =================
   addItem(variantId: number, quantity: number = 1): Observable<CartResponse> {
     this.loadingSubject.next(true);
 
+    // Chỉ optimistic update nếu item đã tồn tại trong giỏ
     const currentItems = [...this.itemsSubject.getValue()];
     const existing = currentItems.find((i) => i.variantId === variantId);
 
     if (existing) {
       existing.quantity = (existing.quantity || 0) + quantity;
-    } else {
-      currentItems.push({
-        variantId: variantId,
-        quantity: quantity,
-        productName: 'Đang tải...',
-        price: 0,
-        unitPrice: 0,
-        color: '',
-        size: '',
-        images: [],
-      } as CartItemView);
+      this.itemsSubject.next(currentItems);
+      this.recalculateTotals();
     }
-
-    this.itemsSubject.next(currentItems);
-    this.recalculateTotals();
+    // Nếu là item mới → KHÔNG push tạm thời (tránh bị biến mất sau khi setCart)
 
     return this.cartApi.addItem(variantId, quantity, this.guestHeader).pipe(
-      tap((cart: CartResponse) => this.setCart(cart)),
+      tap((cart: CartResponse) => {
+        this.setCart(cart); // luôn sync lại từ server
+      }),
       catchError((err) => {
         console.error('Add item error', err);
-        this.refreshCart().subscribe(); // rollback
+        this.refreshCart().subscribe(); // rollback nếu lỗi
         return throwError(err);
       }),
       finalize(() => this.loadingSubject.next(false)),
     );
   }
 
+  // Các hàm khác giữ nguyên (updateItem, removeItem, clearCart, refreshCart...)
   updateItem(variantId: number, quantity: number): Observable<CartResponse> {
     this.loadingSubject.next(true);
 
@@ -169,7 +160,6 @@ export class CartService implements OnDestroy {
 
   refreshCart(): Observable<CartResponse> {
     this.loadingSubject.next(true);
-
     return this.cartApi.getCart(this.guestHeader).pipe(
       tap((cart) => this.setCart(cart)),
       finalize(() => this.loadingSubject.next(false)),
@@ -193,7 +183,6 @@ export class CartService implements OnDestroy {
       .subscribe();
   }
 
-  // ================= HELPER =================
   private setCart(cart: CartResponse): void {
     const items: CartItemView[] = (cart.items || []).map((item) => ({
       ...item,
@@ -221,12 +210,9 @@ export class CartService implements OnDestroy {
     this.totalPriceSubject.next(price);
   }
 
-  // ================= METHOD ĐƯỢC SỬ DỤNG Ở CHECKOUT =================
   getCartIdentifiers(): { guestId?: string; userId?: number } {
     const user = this.authService.getCurrentUser?.();
-    if (user?.id) {
-      return { userId: user.id };
-    }
+    if (user?.id) return { userId: user.id };
     return { guestId: this.guestId ?? undefined };
   }
 }

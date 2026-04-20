@@ -4,6 +4,7 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -26,6 +27,9 @@ public class OrderItemResponse {
     private BigDecimal unitPrice;
     private int quantity;
     private BigDecimal totalPrice;
+
+    /* ===== IMAGES (THÊM MỚI) ===== */
+    private List<String> images;
 
     /* ===== AUDIT ===== */
     private Instant createdAt;

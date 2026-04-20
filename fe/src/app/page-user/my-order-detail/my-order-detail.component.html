@@ -1,4 +1,4 @@
-<div class="max-w-6xl mx-auto p-4">
+<div class="max-w-6xl mx-auto p-4 pt-32">
   <!-- Back Button -->
   <button
     nz-button
@@ -90,22 +90,22 @@
 
             <!-- Thông tin sản phẩm -->
             <div class="flex-1">
-              <h5 class="font-semibold text-xl mb-1">{{ item.productName }}</h5>
-              <p class="text-gray-600">{{ item.color }} • {{ item.size }}</p>
+              <h5 class="font-black text-2xl mb-1">{{ item.productName }}</h5>
+              <p class="text-black">{{ item.color }} • {{ item.size }}</p>
 
               <div class="mt-6 grid grid-cols-3 gap-6">
                 <div>
-                  <p class="text-gray-500 text-sm">Số lượng</p>
+                  <p class="text-black text-sm">Số lượng</p>
                   <p class="text-2xl font-bold">{{ item.quantity }}</p>
                 </div>
                 <div>
-                  <p class="text-gray-500 text-sm">Đơn giá</p>
+                  <p class="text-black text-sm">Đơn giá</p>
                   <p class="text-2xl font-bold">
                     {{ item.unitPrice | number: "1.0-0" }}đ
                   </p>
                 </div>
                 <div>
-                  <p class="text-gray-500 text-sm">Thành tiền</p>
+                  <p class="text-black text-sm">Thành tiền</p>
                   <p class="text-2xl font-bold text-red-600">
                     {{ item.totalPrice | number: "1.0-0" }}đ
                   </p>
@@ -121,7 +121,7 @@
     <div class="p-6 bg-gray-50 border-t">
       <div class="flex justify-between items-end">
         <div>
-          <p class="text-gray-500">Tổng thanh toán</p>
+          <p class="text-black text-sm">Tổng thanh toán</p>
           <h3 class="text-3xl font-bold text-red-600">
             {{ order.finalAmount || order.totalPrice | number: "1.0-0" }}đ
           </h3>

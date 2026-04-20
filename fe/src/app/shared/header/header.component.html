@@ -1,46 +1,71 @@
 <header
-  class="sticky top-0 z-50 bg-white transition-shadow duration-300"
-  [class.shadow-md]="isScrolled"
+  class="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
+  [class.bg-white]="effectiveSolid"
+  [class.shadow-md]="effectiveSolid"
+  [class.bg-transparent]="!effectiveSolid"
+  (mouseenter)="onHeaderMouseEnter()"
+  (mouseleave)="onHeaderMouseLeave()"
 >
-  <div class="max-w-screen-xl mx-auto px-6 lg:px-20 py-4 poppins-medium">
+  <div
+    class="max-w-screen-xl mx-auto px-6 lg:px-20 py-4 poppins-medium"
+    [class.text-white]="!effectiveSolid"
+    [class.text-gray-900]="effectiveSolid"
+  >
     <!-- TOP BAR -->
-    <div
-      class="flex items-center justify-between border-b border-gray-100 pb-3"
-    >
+    <div class="flex items-center justify-between pb-3">
       <!-- LEFT -->
-      <div class="flex items-center gap-6 text-sm text-gray-600">
+      <div class="flex items-center gap-6 text-sm text-inherit">
         <div class="flex items-center gap-2">
-          <img src="./assets/img/location.png" class="w-4 h-4 opacity-70" />
+          <img
+            [src]="
+              effectiveSolid
+                ? './assets/img/location.png'
+                : './assets/img/location-white.png'
+            "
+            class="w-4 h-4"
+          />
           <span>Việt Nam</span>
         </div>
-        <span class="text-gray-300">|</span>
+        <span class="text-inherit opacity-40">|</span>
         <div class="flex items-center gap-2">
-          <img src="./assets/img/phone-call.png" class="w-4 h-4 opacity-70" />
+          <img
+            [src]="
+              effectiveSolid
+                ? './assets/img/phone-call.png'
+                : './assets/img/phone-call-white.png'
+            "
+            class="w-4 h-4"
+          />
           <span>0398 287 981</span>
         </div>
       </div>
 
-      <!-- CENTER -->
-      <div class="text-xl font-semibold tracking-widest text-gray-900">
-        WUKONG
+      <!-- CENTER - LOGO -->
+      <div class="text-xl font-semibold tracking-widest text-inherit">
+        CLOWNZ
       </div>
 
       <!-- RIGHT -->
-      <div class="flex items-center gap-6 text-sm text-gray-600">
+      <div class="flex items-center gap-6 text-sm text-inherit">
         <!-- SEARCH -->
         <div
           class="relative"
           (mouseenter)="onSearchMouseEnter()"
           (mouseleave)="onSearchMouseLeave()"
         >
-          <!-- Icon Search -->
           <div
             class="cursor-pointer hover:text-black transition p-1"
             (click)="isSearchOpen = !isSearchOpen"
           >
-            <img src="./assets/img/search.png" class="w-5 h-5 opacity-70" />
+            <img
+              [src]="
+                effectiveSolid
+                  ? './assets/img/search.png'
+                  : './assets/img/search-white.png'
+              "
+              class="w-5 h-5"
+            />
           </div>
-
           <!-- SEARCH DROPDOWN -->
           <div
             *ngIf="isSearchOpen"
@@ -128,12 +153,18 @@
           (mouseenter)="onAccountMouseEnter()"
           (mouseleave)="onAccountMouseLeave()"
         >
-          <!-- TRIGGER -->
           <div
             class="flex items-center gap-2 cursor-pointer hover:text-black transition"
             (click)="!currentUser && openLoginModal()"
           >
-            <img src="./assets/img/user.png" class="w-4 h-4 opacity-70" />
+            <img
+              [src]="
+                effectiveSolid
+                  ? './assets/img/user.png'
+                  : './assets/img/user-white.png'
+              "
+              class="w-4 h-4"
+            />
             <span>{{ getDisplayName() }}</span>
           </div>
 
@@ -305,7 +336,7 @@
           </div>
         </div>
 
-        <span class="text-gray-300">|</span>
+        <span class="text-inherit opacity-40">|</span>
 
         <!-- CART -->
         <div
@@ -313,19 +344,26 @@
           (mouseenter)="onCartMouseEnter()"
           (mouseleave)="onCartMouseLeave()"
         >
-          <!-- TRIGGER -->
           <div
             class="flex items-center gap-2 cursor-pointer font-medium hover:text-black"
           >
-            <a routerLink="/cart" class="text-sm font-medium">Giỏ hàng</a>
+            <a routerLink="/cart" class="text-sm font-medium text-inherit"
+              >Giỏ hàng</a
+            >
             <div class="relative">
-              <img src="./assets/img/cart.png" class="w-4 h-4 opacity-70" />
+              <img
+                [src]="
+                  effectiveSolid
+                    ? './assets/img/cart.png'
+                    : './assets/img/cart-white.png'
+                "
+                class="w-4 h-4"
+              />
               <span
                 *ngIf="cartTotalQuantity > 0"
                 class="absolute -top-1 -right-2 w-4 h-4 flex items-center justify-center text-[10px] bg-red-500 text-white rounded-full"
+                >{{ cartTotalQuantity }}</span
               >
-                {{ cartTotalQuantity }}
-              </span>
             </div>
           </div>
 
@@ -465,37 +503,175 @@
         </div>
       </div>
     </div>
-
     <!-- MENU -->
     <div
-      class="flex items-center justify-center gap-10 pt-3 text-sm tracking-wide text-gray-600"
+      class="flex items-center justify-center gap-10 pt-3 text-sm tracking-wide text-inherit relative"
     >
       <a
         routerLink="/"
         routerLinkActive="active"
         [routerLinkActiveOptions]="{ exact: true }"
-        class="menu-item relative cursor-pointer"
+        class="menu-item relative cursor-pointer transition-colors"
       >
         Trang chủ <span class="menu-line"></span>
       </a>
-      <a
-        routerLink="/products"
-        routerLinkActive="active"
-        class="menu-item relative cursor-pointer"
+
+      <!-- SẢN PHẨM DROPDOWN - CĂN GIỮA THEO TOÀN BỘ HEADER -->
+      <div
+        class="group"
+        (mouseenter)="onProductMenuEnter()"
+        (mouseleave)="onProductMenuLeave()"
       >
-        Sản phẩm <span class="menu-line"></span>
-      </a>
+        <a
+          routerLink="/products"
+          class="menu-item relative cursor-pointer transition-colors flex items-center gap-1"
+        >
+          Sản phẩm
+          <span class="text-xs">▼</span>
+          <span class="menu-line"></span>
+        </a>
+
+        <!-- DROPDOWN -->
+        <div
+          *ngIf="isProductDropdownOpen"
+          class="product-dropdown absolute left-1/2 -translate-x-1/2 top-full mt-1 bg-white shadow-2xl rounded-2xl border border-gray-100 z-50 py-8 px-10 grid grid-cols-3 gap-10"
+          (mouseenter)="onProductMenuEnter()"
+          (mouseleave)="onProductMenuLeave()"
+        >
+          <!-- CỘT 1: TOP -->
+          <div>
+            <h4
+              class="uppercase text-xs font-bold text-gray-500 mb-5 tracking-widest"
+            >
+              TOP
+            </h4>
+            <ul class="space-y-3 text-sm">
+              <li>
+                <a
+                  routerLink="/products"
+                  [queryParams]="{ category: 'tshirt' }"
+                  class="hover:text-black transition-colors block"
+                  >T-Shirt</a
+                >
+              </li>
+              <li>
+                <a
+                  routerLink="/products"
+                  [queryParams]="{ category: 'hoodie' }"
+                  class="hover:text-black transition-colors block"
+                  >Hoodie</a
+                >
+              </li>
+              <li>
+                <a
+                  routerLink="/products"
+                  [queryParams]="{ category: 'sweatshirt' }"
+                  class="hover:text-black transition-colors block"
+                  >Sweatshirt</a
+                >
+              </li>
+              <li>
+                <a
+                  routerLink="/products"
+                  [queryParams]="{ category: 'jacket' }"
+                  class="hover:text-black transition-colors block"
+                  >Jacket</a
+                >
+              </li>
+            </ul>
+          </div>
+
+          <!-- CỘT 2: BOTTOM -->
+          <div>
+            <h4
+              class="uppercase text-xs font-bold text-gray-500 mb-5 tracking-widest"
+            >
+              BOTTOM
+            </h4>
+            <ul class="space-y-3 text-sm">
+              <li>
+                <a
+                  routerLink="/products"
+                  [queryParams]="{ category: 'pants' }"
+                  class="hover:text-black transition-colors block"
+                  >Pants / Jogger</a
+                >
+              </li>
+              <li>
+                <a
+                  routerLink="/products"
+                  [queryParams]="{ category: 'shorts' }"
+                  class="hover:text-black transition-colors block"
+                  >Shorts</a
+                >
+              </li>
+              <li>
+                <a
+                  routerLink="/products"
+                  [queryParams]="{ category: 'cargo' }"
+                  class="hover:text-black transition-colors block"
+                  >Cargo Pants</a
+                >
+              </li>
+            </ul>
+          </div>
+
+          <!-- CỘT 3: ACCESSORY -->
+          <div>
+            <h4
+              class="uppercase text-xs font-bold text-gray-500 mb-5 tracking-widest"
+            >
+              ACCESSORY
+            </h4>
+            <ul class="space-y-3 text-sm">
+              <li>
+                <a
+                  routerLink="/products"
+                  [queryParams]="{ category: 'cap' }"
+                  class="hover:text-black transition-colors block"
+                  >Cap / Hat</a
+                >
+              </li>
+              <li>
+                <a
+                  routerLink="/products"
+                  [queryParams]="{ category: 'bag' }"
+                  class="hover:text-black transition-colors block"
+                  >Bag</a
+                >
+              </li>
+              <li>
+                <a
+                  routerLink="/products"
+                  [queryParams]="{ category: 'socks' }"
+                  class="hover:text-black transition-colors block"
+                  >Socks</a
+                >
+              </li>
+              <li>
+                <a
+                  routerLink="/products"
+                  [queryParams]="{ category: 'belt' }"
+                  class="hover:text-black transition-colors block"
+                  >Belt / Wallet</a
+                >
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
       <a
         routerLink="/blog"
         routerLinkActive="active"
-        class="menu-item relative cursor-pointer"
+        class="menu-item relative cursor-pointer transition-colors"
       >
         Blog <span class="menu-line"></span>
       </a>
       <a
         routerLink="/contact"
         routerLinkActive="active"
-        class="menu-item relative cursor-pointer"
+        class="menu-item relative cursor-pointer transition-colors"
       >
         Liên hệ <span class="menu-line"></span>
       </a>

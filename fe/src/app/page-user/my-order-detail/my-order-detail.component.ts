@@ -51,12 +51,15 @@ export class MyOrderDetailComponent implements OnInit {
     });
   }
 
+  /** SỬA Ở ĐÂY: Lấy ảnh đầu tiên từ database */
   private initSelectedImages(): void {
     if (!this.order?.items) return;
 
     this.order.items.forEach((item, index) => {
       const key = (item.id || index).toString();
-      this.selectedImages[key] = '/assets/img/demo.webp'; // Mặc định
+
+      // Ưu tiên ảnh đầu tiên từ DB, nếu không có thì mới dùng demo
+      this.selectedImages[key] = item.images?.[0] || '/assets/img/demo.webp';
     });
   }
 
@@ -64,9 +67,12 @@ export class MyOrderDetailComponent implements OnInit {
     this.selectedImages[itemKey] = imageUrl;
   }
 
+  /** SỬA Ở ĐÂY: Luôn ưu tiên ảnh đã chọn */
   getSelectedImage(item: any, index: number): string {
     const key = (item.id || index).toString();
-    return this.selectedImages[key] || '/assets/img/demo.webp';
+    return (
+      this.selectedImages[key] || item.images?.[0] || '/assets/img/demo.webp'
+    );
   }
 
   goBack(): void {

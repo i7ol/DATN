@@ -75,3 +75,18 @@
     transform: rotate(360deg);
   }
 }
+/* ==================== PRODUCT DROPDOWN - CĂN GIỮA HEADER ==================== */
+.product-dropdown {
+  width: 820px !important;
+  min-width: 780px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  box-shadow:
+    0 20px 25px -5px rgb(0 0 0 / 0.1),
+    0 8px 10px -6px rgb(0 0 0 / 0.1);
+}
+
+/* Giảm khoảng cách giữa link và dropdown */
+.group .product-dropdown {
+  margin-top: 4px;
+}

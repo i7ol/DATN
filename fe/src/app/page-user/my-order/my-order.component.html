@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-[#0a0a0a] text-white py-8 poppins-regular">
+<div class="min-h-screen bg-[#0a0a0a] text-black py-8 poppins-regular pt-32">
   <div class="max-w-6xl mx-auto px-4 md:px-8">
     <!-- Tiêu đề động -->
     <h1 class="text-3xl font-bold mb-8 tracking-tight">ĐƠN HÀNG CỦA TÔI</h1>
@@ -28,7 +28,7 @@
       <p class="text-2xl text-gray-400 mb-2">Bạn chưa có đơn hàng nào</p>
       <a
         routerLink="/products"
-        class="inline-block bg-red-600 hover:bg-red-700 text-white px-8 py-4 rounded-2xl font-medium transition mt-4"
+        class="inline-block bg-red-600 hover:bg-red-700 text-black px-8 py-4 rounded-2xl font-medium transition mt-4"
       >
         Bắt đầu mua sắm ngay
       </a>
@@ -50,7 +50,7 @@
         >
           <div>
             <span class="text-xs text-zinc-500">MÃ ĐƠN</span>
-            <p class="font-mono text-xl font-bold text-white">
+            <p class="font-mono text-xl font-bold text-black">
               #{{ order.id }}
             </p>
           </div>
@@ -63,7 +63,7 @@
 
         <!-- Content -->
         <div class="p-5">
-          <p class="text-sm text-gray-400 mb-4">
+          <p class="text-sm text-black mb-4">
             {{ order.createdAt | date: "dd/MM/yyyy HH:mm" }}
           </p>
 
@@ -73,14 +73,14 @@
               *ngFor="let item of order.items | slice: 0 : 2"
               class="flex justify-between text-sm"
             >
-              <span class="text-gray-300 line-clamp-1">{{
+              <span class="text-black line-clamp-1">{{
                 item.productName
               }}</span>
-              <span class="text-gray-400">x{{ item.quantity }}</span>
+              <span class="text-black">x{{ item.quantity }}</span>
             </div>
             <div
               *ngIf="order.items && order.items.length > 2"
-              class="text-xs text-gray-500"
+              class="text-xs text-black"
             >
               +{{ order.items.length - 2 }} sản phẩm khác
             </div>
@@ -90,7 +90,7 @@
           <div
             class="mt-6 pt-4 border-t border-zinc-800 flex justify-between items-end"
           >
-            <span class="text-gray-400 text-sm">Tổng thanh toán</span>
+            <span class="text-black text-sm">Tổng thanh toán</span>
             <span class="text-2xl font-bold text-red-500">
               {{ order.finalAmount || order.totalAmount | number: "1.0-0" }}đ
             </span>

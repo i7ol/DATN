@@ -19,6 +19,7 @@ export interface OrderItemResponse {
     unitPrice?: number;
     quantity?: number;
     totalPrice?: number;
+    images?: Array<string>;
     createdAt?: string;
     updatedAt?: string;
 }

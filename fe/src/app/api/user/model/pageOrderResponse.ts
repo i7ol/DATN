@@ -13,14 +13,14 @@ import { OrderResponse } from './orderResponse';
 
 
 export interface PageOrderResponse { 
-    totalPages?: number;
     totalElements?: number;
-    first?: boolean;
-    last?: boolean;
+    totalPages?: number;
     size?: number;
     content?: Array<OrderResponse>;
     number?: number;
     sort?: Array<SortObject>;
+    first?: boolean;
+    last?: boolean;
     numberOfElements?: number;
     pageable?: PageableObject;
     empty?: boolean;

@@ -4,6 +4,7 @@ import com.datn.shopdatabase.entity.OrderEntity;
 import com.datn.shopobject.dto.response.OrderItemResponse;
 import com.datn.shopobject.dto.response.OrderResponse;
 
+import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 public class OrderMapper {
@@ -48,6 +49,7 @@ public class OrderMapper {
                     dto.setUnitPrice(item.getUnitPrice());
                     dto.setQuantity(item.getQuantity());
                     dto.setTotalPrice(item.getTotalPrice());
+                    dto.setImages(new ArrayList<>());
                     return dto;
                 }).toList()
         );

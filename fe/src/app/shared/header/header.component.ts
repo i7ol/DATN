@@ -1,5 +1,11 @@
 import { CartItemView } from './../../page-user/cart/cart.service';
-import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  HostListener,
+  ChangeDetectorRef,
+} from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { Observable, Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
@@ -11,6 +17,7 @@ import { User } from 'src/app/core/models/user.model';
 import { ProductUserControllerService } from 'src/app/api/user';
 import { ProductResponse, PageProductResponse } from 'src/app/api/user';
 import { Pageable } from 'src/app/api/user';
+
 @Component({
   selector: 'app-header',
   templateUrl: './header.component.html',
@@ -20,12 +27,17 @@ export class HeaderComponent implements OnInit, OnDestroy {
   isScrolled = false;
   isCartHover = false;
   isAccountDropdownOpen = false;
+  isHovered = false;
+
+  // ==================== TRẠNG THÁI HEADER ====================
+  allowTransparent = false;
+  effectiveSolid = true; // ← property bình thường
 
   cartItems: CartItemView[] = [];
   cartLoading = false;
   cartTotalPrice = 0;
   cartTotalQuantity = 0;
-
+  isProductDropdownOpen = false;
   currentUser: User | null = null;
   isAdmin = false;
   currentRoute = '';
@@ -47,6 +59,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
     private dialog: MatDialog,
     private productService: ProductUserControllerService,
     private router: Router,
+    private cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
@@ -74,14 +87,21 @@ export class HeaderComponent implements OnInit, OnDestroy {
       }),
     );
 
+    // Router events - quan trọng nhất
     this.sub.add(
       this.router.events
         .pipe(filter((e) => e instanceof NavigationEnd))
-        .subscribe((e: any) => {
-          this.currentRoute = e.url;
+        .subscribe(() => {
+          this.currentRoute = this.router.url; // dùng this.router.url để chắc chắn
           this.closeAllDropdowns();
+          this.updateTransparentMode();
+          this.cdr.detectChanges(); // ← force update template
         }),
     );
+
+    // Khởi tạo lần đầu
+    this.currentRoute = this.router.url;
+    this.updateTransparentMode();
   }
 
   ngOnDestroy(): void {
@@ -92,22 +112,42 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   @HostListener('window:scroll')
   onScroll() {
-    this.isScrolled = window.scrollY > 10;
+    this.isScrolled = window.scrollY > 80;
+    this.updateEffectiveSolid();
   }
 
-  // ==================== SEARCH METHODS ====================
+  private updateTransparentMode(): void {
+    this.allowTransparent = this.currentRoute.startsWith('/products');
+    this.updateEffectiveSolid();
+  }
 
+  private updateEffectiveSolid(): void {
+    this.effectiveSolid =
+      !this.allowTransparent || this.isScrolled || this.isHovered;
+    this.cdr.detectChanges(); // ← force Angular vẽ lại header
+  }
+
+  // Mouse events
+  onHeaderMouseEnter() {
+    this.isHovered = true;
+    this.updateEffectiveSolid();
+  }
+
+  onHeaderMouseLeave() {
+    this.isHovered = false;
+    this.updateEffectiveSolid();
+  }
+
+  // ==================== Các method cũ giữ nguyên (không thay đổi) ====================
   onSearchMouseEnter() {
     clearTimeout(this.searchTimeout);
     this.isSearchOpen = true;
   }
-
   onSearchMouseLeave() {
     this.searchTimeout = setTimeout(() => {
       this.isSearchOpen = false;
     }, 500);
   }
-
   onSearchInputFocus() {
     this.isSearchOpen = true;
   }
@@ -117,9 +157,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
       this.searchResults = [];
       return;
     }
-
     this.searchLoading = true;
-
     this.productService
       .search(
         { page: 0, size: 8 } as Pageable,
@@ -131,8 +169,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
           this.searchResults = response.content || [];
           this.searchLoading = false;
         },
-        error: (err) => {
-          console.error('Search error:', err);
+        error: () => {
           this.searchResults = [];
           this.searchLoading = false;
         },
@@ -148,21 +185,14 @@ export class HeaderComponent implements OnInit, OnDestroy {
     }
   }
 
-  // ←←← SỬA QUAN TRỌNG Ở ĐÂY ←←←
   selectProduct(product: ProductResponse, event?: Event) {
     if (event) {
-      event.stopImmediatePropagation(); // Ngăn chặn mọi event khác
+      event.stopImmediatePropagation();
       event.preventDefault();
     }
-
     this.router
       .navigate(['/product', product.id])
-      .then((success) => {
-        if (success) {
-          this.closeSearch();
-        }
-      })
-      .catch((err) => console.error('Navigation error:', err));
+      .then(() => this.closeSearch());
   }
 
   closeSearch() {
@@ -176,7 +206,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.isAccountDropdownOpen = false;
     this.closeSearch();
   }
-  // CART
+
   onCartMouseEnter() {
     clearTimeout(this.hideCartTimeout);
     this.isCartHover = true;
@@ -192,7 +222,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.hideCartTimeout = setTimeout(() => (this.isCartHover = false), 150);
   }
 
-  // ACCOUNT
   onAccountMouseEnter() {
     clearTimeout(this.hideAccountTimeout);
     this.isAccountDropdownOpen = true;
@@ -236,5 +265,14 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   isAdminRoute(route: string): boolean {
     return route.startsWith('/admin');
+  }
+
+  onProductMenuEnter() {
+    this.isProductDropdownOpen = true;
+  }
+  onProductMenuLeave() {
+    setTimeout(() => {
+      this.isProductDropdownOpen = false;
+    }, 300);
   }
 }
