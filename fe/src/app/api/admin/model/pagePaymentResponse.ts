@@ -15,12 +15,12 @@ import { PaymentResponse } from './paymentResponse';
 export interface PagePaymentResponse { 
     totalPages?: number;
     totalElements?: number;
-    first?: boolean;
-    last?: boolean;
     size?: number;
     content?: Array<PaymentResponse>;
     number?: number;
     sort?: Array<SortObject>;
+    first?: boolean;
+    last?: boolean;
     numberOfElements?: number;
     pageable?: PageableObject;
     empty?: boolean;

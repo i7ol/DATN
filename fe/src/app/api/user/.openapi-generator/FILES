@@ -10,6 +10,7 @@ api/locationController.service.ts
 api/orderProxyController.service.ts
 api/paymentProxyController.service.ts
 api/productUserController.service.ts
+api/returnProxyController.service.ts
 api/shippingUserController.service.ts
 configuration.ts
 encoder.ts
@@ -21,6 +22,7 @@ model/cartItemResponse.ts
 model/cartResponse.ts
 model/checkoutItemRequest.ts
 model/checkoutRequest.ts
+model/createReturnRequest.ts
 model/guestPaymentRequest.ts
 model/imageDTO.ts
 model/models.ts
@@ -28,10 +30,14 @@ model/orderItemResponse.ts
 model/orderResponse.ts
 model/pageOrderResponse.ts
 model/pageProductResponse.ts
+model/pageReturnResponse.ts
 model/pageable.ts
 model/pageableObject.ts
 model/paymentResponse.ts
 model/productResponse.ts
+model/returnItemRequest.ts
+model/returnItemResponse.ts
+model/returnResponse.ts
 model/shippingResponse.ts
 model/sortObject.ts
 model/userPaymentRequest.ts

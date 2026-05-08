@@ -69,19 +69,7 @@ public interface OrderRepository extends JpaRepository<OrderEntity, Long> {
     List<OrderEntity> findOrdersByDateRange(@Param("startDate") Instant startDate,
                                             @Param("endDate") Instant endDate);
 
-    /**
-     * Top sản phẩm bán chạy
-     */
-    @Query("SELECT oi.productId, oi.productName, SUM(oi.quantity) as totalQuantity " +
-            "FROM OrderItemEntity oi " +
-            "WHERE oi.order.status = com.datn.shopdatabase.enums.OrderStatus.COMPLETED " +
-            "GROUP BY oi.productId, oi.productName " +
-            "ORDER BY totalQuantity DESC")
-    List<Object[]> findTopSellingProducts(Pageable pageable);
 
-    default List<Object[]> findTopSellingProducts(int limit) {
-        return findTopSellingProducts(Pageable.ofSize(limit));
-    }
 
     /**
      * Đơn hàng quá hạn giao
@@ -197,4 +185,136 @@ public interface OrderRepository extends JpaRepository<OrderEntity, Long> {
         FETCH FIRST :limit ROWS ONLY
         """, nativeQuery = true)
     List<Object[]> getTopCustomersNative(@Param("limit") int limit);
+
+
+    // ==================== REVENUE STATISTICS (ORACLE) ====================
+
+    /**
+     * Doanh thu hôm nay
+     */
+    @Query("SELECT COALESCE(SUM(o.finalAmount), 0) FROM OrderEntity o " +
+            "WHERE o.status = com.datn.shopdatabase.enums.OrderStatus.COMPLETED " +
+            "AND o.createdAt >= :startOfDay AND o.createdAt <= :endOfDay")
+    BigDecimal getRevenueToday(@Param("startOfDay") Instant startOfDay,
+                               @Param("endOfDay") Instant endOfDay);
+
+    default BigDecimal getRevenueToday() {
+        LocalDateTime now = LocalDateTime.now(ZoneId.systemDefault());
+        LocalDateTime startOfDay = now.toLocalDate().atStartOfDay();
+        LocalDateTime endOfDay = now.toLocalDate().atTime(23, 59, 59, 999_999_999);
+
+        Instant startInstant = startOfDay.atZone(ZoneId.systemDefault()).toInstant();
+        Instant endInstant = endOfDay.atZone(ZoneId.systemDefault()).toInstant();
+
+        return getRevenueToday(startInstant, endInstant);
+    }
+
+    /**
+     * Doanh thu tháng này
+     */
+    @Query("SELECT COALESCE(SUM(o.finalAmount), 0) FROM OrderEntity o " +
+            "WHERE o.status = com.datn.shopdatabase.enums.OrderStatus.COMPLETED " +
+            "AND EXTRACT(YEAR FROM o.createdAt) = EXTRACT(YEAR FROM CURRENT_DATE) " +
+            "AND EXTRACT(MONTH FROM o.createdAt) = EXTRACT(MONTH FROM CURRENT_DATE)")
+    BigDecimal getRevenueThisMonth();
+
+    /**
+     * Doanh thu 7 ngày gần nhất - Oracle Native Query
+     */
+    @Query(value = """
+    SELECT TRUNC(o.created_at) as stat_date, 
+           NVL(SUM(o.final_amount), 0) as revenue 
+    FROM orders o 
+    WHERE o.status = 'COMPLETED' 
+      AND o.created_at >= TRUNC(SYSDATE) - 7
+    GROUP BY TRUNC(o.created_at) 
+    ORDER BY stat_date ASC
+    """, nativeQuery = true)
+    List<Object[]> getRevenueLast7Days();
+
+    /**
+     * Doanh thu theo tháng trong năm nay - Oracle
+     */
+    @Query(value = """
+    SELECT EXTRACT(MONTH FROM o.created_at) as month_num, 
+           NVL(SUM(o.final_amount), 0) as revenue 
+    FROM orders o 
+    WHERE o.status = 'COMPLETED' 
+      AND EXTRACT(YEAR FROM o.created_at) = EXTRACT(YEAR FROM SYSDATE)
+    GROUP BY EXTRACT(MONTH FROM o.created_at) 
+    ORDER BY month_num ASC
+    """, nativeQuery = true)
+    List<Object[]> getMonthlyRevenueThisYear();
+
+    /**
+     * 1. Top sản phẩm bán chạy (số lượng + doanh thu)
+     */
+    @Query("SELECT oi.productId, oi.productName, SUM(oi.quantity) as totalQuantity, " +
+            "SUM(oi.totalPrice) as totalRevenue " +
+            "FROM OrderItemEntity oi " +
+            "WHERE oi.order.status = com.datn.shopdatabase.enums.OrderStatus.COMPLETED " +
+            "GROUP BY oi.productId, oi.productName " +
+            "ORDER BY totalQuantity DESC")
+    List<Object[]> findTopSellingProducts(Pageable pageable);
+
+    default List<Object[]> findTopSellingProducts(int limit) {
+        return findTopSellingProducts(Pageable.ofSize(limit));
+    }
+
+    /**
+     * 2. Doanh thu theo khoảng thời gian (theo ngày)
+     */
+    @Query(value = """
+    SELECT TRUNC(o.created_at) as stat_date, 
+           COUNT(*) as order_count, 
+           NVL(SUM(o.final_amount), 0) as revenue 
+    FROM orders o 
+    WHERE o.status = 'COMPLETED' 
+      AND o.created_at BETWEEN :startDate AND :endDate
+    GROUP BY TRUNC(o.created_at) 
+    ORDER BY stat_date ASC
+    """, nativeQuery = true)
+    List<Object[]> getRevenueByDateRange(
+            @Param("startDate") java.sql.Timestamp startDate,
+            @Param("endDate") java.sql.Timestamp endDate);
+
+    /**
+     * 3. Doanh thu theo tháng (cho biểu đồ cột)
+     */
+    @Query(value = """
+    SELECT EXTRACT(YEAR FROM o.created_at) as year_num,
+           EXTRACT(MONTH FROM o.created_at) as month_num,
+           NVL(SUM(o.final_amount), 0) as revenue,
+           COUNT(*) as order_count
+    FROM orders o 
+    WHERE o.status = 'COMPLETED' 
+      AND o.created_at >= :startDate
+    GROUP BY EXTRACT(YEAR FROM o.created_at), EXTRACT(MONTH FROM o.created_at)
+    ORDER BY year_num DESC, month_num DESC
+    """, nativeQuery = true)
+    List<Object[]> getRevenueByMonth(@Param("startDate") java.sql.Timestamp startDate);
+
+    /**
+     * 4. Thống kê tổng quan theo khoảng thời gian
+     */
+    @Query("SELECT COUNT(o), SUM(o.finalAmount), AVG(o.finalAmount), MIN(o.finalAmount), MAX(o.finalAmount) " +
+            "FROM OrderEntity o " +
+            "WHERE o.status = com.datn.shopdatabase.enums.OrderStatus.COMPLETED " +
+            "AND o.createdAt BETWEEN :startDate AND :endDate")
+    Object[] getRevenueSummary(@Param("startDate") Instant startDate,
+                               @Param("endDate") Instant endDate);
+
+    /**
+     * 5. Top khách hàng mua nhiều nhất
+     */
+    @Query("SELECT o.userId, COUNT(o) as orderCount, SUM(o.finalAmount) as totalSpent " +
+            "FROM OrderEntity o " +
+            "WHERE o.userId IS NOT NULL AND o.status = com.datn.shopdatabase.enums.OrderStatus.COMPLETED " +
+            "GROUP BY o.userId " +
+            "ORDER BY totalSpent DESC")
+    List<Object[]> findTopCustomers(Pageable pageable);
+
+    default List<Object[]> findTopCustomers(int limit) {
+        return findTopCustomers(Pageable.ofSize(limit));
+    }
 }

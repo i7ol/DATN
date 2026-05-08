@@ -8,7 +8,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule, Routes } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ToastrModule } from 'ngx-toastr';
-import { ApiUserModule, Configuration } from 'src/app/api/user';
+
 // Material Modules
 import { MatIconModule } from '@angular/material/icon';
 import { MatTabsModule } from '@angular/material/tabs';
@@ -34,6 +34,7 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { CarouselModule } from 'ngx-owl-carousel-o';
+import { NgChartsModule } from 'ng2-charts';
 //NG-Zoro
 import { NzDropDownModule } from 'ng-zorro-antd/dropdown';
 import { NzBadgeModule } from 'ng-zorro-antd/badge';
@@ -48,6 +49,12 @@ import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzTypographyModule } from 'ng-zorro-antd/typography';
 import { NzDividerModule } from 'ng-zorro-antd/divider';
+import { NzPaginationModule } from 'ng-zorro-antd/pagination';
+import { CdkTableModule } from '@angular/cdk/table';
+import { NzModalModule } from 'ng-zorro-antd/modal';
+import { NzMessageModule } from 'ng-zorro-antd/message';
+import { NzModalService } from 'ng-zorro-antd/modal';
+import { NzSelectModule } from 'ng-zorro-antd/select';
 // Components-admin
 import { HeaderComponent } from './shared/header/header.component';
 import { AdminDashboardComponent } from './page-admin/admin-dashboard/admin-dashboard.component';
@@ -63,6 +70,7 @@ import { PaymentUpdateDialogComponent } from './shared/components/payment-update
 import { PaymentListComponent } from './page-admin/payment-list/payment-list.component';
 import { ProductListAdminComponent } from './page-admin/product-admin/product-list-admin/product-list-admin.component';
 import { InventoryListComponent } from './page-admin/inventory-list/inventory-list.component';
+import { RevenueService } from './page-admin/admin-dashboard/revenue.service';
 
 // Components-user
 import { CartComponent } from './page-user/cart/cart.component';
@@ -82,7 +90,19 @@ import { ProfileComponent } from './page-user/profile/profile.component';
 import { GuestIdInterceptor } from './core/interceptors/guest-id.interceptor';
 import { MyOrderComponent } from './page-user/my-order/my-order.component';
 import { MyOrderDetailComponent } from './page-user/my-order-detail/my-order-detail.component';
+import { UserListComponent } from './page-admin/user-management/user-list/user-list.component';
+import { UserFormComponent } from './page-admin/user-management/user-form/user-form.component';
 
+import { RoleManagementComponent } from './page-admin/user-management/role-management/role-management.component';
+import { AssignRoleModalComponent } from './page-admin/modals/assign-role-modal/assign-role-modal.component';
+import { NZ_I18N, vi_VN } from 'ng-zorro-antd/i18n';
+import { registerLocaleData } from '@angular/common';
+import vi from '@angular/common/locales/vi';
+import { ReturnAdminComponent } from './page-admin/return/return-admin/return-admin.component';
+import { ReturnUserComponent } from './page-user/return/return-user/return-user.component';
+import { ReturnDetailAdminComponent } from './page-admin/return/return-admin/return-detail-admin.component';
+import { ReturnCreateComponent } from './page-user/return/return-user/return-user-create.component';
+registerLocaleData(vi);
 @NgModule({
   declarations: [
     AppComponent,
@@ -108,6 +128,14 @@ import { MyOrderDetailComponent } from './page-user/my-order-detail/my-order-det
     ProfileComponent,
     MyOrderComponent,
     MyOrderDetailComponent,
+    UserListComponent,
+    UserFormComponent,
+    RoleManagementComponent,
+    AssignRoleModalComponent,
+    ReturnAdminComponent,
+    ReturnUserComponent,
+    ReturnCreateComponent,
+    ReturnDetailAdminComponent,
   ],
   imports: [
     BrowserModule,
@@ -118,6 +146,7 @@ import { MyOrderDetailComponent } from './page-user/my-order-detail/my-order-det
     ReactiveFormsModule,
     RouterModule,
     CommonModule,
+    NgChartsModule,
     // Material Modules
     MatTableModule,
     MatPaginatorModule,
@@ -155,7 +184,11 @@ import { MyOrderDetailComponent } from './page-user/my-order-detail/my-order-det
     NzCardModule,
     NzTypographyModule,
     NzDividerModule,
-
+    CdkTableModule,
+    NzPaginationModule,
+    NzModalModule,
+    NzMessageModule,
+    NzSelectModule,
     ToastrModule.forRoot({
       positionClass: 'toast-top-right',
       timeOut: 3000,
@@ -167,17 +200,17 @@ import { MyOrderDetailComponent } from './page-user/my-order-detail/my-order-det
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
     AuthGuard,
-
+    { provide: NZ_I18N, useValue: vi_VN },
     {
       provide: HTTP_INTERCEPTORS,
       useClass: GuestIdInterceptor,
       multi: true,
     },
-
     ProductUserControllerService,
     AdminGuard,
     OrderAdminControllerService,
     ShippingAdminControllerService,
+    NzModalService,
   ],
   bootstrap: [AppComponent],
 })

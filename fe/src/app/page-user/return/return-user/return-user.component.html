@@ -1,0 +1,57 @@
+<div class="container mt-4">
+  <h2>Đơn đổi trả / bảo hành của tôi</h2>
+
+  <table class="table table-bordered table-hover mt-3">
+    <thead>
+      <tr>
+        <th>Mã đơn</th>
+        <th>Sản phẩm</th>
+        <th>Lý do</th>
+        <th>Trạng thái</th>
+        <th>Thao tác</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr *ngFor="let item of returns">
+        <td>#{{ item.id }}</td>
+        <td>{{ item.orderItem?.productName }}</td>
+        <td>{{ item.reason }}</td>
+
+        <td>
+          <span class="badge" [ngClass]="getStatusClass(item.status)">
+            {{ item.status }}
+          </span>
+        </td>
+
+        <td>
+          <button
+            class="btn btn-sm btn-info"
+            [routerLink]="['/returns/detail', item.id]"
+          >
+            Chi tiết
+          </button>
+        </td>
+      </tr>
+
+      <tr *ngIf="returns.length === 0">
+        <td colspan="5" class="text-center">Không có dữ liệu</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Pagination -->
+  <nav *ngIf="totalPages > 1">
+    <ul class="pagination justify-content-center">
+      <li
+        *ngFor="let i of [].constructor(totalPages); let idx = index"
+        class="page-item"
+        [class.active]="idx === currentPage"
+      >
+        <a class="page-link" (click)="goToPage(idx)">
+          {{ idx + 1 }}
+        </a>
+      </li>
+    </ul>
+  </nav>
+</div>

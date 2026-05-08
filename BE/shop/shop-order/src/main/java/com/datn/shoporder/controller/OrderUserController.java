@@ -3,11 +3,13 @@ package com.datn.shoporder.controller;
 import com.datn.shopdatabase.entity.OrderEntity;
 import com.datn.shopdatabase.entity.OrderItemEntity;
 import com.datn.shopdatabase.entity.ProductEntity;
+import com.datn.shopdatabase.entity.ProductImageEntity;
 import com.datn.shopdatabase.exception.AppException;
 import com.datn.shopdatabase.exception.ErrorCode;
 import com.datn.shopdatabase.repository.ProductRepository;
 import com.datn.shopobject.dto.request.CheckoutItemRequest;
 import com.datn.shopobject.dto.request.CheckoutRequest;
+import com.datn.shopobject.dto.response.OrderItemResponse;
 import com.datn.shopobject.dto.response.OrderResponse;
 import com.datn.shoporder.mapper.OrderMapper;
 import com.datn.shoporder.service.OrderService;
@@ -20,11 +22,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 import java.math.BigDecimal;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
+
 @Slf4j
 @RestController
 @RequestMapping("/api/user/orders")
@@ -34,8 +36,8 @@ public class OrderUserController {
     private final OrderService orderService;
     private final ProductRepository productRepository;
 
-    // ===== CREATE =====
-    @PostMapping(value = "/checkout",produces = MediaType.APPLICATION_JSON_VALUE)
+    // ===== CREATE ORDER =====
+    @PostMapping(value = "/checkout", produces = MediaType.APPLICATION_JSON_VALUE)
     @Transactional
     public OrderResponse checkout(@RequestBody CheckoutRequest request, @AuthenticationPrincipal UserPrincipal principal) {
 
@@ -75,7 +77,7 @@ public class OrderUserController {
 
         Long userId = (principal != null) ? principal.getId() : null;
 
-        // Nếu là Guest thì kiểm tra thông tin guest
+        // Xử lý Guest / User
         if (userId == null) {
             if (request.getGuestId() == null ||
                     request.getGuestName() == null ||
@@ -84,12 +86,13 @@ public class OrderUserController {
                         "Khách vãng lai phải nhập đầy đủ thông tin (tên, sđt)");
             }
         } else {
-            // Nếu là User đã login, bỏ qua guest info
+            // User đã login thì bỏ guest info
             request.setGuestId(null);
             request.setGuestName(null);
             request.setGuestEmail(null);
             request.setGuestPhone(null);
         }
+
         OrderEntity order = orderService.createOrderFromCheckout(
                 userId,
                 request.getGuestId(),
@@ -106,19 +109,21 @@ public class OrderUserController {
                 orderItems
         );
 
-        return OrderMapper.toResponse(order);
+        OrderResponse response = OrderMapper.toResponse(order);
+        enrichOrderWithImages(response);           // ← GÁN ẢNH
+        return response;
     }
 
-
-
-
-    // ===== READ =====
-    @GetMapping(value = "/{orderId}",produces = MediaType.APPLICATION_JSON_VALUE)
+    // ===== GET ORDER DETAIL =====
+    @GetMapping(value = "/{orderId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public OrderResponse getOrder(@PathVariable Long orderId) {
-        return OrderMapper.toResponse(orderService.getOrder(orderId));
+        OrderResponse response = OrderMapper.toResponse(orderService.getOrder(orderId));
+        enrichOrderWithImages(response);           // ← GÁN ẢNH
+        return response;
     }
 
-    @GetMapping(value = "/my-orders",produces = MediaType.APPLICATION_JSON_VALUE)
+    // ===== MY ORDERS =====
+    @GetMapping(value = "/my-orders", produces = MediaType.APPLICATION_JSON_VALUE)
     public Page<OrderResponse> myOrders(
             @AuthenticationPrincipal UserPrincipal principal,
             Pageable pageable) {
@@ -132,8 +137,8 @@ public class OrderUserController {
                 .map(OrderMapper::toResponse);
     }
 
-    // ===== CANCEL =====
-    @PutMapping(value = "/{orderId}/cancel",produces = MediaType.APPLICATION_JSON_VALUE)
+    // ===== CANCEL ORDER =====
+    @PutMapping(value = "/{orderId}/cancel", produces = MediaType.APPLICATION_JSON_VALUE)
     public OrderResponse cancel(
             @PathVariable Long orderId,
             @AuthenticationPrincipal UserPrincipal principal
@@ -146,5 +151,33 @@ public class OrderUserController {
                 orderService.cancelOrderWithPermission(orderId, principal.getId())
         );
     }
-}
 
+    // ==================== HELPER: GÁN ẢNH TỪ PRODUCT VÀO ORDER ====================
+    private void enrichOrderWithImages(OrderResponse response) {
+        if (response.getItems() == null || response.getItems().isEmpty()) return;
+
+        List<Long> productIds = response.getItems().stream()
+                .map(OrderItemResponse::getProductId)
+                .filter(Objects::nonNull)
+                .distinct()
+                .toList();
+
+        if (productIds.isEmpty()) return;
+
+        Map<Long, ProductEntity> productMap = productRepository.findAllById(productIds)
+                .stream()
+                .collect(Collectors.toMap(ProductEntity::getId, p -> p));
+
+        for (OrderItemResponse item : response.getItems()) {
+            ProductEntity product = productMap.get(item.getProductId());
+            if (product != null && product.getImages() != null && !product.getImages().isEmpty()) {
+                List<String> imageUrls = product.getImages().stream()
+                        .map(ProductImageEntity::getUrl)
+                        .collect(Collectors.toList());
+                item.setImages(imageUrls);
+            } else {
+                item.setImages(new ArrayList<>()); // vẫn giữ rỗng nếu không có ảnh
+            }
+        }
+    }
+}

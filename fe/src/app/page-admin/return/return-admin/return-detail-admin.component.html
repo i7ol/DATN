@@ -1,0 +1,67 @@
+<div class="container mt-4" *ngIf="returnDetail">
+  <h2>Chi tiết đơn đổi trả #{{ returnDetail.id }}</h2>
+
+  <div class="card mt-3">
+    <div class="card-body">
+      <p><strong>Khách hàng:</strong> {{ returnDetail.user?.username }}</p>
+
+      <p>
+        <strong>Sản phẩm:</strong>
+        {{ returnDetail.orderItem?.productName }}
+      </p>
+
+      <p><strong>Lý do:</strong> {{ returnDetail.reason }}</p>
+      <p><strong>Mô tả:</strong> {{ returnDetail.description }}</p>
+
+      <p>
+        <strong>Trạng thái:</strong>
+        <span class="badge" [class]="getStatusClass(returnDetail.status)">
+          {{ returnDetail.status }}
+        </span>
+      </p>
+    </div>
+  </div>
+
+  <!-- ACTIONS -->
+  <div class="mt-4" *ngIf="returnDetail.status === 'PENDING'">
+    <h5>Xử lý yêu cầu</h5>
+
+    <div class="mb-2">
+      <input
+        #refundAmount
+        type="number"
+        class="form-control"
+        placeholder="Số tiền hoàn"
+      />
+    </div>
+
+    <div class="mb-2">
+      <textarea #note class="form-control" placeholder="Ghi chú"></textarea>
+    </div>
+
+    <button
+      class="btn btn-success me-2"
+      (click)="approve(refundAmount.value, note.value)"
+    >
+      Duyệt
+    </button>
+
+    <button class="btn btn-danger" (click)="reject(note.value)">Từ chối</button>
+  </div>
+
+  <!-- COMPLETE -->
+  <div class="mt-4" *ngIf="returnDetail.status === 'APPROVED'">
+    <h5>Hoàn tiền</h5>
+
+    <input
+      #transactionId
+      type="text"
+      class="form-control mb-2"
+      placeholder="Mã giao dịch hoàn tiền"
+    />
+
+    <button class="btn btn-primary" (click)="complete(transactionId.value)">
+      Hoàn tất
+    </button>
+  </div>
+</div>

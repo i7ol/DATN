@@ -41,7 +41,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   currentUser: User | null = null;
   isAdmin = false;
   currentRoute = '';
-
+  private productDropdownTimeout: any;
   private hideCartTimeout: any;
   private hideAccountTimeout: any;
   private sub = new Subscription();
@@ -268,10 +268,12 @@ export class HeaderComponent implements OnInit, OnDestroy {
   }
 
   onProductMenuEnter() {
+    clearTimeout(this.productDropdownTimeout);
     this.isProductDropdownOpen = true;
   }
   onProductMenuLeave() {
-    setTimeout(() => {
+    clearTimeout(this.productDropdownTimeout);
+    this.productDropdownTimeout = setTimeout(() => {
       this.isProductDropdownOpen = false;
     }, 300);
   }

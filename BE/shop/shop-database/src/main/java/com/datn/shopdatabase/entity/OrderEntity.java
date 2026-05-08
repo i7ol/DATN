@@ -97,5 +97,32 @@ public class OrderEntity extends BaseEntity {
             items.forEach(this::addItem);
         }
     }
+    // ==================== THÊM VÀO CUỐI CLASS OrderEntity ====================
+
+    /**
+     * Kiểm tra đơn hàng có còn được đổi trả không
+     */
+    public boolean isReturnable() {
+        if (this.status != OrderStatus.DELIVERED || this.actualDeliveryDate == null) {
+            return false;
+        }
+
+        LocalDateTime deadline = this.actualDeliveryDate.plusDays(7);
+        return LocalDateTime.now().isBefore(deadline);
+    }
+
+    /**
+     * Số ngày còn lại để đổi trả
+     */
+    public int getDaysLeftForReturn() {
+        if (this.status != OrderStatus.DELIVERED || this.actualDeliveryDate == null) {
+            return 0;
+        }
+
+        LocalDateTime deadline = this.actualDeliveryDate.plusDays(7);
+        long daysLeft = java.time.temporal.ChronoUnit.DAYS.between(LocalDateTime.now(), deadline);
+
+        return daysLeft > 0 ? (int) daysLeft : 0;
+    }
 
 }

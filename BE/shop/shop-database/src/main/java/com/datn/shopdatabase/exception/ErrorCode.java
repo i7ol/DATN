@@ -36,6 +36,13 @@ public enum ErrorCode {
     CART_ITEM_NOT_FOUND(1028,"Cart hasn't found",HttpStatus.NOT_FOUND),
     OUT_OF_STOCK(1029, "Out of stock", HttpStatus.BAD_REQUEST),
     SERVICE_UNAVAILABLE(503, "Service unavailable",HttpStatus.BAD_REQUEST),
+    ROLE_EXISTED(1030, "Role exist",HttpStatus.BAD_REQUEST),
+    PERMISSION_NOT_EXISTED(1031, "Permission not exit",HttpStatus.BAD_REQUEST),
+    RETURN_NOT_FOUND(1032, "Không tìm thấy yêu cầu đổi trả",HttpStatus.BAD_REQUEST),
+    RETURN_ALREADY_EXISTS(1033, "Đơn hàng này đã có yêu cầu đổi trả",HttpStatus.BAD_REQUEST),
+    RETURN_EXPIRED(1034,"Đã hết hạn yêu cầu đổi trả (7 ngày)",HttpStatus.BAD_REQUEST),
+    CANNOT_RETURN_ORDER(1035, "Đơn hàng không đủ điều kiện đổi trả",HttpStatus.BAD_REQUEST),
+    INVALID_RETURN_STATUS(1036, "Trạng thái yêu cầu đổi trả không hợp lệ",HttpStatus.BAD_REQUEST),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

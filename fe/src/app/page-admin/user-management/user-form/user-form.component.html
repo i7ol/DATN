@@ -1,0 +1,59 @@
+<div>
+  <h2>{{ isEdit ? "Chỉnh sửa người dùng" : "Thêm người dùng mới" }}</h2>
+
+  <form nz-form>
+    <nz-form-item *ngIf="!isEdit">
+      <nz-form-label [nzSpan]="6">Username</nz-form-label>
+      <nz-form-control [nzSpan]="18">
+        <input nz-input [(ngModel)]="form.username" name="username" required />
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item *ngIf="!isEdit">
+      <nz-form-label [nzSpan]="6">Mật khẩu</nz-form-label>
+      <nz-form-control [nzSpan]="18">
+        <input
+          nz-input
+          type="password"
+          [(ngModel)]="form.password"
+          name="password"
+          required
+        />
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label [nzSpan]="6">Email</nz-form-label>
+      <nz-form-control [nzSpan]="18">
+        <input nz-input type="email" [(ngModel)]="form.email" name="email" />
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label [nzSpan]="6">Số điện thoại</nz-form-label>
+      <nz-form-control [nzSpan]="18">
+        <input nz-input [(ngModel)]="form.phone" name="phone" />
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label [nzSpan]="6">Địa chỉ</nz-form-label>
+      <nz-form-control [nzSpan]="18">
+        <input nz-input [(ngModel)]="form.address" name="address" />
+      </nz-form-control>
+    </nz-form-item>
+  </form>
+
+  <div style="margin-top: 24px; text-align: right">
+    <button nz-button (click)="onCancel()">Hủy</button>
+    <button
+      nz-button
+      nzType="primary"
+      [nzLoading]="isSubmitting"
+      (click)="onSave()"
+      style="margin-left: 12px"
+    >
+      {{ isEdit ? "Cập nhật" : "Tạo mới" }}
+    </button>
+  </div>
+</div>

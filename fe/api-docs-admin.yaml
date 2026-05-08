@@ -77,6 +77,127 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ShippingResponse"
+  /api/admin/roles/{roleName}/permissions:
+    get:
+      tags:
+      - role-controller
+      operationId: getRolePermissions
+      parameters:
+      - name: roleName
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseSetPermissionEntity"
+    put:
+      tags:
+      - role-controller
+      operationId: assignPermissions
+      parameters:
+      - name: roleName
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              uniqueItems: true
+              type: array
+              items:
+                type: string
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseRoleEntity"
+  /api/admin/returns/{returnId}/reject:
+    put:
+      tags:
+      - return-admin-proxy-controller
+      operationId: rejectReturn
+      parameters:
+      - name: returnId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: adminNote
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReturnResponse"
+  /api/admin/returns/{returnId}/complete:
+    put:
+      tags:
+      - return-admin-proxy-controller
+      operationId: completeReturn
+      parameters:
+      - name: returnId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: refundTransactionId
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReturnResponse"
+  /api/admin/returns/{returnId}/approve:
+    put:
+      tags:
+      - return-admin-proxy-controller
+      operationId: approveReturn
+      parameters:
+      - name: returnId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: adminNote
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: refundAmount
+        in: query
+        required: true
+        schema:
+          type: number
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReturnResponse"
   /api/admin/products/{id}:
     get:
       tags:
@@ -267,6 +388,44 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/OrderResponse"
+  /api/admin/orders/{orderId}/delivered:
+    put:
+      tags:
+      - order-admin-controller
+      operationId: markAsDelivered
+      parameters:
+      - name: orderId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderResponse"
+  /api/admin/orders/{orderId}/complete:
+    put:
+      tags:
+      - order-admin-controller
+      operationId: completeOrder
+      parameters:
+      - name: orderId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderResponse"
   /api/admin/categories/{id}:
     put:
       tags:
@@ -367,6 +526,34 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiResponseVoid"
+  /api/admin/account/{id}/roles:
+    put:
+      tags:
+      - account-controller
+      operationId: assignRoles
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              uniqueItems: true
+              type: array
+              items:
+                type: string
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserResponse"
   /api/admin/shipping:
     get:
       tags:
@@ -426,6 +613,35 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ShippingResponse"
+  /api/admin/roles:
+    get:
+      tags:
+      - role-controller
+      operationId: getAllRoles
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseListRoleEntity"
+    post:
+      tags:
+      - role-controller
+      operationId: createRole
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RoleEntity"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseRoleEntity"
   /api/admin/products:
     get:
       tags:
@@ -750,6 +966,61 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/ShippingResponse"
+  /api/admin/returns:
+    get:
+      tags:
+      - return-admin-proxy-controller
+      operationId: getAllReturns
+      parameters:
+      - name: pageable
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/Pageable"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PageResponseReturnResponse"
+  /api/admin/returns/{returnId}:
+    get:
+      tags:
+      - return-admin-proxy-controller
+      operationId: getReturnDetail
+      parameters:
+      - name: returnId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReturnResponse"
+  /api/admin/returns/pending:
+    get:
+      tags:
+      - return-admin-proxy-controller
+      operationId: getPendingReturns
+      parameters:
+      - name: pageable
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/Pageable"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PageResponseReturnResponse"
   /api/admin/payments:
     get:
       tags:
@@ -854,6 +1125,96 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/OrderResponse"
+  /api/admin/orders/statistics/top-products:
+    get:
+      tags:
+      - order-admin-controller
+      operationId: getTopSellingProducts
+      parameters:
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 10
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  additionalProperties:
+                    type: object
+  /api/admin/orders/statistics/summary:
+    get:
+      tags:
+      - order-admin-controller
+      operationId: getRevenueSummary
+      parameters:
+      - name: startDate
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: endDate
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: object
+  /api/admin/orders/statistics/revenue:
+    get:
+      tags:
+      - order-admin-controller
+      operationId: getRevenueStatistics
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: object
+  /api/admin/orders/statistics/revenue-by-date:
+    get:
+      tags:
+      - order-admin-controller
+      operationId: getRevenueByDate
+      parameters:
+      - name: startDate
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: endDate
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  additionalProperties:
+                    type: object
   /api/admin/inventory/{variantId}:
     get:
       tags:
@@ -980,6 +1341,129 @@ components:
           type: string
         updatedAt:
           type: string
+    ApiResponseRoleEntity:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+        result:
+          $ref: "#/components/schemas/RoleEntity"
+    PermissionEntity:
+      type: object
+      properties:
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        name:
+          type: string
+        description:
+          type: string
+        endpointPattern:
+          type: string
+        httpMethod:
+          type: string
+    RoleEntity:
+      type: object
+      properties:
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        name:
+          type: string
+        description:
+          type: string
+        permissions:
+          uniqueItems: true
+          type: array
+          items:
+            $ref: "#/components/schemas/PermissionEntity"
+    ReturnItemResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        productId:
+          type: integer
+          format: int64
+        productName:
+          type: string
+        quantity:
+          type: integer
+          format: int32
+        reason:
+          type: string
+        images:
+          type: array
+          items:
+            type: string
+    ReturnResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        orderId:
+          type: integer
+          format: int64
+        userId:
+          type: integer
+          format: int64
+        guestId:
+          type: string
+        returnType:
+          type: string
+          enum:
+          - RETURN
+          - EXCHANGE
+          - WARRANTY
+        reason:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+          enum:
+          - PENDING
+          - APPROVED
+          - REJECTED
+          - PROCESSING
+          - COMPLETED
+          - CANCELLED
+        refundAmount:
+          type: number
+        refundTransactionId:
+          type: string
+        adminNote:
+          type: string
+        returnTrackingCode:
+          type: string
+        requestDate:
+          type: string
+          format: date-time
+        processedDate:
+          type: string
+          format: date-time
+        completedDate:
+          type: string
+          format: date-time
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ReturnItemResponse"
+        imageUrls:
+          type: array
+          items:
+            type: string
     ProductUpdateRequest:
       type: object
       properties:
@@ -1241,6 +1725,8 @@ components:
           - VNPAY
         shippingMethod:
           type: string
+        trackingCode:
+          type: string
         items:
           type: array
           items:
@@ -1260,6 +1746,15 @@ components:
         actualDeliveryDate:
           type: string
           format: date-time
+        returnable:
+          type: boolean
+        daysLeftForReturn:
+          type: integer
+          format: int32
+        returns:
+          type: array
+          items:
+            $ref: "#/components/schemas/ReturnResponse"
     PaymentUpdateRequest:
       type: object
       properties:
@@ -1595,6 +2090,50 @@ components:
         cancelled:
           type: integer
           format: int64
+    ApiResponseListRoleEntity:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+        result:
+          type: array
+          items:
+            $ref: "#/components/schemas/RoleEntity"
+    ApiResponseSetPermissionEntity:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+        result:
+          uniqueItems: true
+          type: array
+          items:
+            $ref: "#/components/schemas/PermissionEntity"
+    PageResponseReturnResponse:
+      type: object
+      properties:
+        page:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ReturnResponse"
     PageProductResponse:
       type: object
       properties:
@@ -1604,10 +2143,6 @@ components:
         totalElements:
           type: integer
           format: int64
-        first:
-          type: boolean
-        last:
-          type: boolean
         size:
           type: integer
           format: int32
@@ -1622,6 +2157,10 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/SortObject"
+        first:
+          type: boolean
+        last:
+          type: boolean
         numberOfElements:
           type: integer
           format: int32
@@ -1639,14 +2178,14 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/SortObject"
-        paged:
-          type: boolean
-        pageNumber:
-          type: integer
-          format: int32
         pageSize:
           type: integer
           format: int32
+        pageNumber:
+          type: integer
+          format: int32
+        paged:
+          type: boolean
         unpaged:
           type: boolean
     SortObject:
@@ -1696,10 +2235,6 @@ components:
         totalElements:
           type: integer
           format: int64
-        first:
-          type: boolean
-        last:
-          type: boolean
         size:
           type: integer
           format: int32
@@ -1714,6 +2249,10 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/SortObject"
+        first:
+          type: boolean
+        last:
+          type: boolean
         numberOfElements:
           type: integer
           format: int32
@@ -1749,10 +2288,6 @@ components:
         totalElements:
           type: integer
           format: int64
-        first:
-          type: boolean
-        last:
-          type: boolean
         size:
           type: integer
           format: int32
@@ -1767,6 +2302,10 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/SortObject"
+        first:
+          type: boolean
+        last:
+          type: boolean
         numberOfElements:
           type: integer
           format: int32
@@ -1799,10 +2338,6 @@ components:
         totalElements:
           type: integer
           format: int64
-        first:
-          type: boolean
-        last:
-          type: boolean
         size:
           type: integer
           format: int32
@@ -1817,6 +2352,10 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/SortObject"
+        first:
+          type: boolean
+        last:
+          type: boolean
         numberOfElements:
           type: integer
           format: int32

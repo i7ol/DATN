@@ -1,8 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-
-import { PaymentAdminProxyControllerService } from 'src/app/api/admin/api/paymentAdminProxyController.service';
-
-import { ShippingAdminControllerService } from 'src/app/api/admin/api/shippingAdminController.service';
+import { RevenueService } from './revenue.service';
+import { ReportService } from './report.service';
+import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -10,110 +9,126 @@ import { ShippingAdminControllerService } from 'src/app/api/admin/api/shippingAd
   styleUrls: ['./admin-dashboard.component.scss'],
 })
 export class AdminDashboardComponent implements OnInit {
+  currentTab: string = 'overview';
+
+  // ==================== STATS ====================
   stats = {
-    totalOrders: 0,
-    pendingOrders: 0,
-    totalPayments: 0,
-    pendingPayments: 0,
-    totalShippings: 0,
-    processingShippings: 0,
-    revenue: 0,
+    totalRevenue: 0,
+    monthRevenue: 0,
+    todayRevenue: 0, // giữ lại phòng trường hợp dùng sau
   };
 
-  recentOrders: any[] = [];
-  recentPayments: any[] = [];
-  recentShippings: any[] = [];
+  totalOrders: number = 0;
+  totalCustomers: number = 0;
+  totalProducts: number = 0;
+
+  // Top Products
+  topProducts: any[] = [];
+
+  // Revenue by Date
+  revenueByDate: any[] = [];
+
+  // Line Chart
+  public lineChartOptions: ChartConfiguration['options'] = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: true, position: 'top' as const },
+      tooltip: {
+        callbacks: {
+          label: (context: any) => context.raw.toLocaleString('vi-VN') + ' ₫',
+        },
+      },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          callback: (value: any) => (value / 1000000).toFixed(1) + 'M',
+        },
+      },
+    },
+  };
+
+  public lineChartType: ChartType = 'line' as const;
+  public lineChartData: ChartData<'line'> = {
+    labels: [],
+    datasets: [
+      {
+        data: [],
+        label: 'Doanh thu',
+        borderColor: '#3b82f6',
+        backgroundColor: 'rgba(59, 130, 246, 0.08)',
+        borderWidth: 3,
+        tension: 0.4,
+        fill: true,
+      },
+    ],
+  };
 
   constructor(
-    private paymentService: PaymentAdminProxyControllerService,
-    private shippingService: ShippingAdminControllerService,
+    private revenueService: RevenueService,
+    private reportService: ReportService,
   ) {}
 
   ngOnInit(): void {
-    this.loadDashboardData();
+    this.loadOverviewData();
+    this.loadTopProducts();
   }
 
-  loadDashboardData(): void {
-    // this.loadOrderStats();
-    this.loadPaymentStats();
-    this.loadShippingStats();
-  }
+  // ==================== LOAD OVERVIEW ====================
+  loadOverviewData(): void {
+    this.revenueService.getRevenueStatistics().subscribe({
+      next: (data: any) => {
+        this.stats.totalRevenue = data.totalRevenue || 0;
+        this.stats.monthRevenue = data.monthRevenue || 0;
+        this.stats.todayRevenue = data.todayRevenue || 0;
 
-  loadPaymentStats(): void {
-    this.paymentService.getSummary1().subscribe({
-      next: (summary: any) => {
-        this.stats.totalPayments = summary.totalPayments ?? 0;
-        this.stats.pendingPayments = summary.pendingPayments ?? 0;
-        this.stats.revenue = summary.totalRevenue ?? 0;
+        this.totalOrders = data.totalOrders || 0;
+        this.totalCustomers = data.totalCustomers || 0;
+        this.totalProducts = data.totalProducts || 0;
+
+        // Chart 7 ngày
+        if (data.last7Days?.length > 0) {
+          this.lineChartData.labels = data.last7Days.map((item: any) =>
+            new Date(item.date).toLocaleDateString('vi-VN', {
+              day: '2-digit',
+              month: '2-digit',
+            }),
+          );
+          this.lineChartData.datasets[0].data = data.last7Days.map(
+            (item: any) => Number(item.revenue) || 0,
+          );
+        }
       },
-      error: (err) => {
-        console.error('Error loading payment summary:', err);
-        this.stats.totalPayments = 0;
-        this.stats.pendingPayments = 0;
-        this.stats.revenue = 0;
-      },
+      error: (err) => console.error('Lỗi load overview', err),
     });
   }
 
-  loadPaymentStatsAlternative(): void {
-    // Tìm phương thức khác hoặc sử dụng mock data
-    // Kiểm tra các phương thức có sẵn
-    console.log('Available payment methods:', Object.keys(this.paymentService));
-
-    // Tạm thời set default values
-    this.stats.totalPayments = 0;
-    this.stats.pendingPayments = 0;
-    this.stats.revenue = 0;
+  // ==================== TOP PRODUCTS ====================
+  loadTopProducts(): void {
+    this.reportService.getTopSellingProducts(10).subscribe({
+      next: (data) => (this.topProducts = data || []),
+      error: (err) => console.error('Lỗi load top products', err),
+    });
   }
 
-  loadShippingStats(): void {
-    // Kiểm tra xem service có phương thức getAllShippings không tham số không
-    if (this.shippingService.getAllShippings) {
-      // Thử gọi không tham số
-      (this.shippingService.getAllShippings as any)().subscribe({
-        next: (shippings: any[]) => {
-          this.stats.totalShippings = shippings.length;
-          this.stats.processingShippings = shippings.filter(
-            (s: any) => s.status === 'PROCESSING' || s.status === 'SHIPPING',
-          ).length;
-          // Sắp xếp theo ngày tạo mới nhất
-          this.recentShippings = shippings
-            .sort(
-              (a: any, b: any) =>
-                new Date(b.createdAt).getTime() -
-                new Date(a.createdAt).getTime(),
-            )
-            .slice(0, 5);
-        },
-        error: (error) => {
-          console.error('Error loading shippings:', error);
-        },
-      });
-    } else {
-      console.warn('Shipping service does not have getAllShippings method');
-      // Hoặc tìm phương thức khác
-      this.loadShippingStatsAlternative();
+  // ==================== REVENUE BY DATE ====================
+  loadRevenueByDate(startDate: string, endDate: string): void {
+    this.reportService.getRevenueByDate(startDate, endDate).subscribe({
+      next: (data) => (this.revenueByDate = data || []),
+      error: (err) => console.error('Lỗi load revenue by date', err),
+    });
+  }
+
+  changeTab(tab: string): void {
+    this.currentTab = tab;
+    if (tab === 'revenue-date') {
+      const end = new Date().toISOString().split('T')[0];
+      const start = new Date(Date.now() - 30 * 86400000)
+        .toISOString()
+        .split('T')[0];
+      this.loadRevenueByDate(start, end);
     }
-  }
-
-  loadShippingStatsAlternative(): void {
-    // Tìm phương thức khác hoặc sử dụng mock data
-    console.log(
-      'Available shipping methods:',
-      Object.keys(this.shippingService),
-    );
-
-    // Tạm thời set default values
-    this.stats.totalShippings = 0;
-    this.stats.processingShippings = 0;
-  }
-
-  // Helper method để format currency
-  formatCurrency(amount: number): string {
-    return new Intl.NumberFormat('vi-VN', {
-      style: 'currency',
-      currency: 'VND',
-      minimumFractionDigits: 0,
-    }).format(amount);
   }
 }

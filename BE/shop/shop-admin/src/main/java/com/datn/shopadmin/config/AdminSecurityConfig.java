@@ -34,7 +34,12 @@ public class AdminSecurityConfig {
             "/api/admin/products/**",
             "/api/admin/products",
             "/api/admin/products/{id}",
-
+            "/api/admin/orders/statistics/revenue",
+            "/api/admin/orders/{orderId}/delivered",
+            "/api/admin/orders/{orderId}/complete",
+            "/api/admin/orders/statistics/top-products",
+            "/api/admin/orders/statistics/revenue-by-date",
+            "/api/admin/orders/statistics/summary",
             "uploads/products",
             "uploads/products/**",
 
@@ -49,10 +54,18 @@ public class AdminSecurityConfig {
             "/api/admin/inventory/adjust/{variantId}",
             "/api/admin/inventory/transactions/{variantId}",
 
+            "/api/admin/returns/**",
+            "/api/admin/returns/pending",
+            "/api/admin/returns/{returnId}",
+            "/api/admin/returns/{returnId}/approve",
+            "/api/admin/returns/{returnId}/reject",
+            "/api/admin/returns/{returnId}/complete",
+
             "/api/admin/categories",
             "/api/admin/categories/**",
 
             "/api/admin/orders",
+            "/api/admin/orders/**",
             "/api/admin/orders/{orderId}",
             "/api/admin/orders/{orderId}/status",
             "/api/admin/orders/{orderId}/payment",

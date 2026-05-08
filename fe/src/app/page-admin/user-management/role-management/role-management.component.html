@@ -1,0 +1,31 @@
+<div class="page-header pt-32">
+  <h2>Quản lý Vai trò & Phân quyền</h2>
+  <button nz-button nzType="primary" (click)="createRole()">
+    <i nz-icon nzType="plus"></i> Tạo vai trò mới
+  </button>
+</div>
+
+<nz-table [nzData]="roles" [nzLoading]="loading">
+  <thead>
+    <tr>
+      <th>Tên vai trò</th>
+      <th>Mô tả</th>
+      <th>Số quyền</th>
+      <th>Hành động</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let role of roles">
+      <td>
+        <strong>{{ role.name }}</strong>
+      </td>
+      <td>{{ role.description }}</td>
+      <td>{{ role.permissions?.length || 0 }}</td>
+      <td>
+        <button nz-button nzType="default" (click)="viewPermissions(role)">
+          Xem quyền
+        </button>
+      </td>
+    </tr>
+  </tbody>
+</nz-table>

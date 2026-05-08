@@ -9,7 +9,6 @@ import { ProductDetailComponent } from './page-user/product-user/product-detail/
 import { CartComponent } from './page-user/cart/cart.component';
 import { CheckoutComponent } from './page-user/checkout/checkout.component';
 import { ProfileComponent } from './page-user/profile/profile.component';
-
 // Admin Components
 import { ProductListAdminComponent } from './page-admin/product-admin/product-list-admin/product-list-admin.component';
 import { InventoryListComponent } from './page-admin/inventory-list/inventory-list.component';
@@ -22,6 +21,11 @@ import { AdminDashboardComponent } from './page-admin/admin-dashboard/admin-dash
 import { PaymentResultComponent } from './page-user/payment-result/payment-result.component';
 import { MyOrderComponent } from './page-user/my-order/my-order.component';
 import { MyOrderDetailComponent } from './page-user/my-order-detail/my-order-detail.component';
+import { UserListComponent } from './page-admin/user-management/user-list/user-list.component';
+import { RoleManagementComponent } from './page-admin/user-management/role-management/role-management.component';
+import { ReturnUserComponent } from './page-user/return/return-user/return-user.component';
+import { ReturnAdminComponent } from './page-admin/return/return-admin/return-admin.component';
+import { ReturnCreateComponent } from './page-user/return/return-user/return-user-create.component';
 const routes: Routes = [
   // Public routes
   { path: '', redirectTo: 'products', pathMatch: 'full' },
@@ -54,14 +58,36 @@ const routes: Routes = [
     path: 'checkout',
     component: CheckoutComponent,
   },
+  {
+    path: 'returns-user',
+    component: ReturnUserComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'returns',
+    component: ReturnUserComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'returns/create',
+    component: ReturnCreateComponent,
+    canActivate: [AuthGuard],
+  },
+
   // Admin protected routes
   {
     path: 'admin',
-    canActivate: [AuthGuard, AdminGuard],
+    canActivate: [AuthGuard],
+    canActivateChild: [AdminGuard],
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'dashboard', component: AdminDashboardComponent },
-
+      { path: 'users', component: UserListComponent },
+      { path: 'roles', component: RoleManagementComponent },
+      {
+        path: 'returns-admin',
+        component: ReturnAdminComponent,
+      },
       // Order Management
       { path: 'orders', component: OrderListComponent },
       { path: 'orders/:id', component: OrderDetailComponent },

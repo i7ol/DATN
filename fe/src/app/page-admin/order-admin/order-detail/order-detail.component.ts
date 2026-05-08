@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
+import { Location } from '@angular/common';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import {
   OrderResponse,
@@ -52,6 +53,7 @@ export class OrderDetailComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private orderApi: OrderAdminControllerService,
+    private location: Location,
     private shippingApi: ShippingAdminControllerService,
     private dialog: MatDialog,
     private snackBar: MatSnackBar,
@@ -61,6 +63,9 @@ export class OrderDetailComponent implements OnInit {
     this.loadOrder();
   }
 
+  goBack(): void {
+    this.location.back();
+  }
   loadOrder(): void {
     this.loading = true;
     this.error = '';

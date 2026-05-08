@@ -147,4 +147,15 @@ public class UserService {
                 .pushToken(user.getPushToken())
                 .build();
     }
+    @Transactional
+    public UserResponse assignRolesToUser(Long userId, Set<String> roleNames) {
+        UserEntity user = findUserEntity(userId);
+
+        Set<RoleEntity> roles = roleNames.stream()
+                .map(this::getRoleByName)
+                .collect(Collectors.toSet());
+
+        user.setRoles(roles);
+        return mapToResponse(userRepository.save(user));
+    }
 }

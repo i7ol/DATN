@@ -25,8 +25,28 @@ public class OrderSecurityConfig {
             "/api/user/orders/my-orders/**",
             "/api/user/orders/checkout",
             "/api/user/orders/{orderId}/cancel",
+
+            "/api/returns/**",
+            "/api/returns/my-returns",
+            "/api/returns/{returnId}",
+
             "/api/admin/orders",
             "/api/admin/orders/**",
+            "/api/admin/orders/statistics/revenue",
+            "/api/admin/orders/{orderId}/delivered",
+            "/api/admin/orders/{orderId}/complete",
+            "/api/admin/orders/statistics/top-products",
+            "/api/admin/orders/statistics/revenue-by-date",
+            "/api/admin/orders/statistics/summary",
+
+            "/api/admin/returns/**",
+            "/api/admin/returns/pending",
+            "/api/admin/returns/{returnId}",
+            "/api/admin/returns/{returnId}/approve",
+            "/api/admin/returns/{returnId}/reject",
+            "/api/admin/returns/{returnId}/complete",
+
+
 
             "/v3/api-docs/**",
             "/swagger-ui/**",
@@ -46,12 +66,12 @@ public class OrderSecurityConfig {
 
                         // Cho phép Guest checkout
                         .requestMatchers(HttpMethod.POST, "/api/user/orders/checkout").permitAll()
-
+                        .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
                         // Các endpoint user khác cần auth
                         .requestMatchers("/api/user/orders/my-orders/**").hasAnyRole("USER", "ADMIN")
                         .requestMatchers("/api/user/orders/{orderId}/cancel").hasAnyRole("USER", "ADMIN")
                         .requestMatchers("/api/user/orders/**").hasAnyRole("USER", "ADMIN")
-
+                        .requestMatchers("/api/admin/orders/statistics/revenue").hasRole("ADMIN")
                         .requestMatchers("/api/admin/orders/**").hasRole("ADMIN")
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/actuator/**").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()

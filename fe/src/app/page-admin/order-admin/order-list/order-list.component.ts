@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
@@ -10,6 +10,7 @@ import {
   OrderResponse,
   PageResponseOrderResponse,
   Pageable,
+  StatusUpdateRequest,
 } from 'src/app/api/admin';
 
 import { StatusUpdateDialogComponent } from 'src/app/shared/components/status-update-dialog/status-update-dialog.component';
@@ -21,6 +22,7 @@ import { StatusUpdateDialogComponent } from 'src/app/shared/components/status-up
 })
 export class OrderListComponent implements OnInit, AfterViewInit {
   displayedColumns: string[] = [
+    'image',
     'id',
     'customer',
     'totalPrice',
@@ -33,7 +35,6 @@ export class OrderListComponent implements OnInit, AfterViewInit {
   dataSource = new MatTableDataSource<OrderResponse>([]);
   loading = false;
 
-  // paging
   page = 0;
   size = 10;
   totalElements = 0;
@@ -52,71 +53,49 @@ export class OrderListComponent implements OnInit, AfterViewInit {
   ngOnInit(): void {
     this.dataSource.filterPredicate = (data, filter) => {
       if (!filter) return true;
-      return data.status === filter;
+      return data.status?.toLowerCase() === filter.toLowerCase();
     };
-
     this.loadOrders();
   }
+
   ngAfterViewInit(): void {
     this.dataSource.sort = this.sort;
   }
 
-  // ================= LOAD ORDERS =================
   loadOrders(): void {
     this.loading = true;
-
-    const pageable: Pageable = {
-      page: this.page,
-      size: this.size,
-    };
-
-    console.log('📤 CALL getAll orders:', pageable);
+    const pageable: Pageable = { page: this.page, size: this.size };
 
     this.orderService.getAll(pageable).subscribe({
-      next: async (resp: any) => {
-        try {
-          if (resp instanceof Blob) {
-            const text = await resp.text();
-
-            const body: PageResponseOrderResponse = JSON.parse(text);
-            this.applyPage(body);
-            return;
-          }
-
-          if (resp?.body instanceof Blob) {
-            const text = await resp.body.text();
-            console.log('📄 BLOB body text:', text);
-
-            const body: PageResponseOrderResponse = JSON.parse(text);
-            this.applyPage(body);
-            return;
-          }
-
-          this.applyPage(resp);
-        } catch (e) {
-          console.error('❌ Parse error:', e);
-          this.dataSource.data = [];
-          this.totalElements = 0;
-        } finally {
-          this.loading = false;
-        }
+      next: (resp: PageResponseOrderResponse) => {
+        this.dataSource.data = resp?.data ?? [];
+        this.totalElements = resp?.totalElements ?? 0;
+        this.loading = false;
       },
       error: (err) => {
         console.error('❌ Load orders failed:', err);
+        this.dataSource.data = [];
+        this.totalElements = 0;
         this.loading = false;
       },
     });
   }
-  private applyPage(body?: PageResponseOrderResponse): void {
-    console.log(' PARSED body:', body);
 
-    this.dataSource.data = body?.data ?? [];
-    this.totalElements = body?.totalElements ?? 0;
-    console.log(' SET orders:', this.dataSource.data);
-    console.log(' TOTAL:', this.totalElements);
+  getFirstProductImage(order: OrderResponse): string {
+    if (!order?.items || order.items.length === 0) {
+      return '/assets/img/demo.webp';
+    }
+    const firstItem = order.items[0];
+    const firstImage = firstItem.images?.[0];
+    if (!firstImage) return '/assets/img/demo.webp';
+
+    return typeof firstImage === 'string'
+      ? firstImage
+      : (firstImage as any)?.url ||
+          (firstImage as any)?.imageUrl ||
+          '/assets/img/demo.webp';
   }
 
-  // ================= ACTIONS =================
   viewDetail(orderId: number): void {
     this.router.navigate(['/admin/orders', orderId]);
   }
@@ -132,9 +111,39 @@ export class OrderListComponent implements OnInit, AfterViewInit {
     });
 
     dialogRef.afterClosed().subscribe((ok) => {
-      if (ok) {
+      if (ok) this.loadOrders();
+    });
+  }
+
+  // ================= MARK AS DELIVERED =================
+  markAsDelivered(orderId: number): void {
+    if (!confirm('Xác nhận đơn hàng này ĐÃ GIAO HÀNG?')) return;
+
+    this.orderService.markAsDelivered(orderId).subscribe({
+      next: () => {
+        alert('Đã cập nhật trạng thái ĐÃ GIAO HÀNG!');
         this.loadOrders();
-      }
+      },
+      error: (err) => {
+        console.error(err);
+        alert('Cập nhật thất bại: ' + (err.error?.message || err.message));
+      },
+    });
+  }
+
+  // ================= MARK AS COMPLETED =================
+  markAsCompleted(orderId: number): void {
+    if (!confirm('Xác nhận HOÀN THÀNH đơn hàng này?')) return;
+
+    this.orderService.completeOrder(orderId).subscribe({
+      next: () => {
+        alert('Đơn hàng đã được HOÀN THÀNH!');
+        this.loadOrders();
+      },
+      error: (err) => {
+        console.error(err);
+        alert('Cập nhật thất bại: ' + (err.error?.message || err.message));
+      },
     });
   }
 
@@ -144,16 +153,18 @@ export class OrderListComponent implements OnInit, AfterViewInit {
     return order.guestName || 'Khách';
   }
 
-  getStatusClass(status: string): string {
-    switch (status) {
+  getStatusClass(status: string | undefined): string {
+    switch (status?.toUpperCase()) {
       case 'PENDING':
         return 'bg-yellow-100 text-yellow-800';
       case 'PROCESSING':
         return 'bg-blue-100 text-blue-800';
-      case 'SHIPPED':
+      case 'SHIPPING':
         return 'bg-purple-100 text-purple-800';
       case 'DELIVERED':
         return 'bg-green-100 text-green-800';
+      case 'COMPLETED':
+        return 'bg-emerald-100 text-emerald-800';
       case 'CANCELLED':
         return 'bg-red-100 text-red-800';
       default:
@@ -161,8 +172,8 @@ export class OrderListComponent implements OnInit, AfterViewInit {
     }
   }
 
-  getPaymentStatusClass(status: string): string {
-    switch (status) {
+  getPaymentStatusClass(status: string | undefined): string {
+    switch (status?.toUpperCase()) {
       case 'PENDING':
         return 'bg-yellow-100 text-yellow-800';
       case 'PAID':
@@ -177,8 +188,8 @@ export class OrderListComponent implements OnInit, AfterViewInit {
   }
 
   applyFilter(event: Event): void {
-    const value = (event.target as HTMLInputElement).value;
-    this.dataSource.filter = value.trim().toLowerCase();
+    const value = (event.target as HTMLInputElement).value.trim().toLowerCase();
+    this.dataSource.filter = value;
   }
 
   filterByStatus(status: string): void {
@@ -186,15 +197,13 @@ export class OrderListComponent implements OnInit, AfterViewInit {
     this.dataSource.filter = status || '';
   }
 
-  // ================= PAGINATION =================
   onPageChange(event: PageEvent): void {
-    console.log('PAGE:', event.pageIndex);
     this.page = event.pageIndex;
     this.size = event.pageSize;
     this.loadOrders();
   }
 
   exportOrders(): void {
-    console.log('Export orders');
+    console.log('Export orders - Chưa triển khai');
   }
 }

@@ -13,6 +13,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.Map;
+
 
 @RestController
 @RequestMapping("/api/admin/orders")
@@ -73,7 +76,41 @@ public class OrderAdminController {
                 request.getStatus()
         );
     }
+    @GetMapping(value = "/statistics/revenue", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Map<String, Object> getRevenueStatistics() {
+        return orderClient.getRevenueStatistics();
+    }
+    /**
+     * Đánh dấu đơn hàng ĐÃ GIAO HÀNG
+     */
+    @PutMapping(value = "/{orderId}/delivered", produces = MediaType.APPLICATION_JSON_VALUE)
+    public OrderResponse markAsDelivered(@PathVariable Long orderId) {
+        return orderClient.markAsDelivered(orderId);
+    }
 
+    /**
+     * Hoàn thành đơn hàng (COMPLETED)
+     */
+    @PutMapping(value = "/{orderId}/complete", produces = MediaType.APPLICATION_JSON_VALUE)
+    public OrderResponse completeOrder(@PathVariable Long orderId) {
+        return orderClient.completeOrder(orderId);
+    }
+    @GetMapping(value = "/statistics/top-products", produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<Map<String, Object>> getTopSellingProducts(@RequestParam(defaultValue = "10") int limit) {
+        return orderClient.getTopSellingProducts(limit);
+    }
 
+    @GetMapping(value = "/statistics/revenue-by-date", produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<Map<String, Object>> getRevenueByDate(
+            @RequestParam String startDate,
+            @RequestParam String endDate) {
+        return orderClient.getRevenueByDate(startDate, endDate);
+    }
 
+    @GetMapping(value = "/statistics/summary", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Map<String, Object> getRevenueSummary(
+            @RequestParam String startDate,
+            @RequestParam String endDate) {
+        return orderClient.getRevenueSummary(startDate, endDate);
+    }
 }

@@ -23,7 +23,9 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -455,5 +457,82 @@ public class OrderService {
         return orderRepository.save(order);
     }
 
+    public Map<String, Object> getRevenueStatistics() {
+        Map<String, Object> stats = new HashMap<>();
 
+        stats.put("todayRevenue", orderRepository.getRevenueToday());
+        stats.put("monthRevenue", orderRepository.getRevenueThisMonth());
+        stats.put("last7Days", convertToRevenueList(orderRepository.getRevenueLast7Days()));
+        stats.put("monthlyRevenue", convertToMonthlyRevenueList(orderRepository.getMonthlyRevenueThisYear()));
+        stats.put("totalRevenue", calculateTotalRevenue());
+
+        return stats;
+    }
+
+// ==================== HELPER METHODS ====================
+
+    private List<Map<String, Object>> convertToRevenueList(List<Object[]> rawData) {
+        return rawData.stream().map(row -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("date", row[0]);      // java.sql.Date
+            map.put("revenue", row[1]);   // BigDecimal
+            return map;
+        }).collect(Collectors.toList());
+    }
+
+    private List<Map<String, Object>> convertToMonthlyRevenueList(List<Object[]> rawData) {
+        return rawData.stream().map(row -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("month", row[0]);
+            map.put("revenue", row[1]);
+            return map;
+        }).collect(Collectors.toList());
+    }
+
+
+    // ==================== BÁO CÁO ====================
+
+    public List<Map<String, Object>> getTopSellingProducts(int limit) {
+        List<Object[]> raw = orderRepository.findTopSellingProducts(limit);
+        return raw.stream().map(row -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("productId", row[0]);
+            map.put("productName", row[1]);
+            map.put("quantity", row[2]);
+            map.put("revenue", row[3]);
+            return map;
+        }).collect(Collectors.toList());
+    }
+
+    public List<Map<String, Object>> getRevenueByDateRange(LocalDate startDate, LocalDate endDate) {
+        LocalDateTime start = startDate.atStartOfDay();
+        LocalDateTime end = endDate.atTime(23, 59, 59, 999_999_999);
+
+        java.sql.Timestamp startTs = java.sql.Timestamp.valueOf(start);
+        java.sql.Timestamp endTs = java.sql.Timestamp.valueOf(end);
+
+        List<Object[]> raw = orderRepository.getRevenueByDateRange(startTs, endTs);
+        return raw.stream().map(row -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("date", row[0]);
+            map.put("orderCount", row[1]);
+            map.put("revenue", row[2]);
+            return map;
+        }).collect(Collectors.toList());
+    }
+
+    public Map<String, Object> getRevenueSummary(LocalDate startDate, LocalDate endDate) {
+        LocalDateTime start = startDate.atStartOfDay();
+        LocalDateTime end = endDate.atTime(23, 59, 59, 999_999_999);
+
+        Object[] summary = orderRepository.getRevenueSummary(
+                start.atZone(ZoneId.systemDefault()).toInstant(),
+                end.atZone(ZoneId.systemDefault()).toInstant());
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("totalOrders", summary[0] != null ? summary[0] : 0);
+        result.put("totalRevenue", summary[1] != null ? summary[1] : BigDecimal.ZERO);
+        result.put("avgOrderValue", summary[2] != null ? summary[2] : BigDecimal.ZERO);
+        return result;
+    }
 }

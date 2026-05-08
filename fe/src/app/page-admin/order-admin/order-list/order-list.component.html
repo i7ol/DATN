@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-gray-50 p-6">
+<div class="min-h-screen bg-gray-50 p-6 pt-32">
   <div class="max-w-7xl mx-auto">
     <!-- Header -->
     <div class="mb-8">
@@ -8,16 +8,10 @@
           <p class="text-gray-600 mt-2">Xem và xử lý tất cả đơn hàng</p>
         </div>
         <div class="flex gap-3">
-          <button
-            (click)="exportOrders()"
-            class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
-          >
+          <button (click)="exportOrders()" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
             Xuất Excel
           </button>
-          <button
-            (click)="loadOrders()"
-            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-          >
+          <button (click)="loadOrders()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
             <i class="fas fa-sync-alt mr-2"></i>
             Làm mới
           </button>
@@ -27,9 +21,7 @@
 
     <!-- Filter Section -->
     <div class="bg-white rounded-xl shadow p-6 mb-6">
-      <div
-        class="flex flex-col md:flex-row md:items-center justify-between gap-4"
-      >
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div class="flex-1">
           <div class="relative">
             <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
@@ -50,15 +42,16 @@
             <option value="">Tất cả trạng thái</option>
             <option value="PENDING">Chờ xử lý</option>
             <option value="PROCESSING">Đang xử lý</option>
-            <option value="SHIPPED">Đã giao hàng</option>
+            <option value="SHIPPING">Đang vận chuyển</option>
             <option value="DELIVERED">Đã giao</option>
+            <option value="COMPLETED">Hoàn thành</option>
             <option value="CANCELLED">Đã hủy</option>
           </select>
         </div>
       </div>
     </div>
 
-    <!-- Loading State -->
+    <!-- Loading -->
     <div *ngIf="loading" class="flex justify-center items-center py-12">
       <div class="text-center">
         <i class="fas fa-spinner fa-spin text-3xl text-blue-600 mb-4"></i>
@@ -66,108 +59,79 @@
       </div>
     </div>
 
-    <!-- Orders Table -->
+    <!-- Table -->
     <div *ngIf="!loading" class="bg-white rounded-xl shadow overflow-hidden">
       <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200">
           <thead class="bg-gray-50">
             <tr>
-              <th
-                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-              >
-                Mã đơn
-              </th>
-              <th
-                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-              >
-                Khách hàng
-              </th>
-              <th
-                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-              >
-                Tổng tiền
-              </th>
-              <th
-                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-              >
-                Trạng thái
-              </th>
-              <th
-                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-              >
-                Thanh toán
-              </th>
-              <th
-                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-              >
-                Ngày tạo
-              </th>
-              <th
-                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-              >
-                Thao tác
-              </th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20">Ảnh</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mã đơn</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Khách hàng</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tổng tiền</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trạng thái</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Thanh toán</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ngày tạo</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Thao tác</th>
             </tr>
           </thead>
           <tbody class="bg-white divide-y divide-gray-200">
             <tr *ngFor="let order of dataSource.data">
               <td class="px-6 py-4 whitespace-nowrap">
-                <span class="font-medium">#{{ order.id }}</span>
+                <img [src]="getFirstProductImage(order)" 
+                     class="w-12 h-12 object-cover rounded-lg border"
+                     onerror="this.src = '/assets/img/demo.webp'" alt="product">
               </td>
+              <td class="px-6 py-4 whitespace-nowrap font-medium">#{{ order.id }}</td>
               <td class="px-6 py-4">
-                <div>
-                  <div class="font-medium">{{ getCustomerName(order) }}</div>
-                  <div class="text-sm text-gray-500">
-                    {{ order.guestEmail || order.guestPhone || "" }}
-                  </div>
-                </div>
+                <div class="font-medium">{{ getCustomerName(order) }}</div>
+                <div class="text-sm text-gray-500">{{ order.guestEmail || order.guestPhone || '' }}</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap font-bold">
+                {{ order.totalPrice | currency: 'VND':'symbol':'1.0-0' }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
-                <span class="font-bold">{{
-                  order.totalPrice | currency: "VND"
-                }}</span>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <span
-                  [class]="
-                    'px-2 py-1 text-xs rounded-full ' +
-                    getStatusClass(order.status)
-                  "
-                >
+                <span [class]="'px-2 py-1 text-xs rounded-full ' + getStatusClass(order.status)">
                   {{ order.status }}
                 </span>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
-                <span
-                  [class]="
-                    'px-2 py-1 text-xs rounded-full ' +
-                    getPaymentStatusClass(order.paymentStatus)
-                  "
-                >
+                <span [class]="'px-2 py-1 text-xs rounded-full ' + getPaymentStatusClass(order.paymentStatus)">
                   {{ order.paymentStatus }}
                 </span>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {{ order.createdAt | date: "dd/MM/yyyy HH:mm" }}
+                {{ order.createdAt | date: 'dd/MM/yyyy HH:mm' }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                <div class="flex gap-2">
-                  <button
-                    (click)="viewDetail(order.id!)"
-                    class="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
-                  >
+                <div class="flex gap-2 flex-wrap">
+                  <button (click)="viewDetail(order.id!)" 
+                          class="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm">
                     Chi tiết
                   </button>
-                  <button
-                    (click)="openStatusDialog(order)"
-                    class="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50 text-sm"
-                  >
+
+                  <button (click)="openStatusDialog(order)" 
+                          class="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50 text-sm">
                     Cập nhật
                   </button>
-                  <a
-                    [routerLink]="['/admin/orders', order.id, 'shipping']"
-                    class="px-3 py-1 bg-purple-600 text-white rounded hover:bg-purple-700 text-sm"
-                  >
+
+                  <!-- Nút Đã giao -->
+                  <button *ngIf="order.status === 'SHIPPING'" 
+                          (click)="markAsDelivered(order.id!)"
+                          class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 text-sm">
+                    Đã giao
+                  </button>
+
+                  <!-- Nút Hoàn thành -->
+               <button 
+      *ngIf="order.status === 'DELIVERED' || order.status?.toUpperCase() === 'DELIVERED'"
+      (click)="markAsCompleted(order.id!)"
+      class="px-3 py-1 bg-green-500 text-white border border-green-500 rounded hover:bg-green-600 text-sm">
+      Hoàn thành
+    </button>
+
+                  <a [routerLink]="['/admin/orders', order.id, 'shipping']"
+                     class="px-3 py-1 bg-purple-600 text-white rounded hover:bg-purple-700 text-sm">
                     Vận chuyển
                   </a>
                 </div>
@@ -180,9 +144,7 @@
       <!-- Empty State -->
       <div *ngIf="dataSource.data.length === 0" class="text-center py-12">
         <i class="fas fa-box-open text-4xl text-gray-400 mb-4"></i>
-        <h3 class="text-lg font-medium text-gray-900 mb-2">
-          Không có đơn hàng nào
-        </h3>
+        <h3 class="text-lg font-medium text-gray-900">Không có đơn hàng nào</h3>
         <p class="text-gray-500">Chưa có đơn hàng nào được tạo</p>
       </div>
 
@@ -194,8 +156,8 @@
           [pageIndex]="page"
           [pageSizeOptions]="[10, 25, 50]"
           (page)="onPageChange($event)"
-          showFirstLastButtons
-        ></mat-paginator>
+          showFirstLastButtons>
+        </mat-paginator>
       </div>
     </div>
   </div>

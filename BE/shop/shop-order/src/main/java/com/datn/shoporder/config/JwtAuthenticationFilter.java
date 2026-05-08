@@ -34,60 +34,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         return request.getServletPath().startsWith("/api/internal/");
     }
 
-//    @Override
-//    protected void doFilterInternal(HttpServletRequest request,
-//                                    HttpServletResponse response,
-//                                    FilterChain filterChain)
-//            throws ServletException, IOException {
-//
-//        String authHeader = request.getHeader("Authorization");
-//
-//        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-//            filterChain.doFilter(request, response);
-//            return;
-//        }
-//
-//        String token = authHeader.substring(7);
-//
-//        try {
-//            boolean isValid = authClient.validateToken("Bearer " + token);
-//            if (!isValid) {
-//                filterChain.doFilter(request, response);
-//                return;
-//            }
-//
-//            UserInfoResponse userInfo = authClient.getCurrentUser("Bearer " + token);
-//
-//            List<GrantedAuthority> authorities = userInfo.getRoles()
-//                    .stream()
-//                    .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
-//                    .collect(Collectors.toList());
-//
-//            UserPrincipal principal = new UserPrincipal(
-//                    userInfo.getId(),
-//                    userInfo.getUsername(),
-//                    userInfo.getRoles()
-//            );
-//
-//            UsernamePasswordAuthenticationToken authentication =
-//                    new UsernamePasswordAuthenticationToken(
-//                            principal,
-//                            "Bearer " + token,
-//                            authorities
-//                    );
-//
-//            authentication.setDetails(
-//                    new WebAuthenticationDetailsSource().buildDetails(request)
-//            );
-//
-//            SecurityContextHolder.getContext().setAuthentication(authentication);
-//
-//        } catch (Exception e) {
-//            log.error("JWT authentication failed", e);
-//        }
-//
-//        filterChain.doFilter(request, response);
-//    }
 @Override
 protected void doFilterInternal(HttpServletRequest request,
                                 HttpServletResponse response,

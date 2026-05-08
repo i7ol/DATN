@@ -1,0 +1,81 @@
+<div class="page-header pt-32">
+  <h2>Quản lý đơn đổi trả</h2>
+</div>
+
+<!-- Tabs -->
+<div style="margin-bottom: 16px">
+  <button
+    nz-button
+    [nzType]="tab === 'pending' ? 'primary' : 'default'"
+    (click)="changeTab('pending')"
+  >
+    Chờ xử lý
+  </button>
+
+  <button
+    nz-button
+    [nzType]="tab === 'all' ? 'primary' : 'default'"
+    (click)="changeTab('all')"
+    style="margin-left: 8px"
+  >
+    Tất cả
+  </button>
+</div>
+
+<!-- Table -->
+<nz-table
+  #basicTable
+  [nzData]="returns"
+  [nzBordered]="true"
+  [nzPageSize]="pageSize"
+  [nzFrontPagination]="false"
+>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Sản phẩm</th>
+      <th>Lý do</th>
+      <th>Trạng thái</th>
+      <th>Hành động</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <tr *ngFor="let item of basicTable.data">
+      <td>#{{ item.id }}</td>
+      <td>{{ item.orderItem?.productName }}</td>
+      <td>{{ item.reason }}</td>
+
+      <td>
+        <nz-tag [nzColor]="getStatusClass(item.status)">
+          {{ item.status }}
+        </nz-tag>
+      </td>
+
+      <td>
+        <button
+          nz-button
+          nzType="default"
+          [routerLink]="['/admin/returns', item.id]"
+        >
+          Chi tiết
+        </button>
+      </td>
+    </tr>
+
+    <!-- Empty -->
+    <tr *ngIf="returns.length === 0">
+      <td colspan="5" style="text-align: center">Không có dữ liệu</td>
+    </tr>
+  </tbody>
+</nz-table>
+
+<!-- Pagination -->
+<nz-pagination
+  [nzTotal]="total"
+  [nzPageSize]="pageSize"
+  [nzPageIndex]="currentPage + 1"
+  (nzPageIndexChange)="onPageChange($event)"
+  style="margin-top: 16px; text-align: right"
+>
+</nz-pagination>

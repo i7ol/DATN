@@ -1,0 +1,31 @@
+<div>
+  <h3>
+    Phân quyền cho: <strong>{{ user.username }}</strong>
+  </h3>
+
+  <nz-select
+    nzMode="multiple"
+    [(ngModel)]="selectedRoles"
+    style="width: 100%; margin-top: 16px"
+    placeholder="Chọn quyền"
+  >
+    <nz-option
+      *ngFor="let role of allRoles"
+      [nzValue]="role.name"
+      [nzLabel]="role.name + (role.description ? ' - ' + role.description : '')"
+    >
+    </nz-option>
+  </nz-select>
+
+  <div style="margin-top: 24px; text-align: right">
+    <button nz-button (click)="onCancel()">Hủy</button>
+    <button
+      nz-button
+      nzType="primary"
+      (click)="onSave()"
+      style="margin-left: 8px"
+    >
+      Lưu phân quyền
+    </button>
+  </div>
+</div>

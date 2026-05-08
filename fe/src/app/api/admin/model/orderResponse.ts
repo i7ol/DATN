@@ -8,6 +8,7 @@
  * Do not edit the class manually.
  */
 import { OrderItemResponse } from './orderItemResponse';
+import { ReturnResponse } from './returnResponse';
 
 
 export interface OrderResponse { 
@@ -27,12 +28,16 @@ export interface OrderResponse {
     finalAmount?: number;
     paymentMethod?: OrderResponsePaymentMethodEnum;
     shippingMethod?: string;
+    trackingCode?: string;
     items?: Array<OrderItemResponse>;
     createdAt?: string;
     updatedAt?: string;
     paymentDate?: string;
     estimatedDeliveryDate?: string;
     actualDeliveryDate?: string;
+    returnable?: boolean;
+    daysLeftForReturn?: number;
+    returns?: Array<ReturnResponse>;
 }
 export enum OrderResponseStatusEnum {
     NEW = 'NEW',

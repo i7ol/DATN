@@ -17,12 +17,21 @@
     <!-- Order Header -->
     <div class="order-header">
       <div class="flex justify-between items-start mb-4">
-        <div>
-          <h1 class="text-2xl font-bold">Đơn hàng #{{ order.id }}</h1>
-          <p class="text-gray-600">
-            Ngày tạo: {{ order.createdAt | date : "dd/MM/yyyy HH:mm" }}
-          </p>
+        <!-- NÚT BACK -->
+        <div class="flex items-center gap-3">
+          <button mat-icon-button (click)="goBack()" aria-label="Quay lại">
+            <mat-icon>arrow_back</mat-icon>
+          </button>
+          <div>
+            <h1 class="text-2xl font-bold text-black">
+              Đơn hàng #{{ order.id }}
+            </h1>
+            <p class="text-black">
+              Ngày tạo: {{ order.createdAt | date: "dd/MM/yyyy HH:mm" }}
+            </p>
+          </div>
         </div>
+
         <div class="flex gap-2">
           <button
             mat-raised-button
@@ -51,25 +60,25 @@
       <!-- Order Info Grid -->
       <div class="order-info-grid">
         <div class="order-info-item">
-          <h3 class="font-semibold mb-2">Thông tin khách hàng</h3>
-          <p>
+          <h3 class="font-semibold mb-2 text-black">Thông tin khách hàng</h3>
+          <p class="text-black">
             <strong>Tên:</strong>
             {{ order.userId ? "User #" + order.userId : order.guestName }}
           </p>
-          <p *ngIf="order.guestEmail">
+          <p *ngIf="order.guestEmail" class="text-black">
             <strong>Email:</strong> {{ order.guestEmail }}
           </p>
-          <p *ngIf="order.guestPhone">
+          <p *ngIf="order.guestPhone" class="text-black">
             <strong>Điện thoại:</strong> {{ order.guestPhone }}
           </p>
         </div>
 
         <div class="order-info-item">
-          <h3 class="font-semibold mb-2">Trạng thái</h3>
+          <h3 class="font-semibold mb-2 text-black">Trạng thái</h3>
           <span class="status-badge status-{{ order.status?.toLowerCase() }}">
             {{ getStatusLabel(order.status) }}
           </span>
-          <h3 class="font-semibold mb-2 mt-4">Thanh toán</h3>
+          <h3 class="font-semibold mb-2 mt-4 text-black">Thanh toán</h3>
           <span
             class="payment-badge payment-{{
               order.paymentStatus?.toLowerCase()
@@ -80,18 +89,18 @@
         </div>
 
         <div class="order-info-item">
-          <h3 class="font-semibold mb-2">Tổng thanh toán</h3>
-          <p class="text-2xl font-bold text-blue-600">
+          <h3 class="font-semibold mb-2 text-black">Tổng thanh toán</h3>
+          <p class="text-3xl font-bold text-blue-900">
             {{ order.totalPrice | number }} ₫
           </p>
         </div>
 
         <div class="order-info-item">
-          <h3 class="font-semibold mb-2">Thông tin giao hàng</h3>
-          <p *ngIf="order.shippingAddress">
+          <h3 class="font-semibold mb-2 text-black">Thông tin giao hàng</h3>
+          <p *ngIf="order.shippingAddress" class="text-black">
             <strong>Địa chỉ:</strong> {{ order.shippingAddress }}
           </p>
-          <p *ngIf="order.shippingNote">
+          <p *ngIf="order.shippingNote" class="text-black">
             <strong>Ghi chú:</strong> {{ order.shippingNote }}
           </p>
         </div>
@@ -100,7 +109,7 @@
 
     <!-- Products Section -->
     <div class="products-section">
-      <h2 class="text-xl font-semibold mb-4">Sản phẩm</h2>
+      <h2 class="text-xl font-semibold mb-4 text-black">Sản phẩm</h2>
       <div class="table-content">
         <table class="products-table">
           <thead>
@@ -115,18 +124,24 @@
             <tr *ngFor="let item of order.items">
               <td>
                 <div class="flex items-center gap-3">
-                  <div class="font-medium">{{ item.productName }}</div>
+                  <div class="font-medium text-black">
+                    {{ item.productName }}
+                  </div>
                 </div>
               </td>
-              <td>{{ item.price | number }} ₫</td>
-              <td>{{ item.quantity }}</td>
-              <td>{{ item.price * item.quantity | number }} ₫</td>
+              <td class="text-black">{{ item.price | number }} ₫</td>
+              <td class="text-black">{{ item.quantity }}</td>
+              <td class="text-black">
+                {{ item.price * item.quantity | number }} ₫
+              </td>
             </tr>
           </tbody>
           <tfoot>
             <tr>
-              <td colspan="3" class="text-right font-semibold">Tổng cộng:</td>
-              <td class="font-bold text-blue-600">
+              <td colspan="3" class="text-right font-semibold text-black">
+                Tổng cộng:
+              </td>
+              <td class="font-bold text-black">
                 {{ order.totalPrice | number }} ₫
               </td>
             </tr>
@@ -137,7 +152,9 @@
 
     <!-- Shipping Info Section -->
     <div *ngIf="shippingInfo.length > 0" class="shipping-section">
-      <h2 class="text-xl font-semibold mb-4">Thông tin vận chuyển</h2>
+      <h2 class="text-xl font-semibold mb-4 text-black">
+        Thông tin vận chuyển
+      </h2>
       <div class="table-content">
         <table class="products-table">
           <thead>
@@ -151,9 +168,9 @@
           </thead>
           <tbody>
             <tr *ngFor="let shipping of shippingInfo">
-              <td>#{{ shipping.id }}</td>
-              <td>{{ shipping.carrier }}</td>
-              <td>{{ shipping.trackingNumber }}</td>
+              <td class="text-black">#{{ shipping.id }}</td>
+              <td class="text-black">{{ shipping.carrier }}</td>
+              <td class="text-black">{{ shipping.trackingNumber }}</td>
               <td>
                 <span
                   class="status-badge status-{{
@@ -163,7 +180,9 @@
                   {{ getShippingStatusLabel(shipping.status) }}
                 </span>
               </td>
-              <td>{{ shipping.createdAt | date : "dd/MM/yyyy HH:mm" }}</td>
+              <td class="text-black">
+                {{ shipping.createdAt | date: "dd/MM/yyyy HH:mm" }}
+              </td>
             </tr>
           </tbody>
         </table>

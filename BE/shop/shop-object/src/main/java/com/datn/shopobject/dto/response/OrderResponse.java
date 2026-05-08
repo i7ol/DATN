@@ -35,7 +35,7 @@ public class OrderResponse {
 
     private PaymentMethod paymentMethod;
     private String shippingMethod;
-
+    private String trackingCode;
     private List<OrderItemResponse> items;
 
     private Instant createdAt;
@@ -43,4 +43,8 @@ public class OrderResponse {
     private Instant paymentDate;
     private LocalDateTime estimatedDeliveryDate;
     private LocalDateTime actualDeliveryDate;
+    // Thêm các field này vào OrderResponse
+    private boolean returnable;
+    private int daysLeftForReturn;
+    private List<ReturnResponse> returns;   // Optional: danh sách yêu cầu đổi trả của đơn hàng
 }

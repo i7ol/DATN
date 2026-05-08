@@ -31,13 +31,14 @@ public class OrderMapper {
         res.setPaymentStatus(order.getPaymentStatus());
         res.setPaymentMethod(order.getPaymentMethod());
         res.setShippingMethod(order.getShippingMethod());
-
+        res.setTrackingCode(order.getTrackingCode());
         res.setCreatedAt(order.getCreatedAt());
         res.setUpdatedAt(order.getUpdatedAt());
         res.setPaymentDate(order.getPaymentDate());
         res.setEstimatedDeliveryDate(order.getEstimatedDeliveryDate());
         res.setActualDeliveryDate(order.getActualDeliveryDate());
-
+        res.setReturnable(order.isReturnable());
+        res.setDaysLeftForReturn(order.getDaysLeftForReturn());
         res.setItems(
                 order.getItems().stream().map(item -> {
                     OrderItemResponse dto = new OrderItemResponse();

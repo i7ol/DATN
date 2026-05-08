@@ -1,0 +1,155 @@
+.modal-wrapper {
+  background: #ffffff;
+  border-radius: 20px;
+  overflow: hidden;
+  border: none;
+}
+
+/* HEADER XANH */
+.modal-header {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: white;
+  padding: 20px;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: white;
+}
+
+.modal-header p {
+  margin-top: 4px;
+  font-size: 13px;
+  opacity: 0.9;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+/* BODY */
+.modal-body {
+  padding: 22px;
+}
+
+/* GROUP */
+.form-group {
+  margin-bottom: 18px;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 6px;
+  color: #111827;
+}
+
+/* INPUT */
+input[nz-input],
+textarea[nz-input] {
+  background: #ffffff !important;
+  border: 1.5px solid #111827 !important;
+  color: #111827;
+  border-radius: 12px !important;
+  padding: 10px 14px;
+  transition: all 0.25s ease;
+  box-shadow: none !important;
+}
+
+/* FIX bo góc bị vuông */
+input[nz-input]::placeholder,
+textarea[nz-input]::placeholder {
+  color: #9ca3af;
+}
+
+/* FOCUS */
+input[nz-input]:focus,
+textarea[nz-input]:focus {
+  border-color: #2563eb !important;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+
+/* SELECT */
+.ant-select-selector {
+  background: #fff !important;
+  border: 1.5px solid #111827 !important;
+  border-radius: 12px !important;
+  height: 42px !important;
+  display: flex;
+  align-items: center;
+  color: #111827 !important;
+}
+
+.ant-select-focused .ant-select-selector {
+  border-color: #2563eb !important;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+
+/* ACTION */
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+  border-top: 1px solid #e5e7eb;
+  padding-top: 16px;
+}
+
+/* CANCEL */
+.actions button[nz-button]:not([nzType="primary"]) {
+  background: white;
+  border: 1px solid #d1d5db;
+  color: #374151;
+  border-radius: 10px;
+}
+
+.actions button[nz-button]:not([nzType="primary"]):hover {
+  border-color: #2563eb;
+  color: #2563eb;
+}
+
+/* SUBMIT */
+.actions button[nzType="primary"] {
+  background: #2563eb;
+  border: none;
+  color: white !important;
+  border-radius: 10px;
+  font-weight: 500;
+  padding: 0 18px;
+  transition: all 0.25s ease;
+}
+
+.actions button[nzType="primary"]:hover {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 16px rgba(37, 99, 235, 0.3);
+}
+
+/* DISABLED */
+button[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+::ng-deep .ant-modal-content {
+  border-radius: 20px !important;
+  overflow: hidden !important;
+  padding: 0 !important; // bỏ padding mặc định
+}
+
+::ng-deep .ant-modal-body {
+  padding: 0 !important; // để wrapper control layout
+}
+
+::ng-deep .ant-modal-header {
+  display: none; // ẩn header mặc định của nz
+}
+::ng-deep .ant-select-selector {
+  background: #fff !important;
+  border: 1.5px solid #111827 !important;
+  border-radius: 12px !important;
+  height: 42px !important;
+  display: flex;
+  align-items: center;
+  box-shadow: none !important;
+}

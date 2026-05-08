@@ -1,0 +1,39 @@
+<div class="modal-wrapper">
+  <div class="modal-header">
+    <h3>Yêu cầu bảo hành</h3>
+    <p>Điền thông tin để xử lý nhanh hơn</p>
+  </div>
+
+  <form [formGroup]="form" class="modal-body">
+    <div class="form-group">
+      <label>Loại yêu cầu</label>
+      <nz-select formControlName="returnType">
+        <nz-option nzValue="RETURN" nzLabel="Trả hàng"></nz-option>
+        <nz-option nzValue="EXCHANGE" nzLabel="Đổi hàng"></nz-option>
+        <nz-option nzValue="WARRANTY" nzLabel="Bảo hành"></nz-option>
+      </nz-select>
+    </div>
+
+    <div class="form-group">
+      <label>Lý do *</label>
+      <input nz-input formControlName="reason" />
+    </div>
+
+    <div class="form-group">
+      <label>Mô tả</label>
+      <textarea nz-input rows="3" formControlName="description"></textarea>
+    </div>
+
+    <div class="actions">
+      <button nz-button (click)="cancel()">Hủy</button>
+      <button
+        nz-button
+        nzType="primary"
+        [nzLoading]="loading"
+        (click)="submit()"
+      >
+        Gửi yêu cầu
+      </button>
+    </div>
+  </form>
+</div>
