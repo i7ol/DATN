@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { ReturnAdminService } from '../return-admin/return-admin.service';
-import { ReturnResponse } from 'src/app/api/admin/model/models';
+import { ReturnAdminProxyControllerService } from 'src/app/api/admin/api/returnAdminProxyController.service';
+import { ReturnResponse } from 'src/app/api/admin/model/returnResponse';
 
 @Component({
   selector: 'app-return-detail-admin',
@@ -13,7 +13,7 @@ export class ReturnDetailAdminComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private adminService: ReturnAdminService,
+    private returnAdminService: ReturnAdminProxyControllerService,
   ) {}
 
   ngOnInit() {
@@ -22,14 +22,18 @@ export class ReturnDetailAdminComponent implements OnInit {
   }
 
   loadDetail() {
-    this.adminService.getReturnDetail(this.returnId).subscribe((res: any) => {
-      this.returnDetail = res.result || res;
+    this.returnAdminService.getReturnDetail(this.returnId).subscribe({
+      next: (res: any) => {
+        console.log('📦 Return Detail Response:', res);
+
+        this.returnDetail = res?.result || res;
+      },
+      error: (err) => console.error(err),
     });
   }
 
-  // ✅ FIX lỗi ngClass
   getStatusClass(status: string): string {
-    switch (status) {
+    switch (status?.toUpperCase()) {
       case 'PENDING':
         return 'badge bg-warning';
       case 'APPROVED':
@@ -37,22 +41,22 @@ export class ReturnDetailAdminComponent implements OnInit {
       case 'REJECTED':
         return 'badge bg-danger';
       case 'COMPLETED':
-        return 'badge bg-secondary';
+        return 'badge bg-info';
       default:
         return 'badge bg-dark';
     }
   }
 
-  approve(refundAmount: any, adminNote: string) {
+  approve(refundAmount: string, adminNote: string) {
     if (!refundAmount) {
       alert('Vui lòng nhập số tiền hoàn');
       return;
     }
 
-    this.adminService
+    this.returnAdminService
       .approveReturn(this.returnId, Number(refundAmount), adminNote)
       .subscribe(() => {
-        alert('Đã phê duyệt!');
+        alert('Đã phê duyệt thành công!');
         this.loadDetail();
       });
   }
@@ -63,22 +67,24 @@ export class ReturnDetailAdminComponent implements OnInit {
       return;
     }
 
-    this.adminService.rejectReturn(this.returnId, adminNote).subscribe(() => {
-      alert('Đã từ chối!');
-      this.loadDetail();
-    });
+    this.returnAdminService
+      .rejectReturn(this.returnId, adminNote)
+      .subscribe(() => {
+        alert('Đã từ chối!');
+        this.loadDetail();
+      });
   }
 
   complete(refundTransactionId: string) {
     if (!refundTransactionId) {
-      alert('Vui lòng nhập mã giao dịch');
+      alert('Vui lòng nhập mã giao dịch hoàn tiền');
       return;
     }
 
-    this.adminService
+    this.returnAdminService
       .completeReturn(this.returnId, refundTransactionId)
       .subscribe(() => {
-        alert('Hoàn tất!');
+        alert('Hoàn tất đơn đổi trả!');
         this.loadDetail();
       });
   }

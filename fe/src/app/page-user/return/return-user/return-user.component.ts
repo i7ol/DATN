@@ -9,40 +9,44 @@ import { PageReturnResponse } from 'src/app/api/user/model/pageReturnResponse';
 })
 export class ReturnUserComponent implements OnInit {
   returns: ReturnResponse[] = [];
-  totalPages = 0;
-  currentPage = 0;
-  pageSize = 10;
+  loading = false;
 
-  constructor(private returnProxyService: ReturnProxyControllerService) {}
+  constructor(private returnService: ReturnProxyControllerService) {}
 
   ngOnInit(): void {
     this.loadReturns();
   }
 
   loadReturns(): void {
-    this.returnProxyService
-      .getMyReturns(this.currentPage, this.pageSize)
-      .subscribe((res: any) => {
-        this.returns = res.result?.content || [];
-        this.totalPages = res.result?.totalPages || 0;
-      });
-  }
-
-  goToPage(page: number): void {
-    this.currentPage = page;
-    this.loadReturns();
+    this.loading = true;
+    this.returnService.getMyReturns(0, 20).subscribe({
+      next: (res: any) => {
+        this.returns = res.result?.content || res.content || [];
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error(err);
+        this.loading = false;
+      },
+    });
   }
 
   getStatusClass(status: string): string {
-    switch (status) {
+    switch (status?.toUpperCase()) {
       case 'PENDING':
-        return 'bg-warning';
+        return 'status-pending';
+
       case 'APPROVED':
-        return 'bg-success';
+        return 'status-approved';
+
       case 'REJECTED':
-        return 'bg-danger';
+        return 'status-rejected';
+
+      case 'CANCELLED':
+        return 'status-completed';
+
       default:
-        return 'bg-secondary';
+        return '';
     }
   }
 }

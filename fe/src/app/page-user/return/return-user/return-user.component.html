@@ -1,57 +1,64 @@
-<div class="container mt-4">
-  <h2>Đơn đổi trả / bảo hành của tôi</h2>
+<div class="return-wrapper">
+  <div class="return-header">
+    <div>
+      <h2>Yêu cầu đổi trả / bảo hành</h2>
+      <p>Theo dõi trạng thái các yêu cầu của bạn</p>
+    </div>
+  </div>
 
-  <table class="table table-bordered table-hover mt-3">
-    <thead>
-      <tr>
-        <th>Mã đơn</th>
-        <th>Sản phẩm</th>
-        <th>Lý do</th>
-        <th>Trạng thái</th>
-        <th>Thao tác</th>
-      </tr>
-    </thead>
+  <nz-spin [nzSpinning]="loading">
+    <div class="table-wrapper">
+      <table class="return-table" *ngIf="returns.length > 0">
+        <thead>
+          <tr>
+            <th>Mã YC</th>
+            <th>Đơn hàng</th>
+            <th>Sản phẩm</th>
+            <th>Lý do</th>
+            <th>Trạng thái</th>
+            <th>Ngày tạo</th>
+          </tr>
+        </thead>
 
-    <tbody>
-      <tr *ngFor="let item of returns">
-        <td>#{{ item.id }}</td>
-        <td>{{ item.orderItem?.productName }}</td>
-        <td>{{ item.reason }}</td>
+        <tbody>
+          <tr *ngFor="let item of returns">
+            <td class="id-col">#{{ item.id }}</td>
 
-        <td>
-          <span class="badge" [ngClass]="getStatusClass(item.status)">
-            {{ item.status }}
-          </span>
-        </td>
+            <td>#{{ item.orderId }}</td>
 
-        <td>
-          <button
-            class="btn btn-sm btn-info"
-            [routerLink]="['/returns/detail', item.id]"
-          >
-            Chi tiết
-          </button>
-        </td>
-      </tr>
+            <td>
+              <div class="product-name">
+                {{ item.orderItem?.productName || "N/A" }}
+              </div>
+            </td>
 
-      <tr *ngIf="returns.length === 0">
-        <td colspan="5" class="text-center">Không có dữ liệu</td>
-      </tr>
-    </tbody>
-  </table>
+            <td class="reason">
+              {{ item.reason }}
+            </td>
 
-  <!-- Pagination -->
-  <nav *ngIf="totalPages > 1">
-    <ul class="pagination justify-content-center">
-      <li
-        *ngFor="let i of [].constructor(totalPages); let idx = index"
-        class="page-item"
-        [class.active]="idx === currentPage"
-      >
-        <a class="page-link" (click)="goToPage(idx)">
-          {{ idx + 1 }}
-        </a>
-      </li>
-    </ul>
-  </nav>
+            <td>
+              <span
+                class="status-badge"
+                [ngClass]="getStatusClass(item.status)"
+              >
+                {{ item.status }}
+              </span>
+            </td>
+
+            <td>
+              {{ item.createdAt | date: "dd/MM/yyyy HH:mm" }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="empty-state" *ngIf="!loading && returns.length === 0">
+        <img src="assets/images/empty-order.png" alt="" />
+
+        <h3>Chưa có yêu cầu nào</h3>
+
+        <p>Các yêu cầu đổi trả sẽ hiển thị tại đây</p>
+      </div>
+    </div>
+  </nz-spin>
 </div>

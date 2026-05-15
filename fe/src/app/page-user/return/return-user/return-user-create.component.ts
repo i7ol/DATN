@@ -39,37 +39,48 @@ export class ReturnCreateComponent implements OnInit {
 
   submit(): void {
     if (this.form.invalid || !this.orderId) {
-      this.notify.error('Thiếu thông tin đơn hàng');
+      this.notify.error('Thiếu thông tin bắt buộc');
       return;
     }
 
-    this.loading = true;
+    if (this.items.length === 0) {
+      this.notify.error('Không có sản phẩm nào được chọn');
+      return;
+    }
 
     const request: CreateReturnRequest = {
       orderId: this.orderId,
-      returnType: this.form.value.returnType as any,
-      reason: this.form.value.reason,
-      description: this.form.value.description,
-      items: this.items.map((item) => ({
-        orderItemId: item.orderItemId,
-        productId: item.productId,
-        quantity: 1,
-        reason: this.form.value.reason,
-      })),
+      returnType: this.form.value.returnType,
+      reason: this.form.value.reason?.trim(),
+      description: this.form.value.description?.trim() || '',
+      items: this.items.map((item, index) => {
+        console.log(`Item ${index}:`, item); // Debug
+        return {
+          orderItemId: item.orderItemId,
+          productId: item.productId,
+          quantity: 1, // TODO: sau có thể lấy từ order item
+          reason: this.form.value.reason?.trim() || '',
+        };
+      }),
     };
 
-    console.log('📤 Sending return request:', request); // Debug
+    console.log('🚀 Final Return Request:', JSON.stringify(request, null, 2));
+
+    this.loading = true;
 
     this.returnService.createReturn(request).subscribe({
       next: (res) => {
         this.loading = false;
         this.notify.success('Gửi yêu cầu đổi trả thành công!');
-        this.modalRef.close(true);
+        this.modalRef.close({ success: true });
       },
       error: (err) => {
         this.loading = false;
         console.error('❌ Create return error:', err);
-        this.notify.error(err.error?.message || 'Không thể gửi yêu cầu');
+        console.error('Response body:', err.error);
+        this.notify.error(
+          err.error?.message || err.error?.error || 'Không thể gửi yêu cầu',
+        );
       },
     });
   }

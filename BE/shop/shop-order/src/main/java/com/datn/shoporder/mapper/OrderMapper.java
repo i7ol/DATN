@@ -42,6 +42,7 @@ public class OrderMapper {
         res.setItems(
                 order.getItems().stream().map(item -> {
                     OrderItemResponse dto = new OrderItemResponse();
+                    dto.setId(item.getId());
                     dto.setProductId(item.getProductId());
                     dto.setProductName(item.getProductName());
                     dto.setVariantId(item.getVariantId());

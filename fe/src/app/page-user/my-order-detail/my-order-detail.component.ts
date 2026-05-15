@@ -6,6 +6,7 @@ import { OrderResponse } from 'src/app/api/user/model/orderResponse';
 import { OrderItemResponse } from 'src/app/api/admin/model/models';
 import { NzModalService } from 'ng-zorro-antd/modal';
 import { ReturnCreateComponent } from '../return/return-user/return-user-create.component';
+import { ReturnUserComponent } from '../return/return-user/return-user.component';
 @Component({
   selector: 'my-order-detail',
   templateUrl: './my-order-detail.component.html',
@@ -54,69 +55,105 @@ export class MyOrderDetailComponent implements OnInit {
     });
   }
   canReturn(): boolean {
+    if (!this.order) return false;
+
     return (
-      this.order?.status === 'DELIVERED' &&
-      !!this.order?.actualDeliveryDate &&
-      this.daysLeftForReturn > 0
+      this.order.status === 'DELIVERED' && !!this.order.actualDeliveryDate
+      // Tạm thời bỏ điều kiện > 0 để test
+      // && this.daysLeftForReturn > 0
     );
   }
 
-  // ==================== LOGIC CHỌN SẢN PHẨM ĐỔI TRẢ ====================
-
   toggleReturnItem(item: OrderItemResponse): void {
-    if (!item || !item.id) return;
-
-    const exists = this.selectedReturnItems.some((i) => i.id === item.id);
-
-    if (exists) {
-      this.selectedReturnItems = this.selectedReturnItems.filter(
-        (i) => i.id !== item.id,
-      );
-    } else {
-      this.selectedReturnItems = [...this.selectedReturnItems, item];
+    if (!item) {
+      console.warn('Item không hợp lệ:', item);
+      return;
     }
 
-    console.log('SELECTED:', this.selectedReturnItems);
-  }
-  isSelectedForReturn(item: OrderItemResponse): boolean {
-    if (!item || !item.id) return false;
+    // Quan trọng: Kiểm tra id
+    if (!item.id) {
+      console.error('Item không có id (orderItemId):', item);
+      this.notify.error('Sản phẩm này không thể chọn vì thiếu ID');
+      return;
+    }
 
-    return this.selectedReturnItems.some((i) => i && i.id === item.id);
+    const index = this.selectedReturnItems.findIndex((i) => i.id === item.id);
+
+    if (index !== -1) {
+      // Bỏ chọn
+      this.selectedReturnItems = this.selectedReturnItems.filter(
+        (_, idx) => idx !== index,
+      );
+      console.log('❌ Bỏ chọn item:', item.id);
+    } else {
+      // Thêm vào
+      this.selectedReturnItems = [...this.selectedReturnItems, item];
+      console.log('✅ Chọn item:', item.id, '-', item.productName);
+    }
+
+    console.log('✅ SELECTED ITEMS:', this.selectedReturnItems);
+    console.log('✅ Số lượng đã chọn:', this.selectedReturnItems.length);
+  }
+
+  isSelectedForReturn(item: OrderItemResponse): boolean {
+    if (!item?.id) return false;
+    return this.selectedReturnItems.some((i) => i.id === item.id);
   }
 
   goToCreateReturn(): void {
+    console.log('📤 Số item sẽ gửi:', this.selectedReturnItems.length);
+    console.log(
+      '📦 Selected items chi tiết:',
+      this.selectedReturnItems.map((i) => ({
+        id: i.id,
+        productId: i.productId,
+        name: i.productName,
+      })),
+    );
+
     if (!this.canReturn()) {
-      this.notify.error('Hết thời gian');
+      this.notify.error('Không thể tạo yêu cầu đổi trả lúc này');
       return;
     }
 
     if (this.selectedReturnItems.length === 0) {
-      this.notify.error('Chọn ít nhất 1 sản phẩm');
+      this.notify.error('Vui lòng chọn ít nhất 1 sản phẩm');
       return;
     }
 
-    const items = this.selectedReturnItems
-      .filter((i) => i && i.id && i.productId) // lọc null
+    // ========== PHẦN SỬA CHÍNH ==========
+    const itemsForModal = this.selectedReturnItems
+      .filter((i) => i && i.id != null && i.productId != null)
       .map((i) => ({
-        orderItemId: i.id!,
-        productId: i.productId!,
+        orderItemId: Number(i.id), // Đây là field quan trọng nhất
+        productId: Number(i.productId),
+        quantity: i.quantity || 1,
+        reason: '',
       }));
 
-    console.log('SELECTED BEFORE SEND:', this.selectedReturnItems);
+    console.log('📦 Items gửi vào modal (sau mapping):', itemsForModal);
+
+    if (itemsForModal.length === 0) {
+      this.notify.error('Không có sản phẩm hợp lệ để tạo yêu cầu đổi trả');
+      return;
+    }
+
     const modalRef = this.modal.create({
       nzContent: ReturnCreateComponent,
+      nzWidth: 520,
       nzFooter: null,
-      nzWidth: 500,
+      nzTitle: null,
+      nzClosable: false,
       nzComponentParams: {
         orderId: this.order?.id,
-        items: items,
+        items: itemsForModal, // Truyền mảng đã map
       },
     });
 
     modalRef.afterClose.subscribe((result) => {
       if (result?.success) {
-        this.selectedReturnItems = []; // reset sau khi tạo thành công
-        this.loadOrderDetail();
+        this.selectedReturnItems = []; // Reset sau khi tạo thành công
+        this.loadOrderDetail(); // Refresh lại đơn hàng
       }
     });
   }
@@ -126,11 +163,14 @@ export class MyOrderDetailComponent implements OnInit {
     return 'danger';
   }
   private calculateReturnDeadline(): void {
-    if (!this.order?.actualDeliveryDate) return;
+    if (!this.order?.actualDeliveryDate) {
+      this.daysLeftForReturn = 0;
+      return;
+    }
 
     const deliveryDate = new Date(this.order.actualDeliveryDate);
     const deadline = new Date(deliveryDate);
-    deadline.setDate(deadline.getDate() + 7);
+    deadline.setDate(deadline.getDate() + 7); // +7 ngày
 
     const now = new Date();
     const diffTime = deadline.getTime() - now.getTime();
@@ -139,9 +179,34 @@ export class MyOrderDetailComponent implements OnInit {
       0,
       Math.ceil(diffTime / (1000 * 60 * 60 * 24)),
     );
+
+    console.log(`📅 Days left for return: ${this.daysLeftForReturn}`);
   }
   goToMyReturns(): void {
-    this.router.navigate(['/returns']);
+    const modalRef = this.modal.create({
+      nzTitle: null,
+
+      nzContent: ReturnUserComponent,
+
+      nzWidth: 1200,
+
+      nzFooter: null,
+
+      nzClosable: true,
+
+      nzCentered: true,
+
+      nzWrapClassName: 'fashion-return-modal',
+
+      nzBodyStyle: {
+        padding: '0',
+        background: 'transparent',
+      },
+    });
+
+    modalRef.afterClose.subscribe(() => {
+      this.loadOrderDetail();
+    });
   }
 
   /** Helper an toàn: Lấy URL ảnh (hỗ trợ cả string và object) */

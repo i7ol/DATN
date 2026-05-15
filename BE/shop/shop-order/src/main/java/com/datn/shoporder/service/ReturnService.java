@@ -12,7 +12,9 @@ import com.datn.shopdatabase.exception.ErrorCode;
 import com.datn.shopdatabase.repository.OrderRepository;
 import com.datn.shopdatabase.repository.OrderReturnRepository;
 import com.datn.shopobject.dto.request.CreateReturnRequest;
+import com.datn.shopobject.dto.request.ReturnItemRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -23,8 +25,11 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.time.temporal.ChronoUnit;
 import java.util.Objects;
+import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ReturnService {
@@ -34,88 +39,117 @@ public class ReturnService {
 
     @Transactional
     public OrderReturnEntity createReturnRequest(
-            Long userId,                    // null nếu là guest
-            String guestId,                 // null nếu là user
-            CreateReturnRequest request) {
+            Long userId, String guestId, CreateReturnRequest request) {
 
+        log.info("=== CREATE RETURN REQUEST START ===");
+        log.info("UserId={}, GuestId={}, OrderId={}, ReturnType={}, Items={}",
+                userId, guestId, request.getOrderId(), request.getReturnType(), request.getItems());
+
+        // 1. Tìm order
         OrderEntity order = orderRepository.findById(request.getOrderId())
-                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND, "Không tìm thấy đơn hàng"));
 
-        // ==================== KIỂM TRA QUYỀN SỞ HỮU ====================
-        boolean isValidOwner = false;
+        log.info("Order found - ID={}, Status={}, UserId={}, ActualDeliveryDate={}",
+                order.getId(), order.getStatus(), order.getUserId(), order.getActualDeliveryDate());
 
-        if (userId != null) {
-            // Trường hợp User đã login
-            isValidOwner = Objects.equals(order.getUserId(), userId);
-        } else if (guestId != null || request.getGuestPhone() != null) {
-            // Trường hợp Guest
-            isValidOwner = (Objects.equals(order.getGuestId(), guestId) ||
-                    Objects.equals(order.getGuestPhone(), request.getGuestPhone()));
-        }
-
+        // 2. Kiểm tra quyền sở hữu
+        boolean isValidOwner = (userId != null && Objects.equals(order.getUserId(), userId)) ||
+                (guestId != null && Objects.equals(order.getGuestId(), guestId));
         if (!isValidOwner) {
-            throw new AppException(ErrorCode.FORBIDDEN, "Bạn không có quyền thực hiện đổi trả trên đơn hàng này");
+            log.error("Permission denied! User {} / Guest {} is not owner of order {}",
+                    userId, guestId, order.getId());
+            throw new AppException(ErrorCode.FORBIDDEN, "Bạn không có quyền đổi trả đơn hàng này");
         }
 
-        // Kiểm tra điều kiện đổi trả
+        // 3. Validate thời gian
         validateReturnEligibility(order);
 
-        // Kiểm tra đã có yêu cầu đang xử lý chưa
-        if (returnRepository.findActiveReturnByOrderId(order.getId()).isPresent()) {
+        // 4. Kiểm tra đã có return active chưa
+        Optional<OrderReturnEntity> activeReturn = returnRepository.findActiveReturnByOrderId(order.getId());
+        log.info("Has active return: {}", activeReturn.isPresent());
+        if (activeReturn.isPresent()) {
+            log.warn("Order {} already has an active return with ID: {}",
+                    order.getId(), activeReturn.get().getId());
             throw new AppException(ErrorCode.INVALID_REQUEST, "Đơn hàng này đã có yêu cầu đổi trả đang xử lý");
         }
 
+        // 5. Tạo entity
         OrderReturnEntity returnRequest = OrderReturnEntity.builder()
                 .orderId(order.getId())
                 .userId(userId)
                 .guestId(guestId != null ? guestId : order.getGuestId())
                 .returnType(request.getReturnType())
                 .reason(request.getReason())
-                .description(request.getDescription())
+                .description(request.getDescription() != null ? request.getDescription() : "")
                 .status(ReturnStatus.PENDING)
-                .items(new ArrayList<>())
-                .images(new ArrayList<>())
                 .build();
 
-        // Thêm items
-        if (request.getItems() != null) {
-            request.getItems().forEach(itemReq -> {
-                OrderReturnItemEntity item = new OrderReturnItemEntity();
-                item.setOrderItemId(itemReq.getOrderItemId());
-                item.setProductId(itemReq.getProductId());
-                item.setQuantity(itemReq.getQuantity());
-                item.setReason(itemReq.getReason());
-                returnRequest.addItem(item);
-            });
+        // === KHỞI TẠO LIST AN TOÀN ===
+        if (returnRequest.getItems() == null) {
+            returnRequest.setItems(new ArrayList<>());
+        }
+        if (returnRequest.getImages() == null) {
+            returnRequest.setImages(new ArrayList<>());
         }
 
-        // Thêm ảnh
-        if (request.getImageUrls() != null) {
-            request.getImageUrls().forEach(url -> {
+        log.info("Entity built successfully. Items list size before adding: {}", returnRequest.getItems().size());
+
+        // 6. Thêm items
+        if (request.getItems() == null || request.getItems().isEmpty()) {
+            throw new AppException(ErrorCode.INVALID_REQUEST, "Phải chọn ít nhất một sản phẩm để đổi trả");
+        }
+
+        for (ReturnItemRequest itemReq : request.getItems()) {
+            log.info("Adding item - orderItemId={}, productId={}, quantity={}",
+                    itemReq.getOrderItemId(), itemReq.getProductId(), itemReq.getQuantity());
+
+            OrderReturnItemEntity item = new OrderReturnItemEntity();
+            item.setOrderItemId(itemReq.getOrderItemId());
+            item.setProductId(itemReq.getProductId());
+            item.setQuantity(itemReq.getQuantity() != null ? itemReq.getQuantity() : 1);
+            item.setReason(itemReq.getReason() != null ? itemReq.getReason() : request.getReason());
+
+            returnRequest.addItem(item);
+        }
+
+        // 7. Thêm ảnh (nếu có)
+        if (request.getImageUrls() != null && !request.getImageUrls().isEmpty()) {
+            for (String url : request.getImageUrls()) {
                 ReturnImageEntity image = new ReturnImageEntity();
                 image.setImageUrl(url);
                 returnRequest.addImage(image);
-            });
+            }
         }
 
-        return returnRepository.save(returnRequest);
+        log.info("Saving return to database...");
+        OrderReturnEntity saved = returnRepository.save(returnRequest);
+
+        log.info("✅ RETURN CREATED SUCCESSFULLY - Return ID: {}", saved.getId());
+        return saved;
     }
 
     private void validateReturnEligibility(OrderEntity order) {
         if (order.getStatus() != OrderStatus.DELIVERED) {
             throw new AppException(ErrorCode.INVALID_REQUEST,
-                    "Chỉ đơn hàng đã giao hàng mới được yêu cầu đổi trả/bảo hành");
+                    "Chỉ đơn hàng đã giao (DELIVERED) mới được đổi trả. Trạng thái hiện tại: " + order.getStatus());
         }
 
         if (order.getActualDeliveryDate() == null) {
-            throw new AppException(ErrorCode.INVALID_REQUEST, "Không tìm thấy ngày giao hàng");
+            throw new AppException(ErrorCode.INVALID_REQUEST, "Không tìm thấy ngày giao hàng thực tế");
         }
 
-        LocalDateTime deadline = order.getActualDeliveryDate().plusDays(7);
-        if (LocalDateTime.now().isAfter(deadline)) {
+        LocalDateTime deadline = order.getActualDeliveryDate().plusDays(7).withHour(23).withMinute(59).withSecond(59);
+        LocalDateTime now = LocalDateTime.now();
+
+        log.info("Deadline (end of day): {}, Now: {}", deadline, now);
+
+        if (now.isAfter(deadline)) {
             throw new AppException(ErrorCode.INVALID_REQUEST,
                     "Đã hết hạn yêu cầu đổi trả (tối đa 7 ngày kể từ ngày nhận hàng)");
         }
+
+        log.info("✅ Validation passed - Days remaining: {}",
+                java.time.temporal.ChronoUnit.DAYS.between(now.toLocalDate(), deadline.toLocalDate()));
     }
 
     // ==================== ADMIN FUNCTIONS ====================

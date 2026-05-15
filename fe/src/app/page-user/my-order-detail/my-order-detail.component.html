@@ -1,4 +1,4 @@
-<div class="max-w-6xl mx-auto p-4 pt-32">
+<div class="max-w-6xl mx-auto p-4 pt-32 pb-32">
   <!-- Loading -->
   <div *ngIf="loading" class="text-center py-12">
     <nz-spin nzSize="large"></nz-spin>
@@ -36,77 +36,63 @@
 
       <div
         *ngFor="let item of order.items; let i = index"
-        class="product-row border rounded-2xl mb-4 p-5 flex gap-5 items-center"
+        class="product-row border rounded-2xl mb-4 p-5 flex gap-5 items-center hover:bg-gray-50"
         [class.selected]="isSelectedForReturn(item)"
       >
         <!-- CHECKBOX -->
-        <div *ngIf="canReturn()">
-          <input
-            type="checkbox"
-            [disabled]="item.isReturnRequested"
-            [checked]="isSelectedForReturn(item)"
-            (change)="toggleReturnItem(item)"
-            class="w-5 h-5 accent-red-600 cursor-pointer"
-          />
+        <div *ngIf="canReturn()" class="flex items-center">
+          <label class="flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              [checked]="isSelectedForReturn(item)"
+              (change)="toggleReturnItem(item)"
+              class="w-5 h-5 accent-primary-600 cursor-pointer"
+            />
+            <span class="ml-3 text-sm font-medium">Chọn đổi/trả</span>
+          </label>
         </div>
 
         <!-- IMAGE -->
         <img
           [src]="getSelectedImage(item, i)"
-          class="product-img rounded-lg border"
+          class="w-20 h-20 object-cover rounded-lg border"
           onerror="this.src = '/assets/img/demo.webp'"
         />
 
         <!-- INFO -->
-        <div class="flex-1">
-          <div class="flex justify-between items-start">
-            <div>
-              <h3 class="font-semibold text-lg">
-                {{ item.productName }}
-              </h3>
-              <p class="text-gray-500 text-sm">
-                {{ item.color }} • {{ item.size }}
-              </p>
-              <div *ngIf="item.isReturnRequested" class="return-badge">
-                Đã gửi yêu cầu bảo hành
-              </div>
-            </div>
+        <div class="flex-1 min-w-0">
+          <h3 class="font-semibold text-lg leading-tight">
+            {{ item.productName }}
+          </h3>
+          <p class="text-gray-500 text-sm mt-1">
+            {{ item.color }} • {{ item.size }} • SL: <b>{{ item.quantity }}</b>
+          </p>
 
-            <!-- BADGE BẢO HÀNH -->
-            <div *ngIf="canReturn()" class="return-deadline">
-              <span class="label">Thời hạn bảo hành:</span>
-
-              <span class="value" [ngClass]="getReturnClass()">
-                còn <b>{{ daysLeftForReturn }}</b> ngày
-              </span>
-            </div>
-          </div>
-
-          <!-- PRICE ROW (tách riêng ra) -->
-          <div class="flex gap-10 mt-3 text-sm">
-            <span
-              >Số lượng: <b>{{ item.quantity }}</b></span
-            >
+          <div class="flex gap-6 mt-2 text-sm">
             <span
               >Đơn giá: <b>{{ item.unitPrice | number }}đ</b></span
             >
-            <span class="text-red-600">
-              <b>{{ item.totalPrice | number }}đ</b>
+            <span class="text-red-600 font-semibold">
+              Tổng: <b>{{ item.totalPrice | number }}đ</b>
             </span>
           </div>
         </div>
+
+        <!-- Return deadline -->
+        <div *ngIf="canReturn()" class="text-right text-sm">
+          <span class="text-gray-500">Còn</span><br />
+          <span class="font-bold text-lg" [ngClass]="getReturnClass()">
+            {{ daysLeftForReturn }} ngày
+          </span>
+        </div>
       </div>
 
-      <!-- SUMMARY -->
-      <div class="p-6 bg-gray-50 border-t flex justify-between items-center">
-        <div>
-          <p class="text-sm">Tổng thanh toán</p>
-          <h3 class="text-2xl font-bold text-red-600">
-            {{ order.finalAmount || order.totalPrice | number }}đ
-          </h3>
-        </div>
-
-        <button nz-button nzType="default" (click)="goBack()">Quay lại</button>
+      <!-- Nếu không có sản phẩm -->
+      <div
+        *ngIf="order?.items?.length === 0"
+        class="text-center py-12 text-gray-500"
+      >
+        Không có sản phẩm nào trong đơn hàng
       </div>
     </div>
 
@@ -116,11 +102,16 @@
     </div>
   </div>
 
-  <!-- ================= ACTION BAR (QUAN TRỌNG) ================= -->
-  <div *ngIf="canReturn()" class="action-bar shadow-lg">
+  <!-- ================= ACTION BAR ================= -->
+  <div *ngIf="order?.status === 'DELIVERED'" class="action-bar shadow-lg">
     <div class="max-w-6xl mx-auto flex justify-between items-center">
       <div>
-        Đã chọn <b>{{ selectedReturnItems.length }}</b> sản phẩm
+        <span *ngIf="daysLeftForReturn > 0">
+          Đã chọn <b>{{ selectedReturnItems.length }}</b> sản phẩm
+        </span>
+        <span *ngIf="daysLeftForReturn === 0" class="text-red-500">
+          Đã hết thời hạn đổi trả (7 ngày)
+        </span>
       </div>
 
       <div class="flex gap-3">
@@ -129,7 +120,9 @@
         <button
           nz-button
           nzType="primary"
-          [disabled]="selectedReturnItems.length === 0"
+          [disabled]="
+            selectedReturnItems.length === 0 || daysLeftForReturn === 0
+          "
           (click)="goToCreateReturn()"
         >
           Gửi yêu cầu đổi trả

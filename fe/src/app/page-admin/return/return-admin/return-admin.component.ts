@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { PageResponseReturnResponse } from 'src/app/api/admin/model/models';
-import { ReturnAdminService } from './return-admin.service';
+import { ReturnAdminProxyControllerService } from 'src/app/api/admin/api/returnAdminProxyController.service';
+import { ReturnResponse } from 'src/app/api/admin/model/returnResponse';
 
 @Component({
   selector: 'app-return-admin',
@@ -8,35 +8,37 @@ import { ReturnAdminService } from './return-admin.service';
   styleUrls: ['./return-admin.component.scss'],
 })
 export class ReturnAdminComponent implements OnInit {
-  returns: any[] = [];
+  returns: ReturnResponse[] = [];
   currentPage = 0;
   pageSize = 10;
   total = 0;
 
   tab = 'pending'; // 'pending' | 'all'
 
-  constructor(private adminService: ReturnAdminService) {}
+  constructor(private returnAdminService: ReturnAdminProxyControllerService) {}
 
   ngOnInit() {
     this.loadData();
   }
 
   loadData() {
-    const pageable = {
-      page: this.currentPage,
-      size: this.pageSize,
-    };
+    const pageable = { page: this.currentPage, size: this.pageSize };
 
     const obs =
       this.tab === 'pending'
-        ? this.adminService.getPendingReturns(pageable)
-        : this.adminService.getAllReturns(pageable);
+        ? this.returnAdminService.getPendingReturns(pageable)
+        : this.returnAdminService.getAllReturns(pageable);
 
-    obs.subscribe((res: PageResponseReturnResponse) => {
-      const data = (res as any).result;
+    obs.subscribe({
+      next: (res: any) => {
+        console.log('📦 API Response:', res); // Giữ lại để debug
 
-      this.returns = data?.content || [];
-      this.total = data?.totalElements || 0;
+        this.returns = res?.data || []; // ← Sửa thành 'data'
+        this.total = res?.totalElements || 0; // ← Sửa thành totalElements
+      },
+      error: (err) => {
+        console.error('Load returns error:', err);
+      },
     });
   }
 
@@ -51,9 +53,8 @@ export class ReturnAdminComponent implements OnInit {
     this.loadData();
   }
 
-  // ✅ FIX lỗi ngClass bằng function
   getStatusClass(status: string): string {
-    switch (status) {
+    switch (status?.toUpperCase()) {
       case 'PENDING':
         return 'orange';
       case 'APPROVED':

@@ -28,6 +28,7 @@ public class ReturnProxyController {
             @RequestBody CreateReturnRequest request) {
 
         log.info("=== CREATE RETURN REQUEST RECEIVED ===");
+        log.info("Raw Request: {}", request);
         log.info("OrderId: {}, ReturnType: {}, Items: {}",
                 request.getOrderId(), request.getReturnType(), request.getItems());
         // Truyền thông tin user nếu có

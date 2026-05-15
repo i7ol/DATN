@@ -1,0 +1,160 @@
+::ng-deep .fashion-return-modal .ant-modal-content {
+  padding: 0 !important;
+  overflow: hidden;
+  border-radius: 28px !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+::ng-deep .fashion-return-modal .ant-modal-body {
+  padding: 0 !important;
+  background: transparent !important;
+}
+
+::ng-deep .fashion-return-modal .ant-modal-close {
+  color: white;
+  top: 22px;
+  right: 22px;
+}
+
+.return-wrapper {
+  background: #f8fafc;
+  border-radius: 28px;
+  overflow: hidden;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.18);
+}
+
+.return-header {
+  background: linear-gradient(135deg, #0f172a, #111827);
+  padding: 34px 40px;
+  color: white;
+
+  h2 {
+    margin: 0;
+    font-size: 34px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    color: white;
+  }
+
+  p {
+    margin-top: 8px;
+    font-size: 15px;
+    color: rgba(255, 255, 255, 0.7);
+  }
+}
+
+.table-wrapper {
+  padding: 0;
+}
+
+.return-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+
+  thead {
+    background: #111827;
+
+    th {
+      color: rgba(255, 255, 255, 0.92);
+      font-size: 13px;
+      font-weight: 700;
+      padding: 22px 24px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      border: none;
+    }
+  }
+
+  tbody {
+    tr {
+      transition: 0.25s ease;
+      border-bottom: 1px solid #f1f5f9;
+
+      &:hover {
+        background: #f8fafc;
+      }
+
+      td {
+        padding: 24px;
+        color: #334155;
+        font-size: 14px;
+        vertical-align: middle;
+      }
+    }
+  }
+}
+
+.id-col {
+  font-weight: 700;
+  color: #585e6a;
+}
+
+.product-name {
+  font-weight: 600;
+  color: #585e6a;
+}
+
+.reason {
+  color: #64748b;
+  max-width: 240px;
+}
+
+.status-badge {
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  display: inline-flex;
+  align-items: center;
+  text-transform: uppercase;
+}
+
+/* Pending */
+.status-pending {
+  background: #fff7ed;
+  color: #ea580c;
+}
+
+/* Approved */
+.status-approved {
+  background: #ecfdf5;
+  color: #059669;
+}
+
+/* Rejected */
+.status-rejected {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+/* Cancelled */
+.status-completed {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.empty-state {
+  padding: 90px 20px;
+  text-align: center;
+  background: white;
+
+  img {
+    width: 130px;
+    opacity: 0.7;
+    margin-bottom: 20px;
+  }
+
+  h3 {
+    font-size: 24px;
+    margin-bottom: 10px;
+    color: #0f172a;
+    font-weight: 700;
+  }
+
+  p {
+    color: #64748b;
+  }
+}
