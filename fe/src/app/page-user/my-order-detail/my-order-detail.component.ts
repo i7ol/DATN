@@ -142,7 +142,7 @@ export class MyOrderDetailComponent implements OnInit {
       nzContent: ReturnCreateComponent,
       nzWidth: 520,
       nzFooter: null,
-      nzTitle: null,
+      nzTitle: '',
       nzClosable: false,
       nzComponentParams: {
         orderId: this.order?.id,
@@ -184,7 +184,7 @@ export class MyOrderDetailComponent implements OnInit {
   }
   goToMyReturns(): void {
     const modalRef = this.modal.create({
-      nzTitle: null,
+      nzTitle: '',
 
       nzContent: ReturnUserComponent,
 

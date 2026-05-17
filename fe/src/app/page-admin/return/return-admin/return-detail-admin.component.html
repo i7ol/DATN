@@ -1,67 +1,121 @@
-<div class="container mt-4" *ngIf="returnDetail">
-  <h2>Chi tiết đơn đổi trả #{{ returnDetail.id }}</h2>
-
-  <div class="card mt-3">
-    <div class="card-body">
-      <p><strong>Khách hàng:</strong> {{ returnDetail.user?.username }}</p>
-
-      <p>
-        <strong>Sản phẩm:</strong>
-        {{ returnDetail.orderItem?.productName }}
-      </p>
-
-      <p><strong>Lý do:</strong> {{ returnDetail.reason }}</p>
-      <p><strong>Mô tả:</strong> {{ returnDetail.description }}</p>
-
-      <p>
-        <strong>Trạng thái:</strong>
-        <span class="badge" [class]="getStatusClass(returnDetail.status)">
-          {{ returnDetail.status }}
-        </span>
-      </p>
+<div *ngIf="returnDetail" class="return-detail-wrapper">
+  <!-- HEADER -->
+  <div class="detail-header">
+    <div>
+      <h2>Chi tiết yêu cầu #{{ returnDetail.id }}</h2>
+      <p>Đơn hàng #{{ returnDetail.orderId }}</p>
     </div>
+
+    <span class="status-badge" [ngClass]="getStatusClass(returnDetail.status)">
+      {{ returnDetail.status }}
+    </span>
   </div>
 
-  <!-- ACTIONS -->
-  <div class="mt-4" *ngIf="returnDetail.status === 'PENDING'">
-    <h5>Xử lý yêu cầu</h5>
+  <!-- BODY -->
+  <div class="detail-body">
+    <!-- SẢN PHẨM -->
+    <div class="info-item full mb-4">
+      <label>Sản phẩm yêu cầu đổi trả</label>
 
-    <div class="mb-2">
-      <input
-        #refundAmount
-        type="number"
-        class="form-control"
-        placeholder="Số tiền hoàn"
-      />
+      <div
+        *ngFor="let it of returnDetail.items"
+        class="border rounded-4 p-3 mb-3"
+      >
+        <div class="d-flex justify-content-between align-items-start gap-3">
+          <div>
+            <p class="mb-1 fw-bold">
+              {{ it.productName || "Sản phẩm #" + it.productId }}
+            </p>
+
+            <small class="text-muted"> Số lượng: {{ it.quantity }} </small>
+          </div>
+
+          <div class="text-end">
+            <small class="text-muted">Lý do</small>
+            <p class="mb-0">{{ it.reason }}</p>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div class="mb-2">
-      <textarea #note class="form-control" placeholder="Ghi chú"></textarea>
+    <!-- THÔNG TIN -->
+    <div class="info-grid">
+      <div class="info-item">
+        <label>Lý do chung</label>
+        <p>{{ returnDetail.reason }}</p>
+      </div>
+
+      <div class="info-item">
+        <label>Ngày yêu cầu</label>
+        <p>
+          {{ returnDetail.requestDate | date: "dd/MM/yyyy HH:mm" }}
+        </p>
+      </div>
+
+      <div class="info-item full">
+        <label>Mô tả</label>
+        <p>{{ returnDetail.description || "Không có" }}</p>
+      </div>
     </div>
 
-    <button
-      class="btn btn-success me-2"
-      (click)="approve(refundAmount.value, note.value)"
-    >
-      Duyệt
-    </button>
+    <!-- ACTION PENDING -->
+    <div class="action-section" *ngIf="returnDetail.status === 'PENDING'">
+      <h4>Xử lý yêu cầu</h4>
 
-    <button class="btn btn-danger" (click)="reject(note.value)">Từ chối</button>
-  </div>
+      <div class="form-group">
+        <label>Số tiền hoàn</label>
 
-  <!-- COMPLETE -->
-  <div class="mt-4" *ngIf="returnDetail.status === 'APPROVED'">
-    <h5>Hoàn tiền</h5>
+        <input
+          #refundAmount
+          type="number"
+          class="modern-input"
+          placeholder="Nhập số tiền hoàn"
+        />
+      </div>
 
-    <input
-      #transactionId
-      type="text"
-      class="form-control mb-2"
-      placeholder="Mã giao dịch hoàn tiền"
-    />
+      <div class="form-group">
+        <label>Ghi chú</label>
 
-    <button class="btn btn-primary" (click)="complete(transactionId.value)">
-      Hoàn tất
-    </button>
+        <textarea
+          #note
+          rows="4"
+          class="modern-input"
+          placeholder="Nhập ghi chú..."
+        ></textarea>
+      </div>
+
+      <div class="actions">
+        <button class="btn-reject" (click)="reject(note.value)">Từ chối</button>
+
+        <button
+          class="btn-approve"
+          (click)="approve(refundAmount.value, note.value)"
+        >
+          Duyệt
+        </button>
+      </div>
+    </div>
+
+    <!-- ACTION APPROVED -->
+    <div class="action-section" *ngIf="returnDetail.status === 'APPROVED'">
+      <h4>Hoàn tất hoàn tiền</h4>
+
+      <div class="form-group">
+        <label>Mã giao dịch hoàn tiền</label>
+
+        <input
+          #transactionId
+          type="text"
+          class="modern-input"
+          placeholder="Nhập mã giao dịch"
+        />
+      </div>
+
+      <div class="actions">
+        <button class="btn-complete" (click)="complete(transactionId.value)">
+          Hoàn tất
+        </button>
+      </div>
+    </div>
   </div>
 </div>

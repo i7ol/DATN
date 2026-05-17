@@ -13,8 +13,8 @@ import { InventoryResponse } from './inventoryResponse';
 
 
 export interface PageInventoryResponse { 
-    totalPages?: number;
     totalElements?: number;
+    totalPages?: number;
     size?: number;
     content?: Array<InventoryResponse>;
     number?: number;

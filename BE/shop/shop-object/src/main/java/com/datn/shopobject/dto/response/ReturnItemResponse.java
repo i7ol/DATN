@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,8 +17,11 @@ public class ReturnItemResponse {
 
     private Long id;
     private Long productId;
-    private String productName;     // Để hiển thị
+    private String productName;
+
     private Integer quantity;
     private String reason;
+    private BigDecimal unitPrice;
+    private BigDecimal subtotal;
     private List<String> images = new ArrayList<>();
 }

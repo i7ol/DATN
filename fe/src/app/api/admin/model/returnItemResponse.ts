@@ -15,6 +15,8 @@ export interface ReturnItemResponse {
     productName?: string;
     quantity?: number;
     reason?: string;
+    unitPrice?: number;
+    subtotal?: number;
     images?: Array<string>;
 }
 

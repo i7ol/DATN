@@ -70,7 +70,6 @@ import { PaymentUpdateDialogComponent } from './shared/components/payment-update
 import { PaymentListComponent } from './page-admin/payment-list/payment-list.component';
 import { ProductListAdminComponent } from './page-admin/product-admin/product-list-admin/product-list-admin.component';
 import { InventoryListComponent } from './page-admin/inventory-list/inventory-list.component';
-import { RevenueService } from './page-admin/admin-dashboard/revenue.service';
 
 // Components-user
 import { CartComponent } from './page-user/cart/cart.component';
@@ -100,8 +99,9 @@ import { registerLocaleData } from '@angular/common';
 import vi from '@angular/common/locales/vi';
 import { ReturnAdminComponent } from './page-admin/return/return-admin/return-admin.component';
 import { ReturnUserComponent } from './page-user/return/return-user/return-user.component';
-import { ReturnDetailAdminComponent } from './page-admin/return/return-admin/return-detail-admin.component';
+import { ReturnDetailAdmin } from './page-admin/return/return-admin/return-detail-admin';
 import { ReturnCreateComponent } from './page-user/return/return-user/return-user-create.component';
+import { BlogComponent } from './page-user/blog/blog.component';
 registerLocaleData(vi);
 @NgModule({
   declarations: [
@@ -135,7 +135,8 @@ registerLocaleData(vi);
     ReturnAdminComponent,
     ReturnUserComponent,
     ReturnCreateComponent,
-    ReturnDetailAdminComponent,
+    ReturnDetailAdmin,
+    BlogComponent,
   ],
   imports: [
     BrowserModule,

@@ -49,7 +49,7 @@ public class OrderReturnEntity extends BaseEntity {
 
     @Column(columnDefinition = "CLOB")
     private String adminNote;
-
+    private BigDecimal totalReturnValue;
     private String returnTrackingCode;   // Mã vận chuyển khi khách trả hàng
 
     private Instant processedDate;

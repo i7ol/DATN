@@ -13,8 +13,8 @@ import { PaymentResponse } from './paymentResponse';
 
 
 export interface PagePaymentResponse { 
-    totalPages?: number;
     totalElements?: number;
+    totalPages?: number;
     size?: number;
     content?: Array<PaymentResponse>;
     number?: number;

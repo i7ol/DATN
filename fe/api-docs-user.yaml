@@ -799,6 +799,10 @@ components:
           format: int32
         reason:
           type: string
+        unitPrice:
+          type: number
+        subtotal:
+          type: number
         images:
           type: array
           items:

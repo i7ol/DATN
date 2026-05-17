@@ -26,12 +26,14 @@ import { RoleManagementComponent } from './page-admin/user-management/role-manag
 import { ReturnUserComponent } from './page-user/return/return-user/return-user.component';
 import { ReturnAdminComponent } from './page-admin/return/return-admin/return-admin.component';
 import { ReturnCreateComponent } from './page-user/return/return-user/return-user-create.component';
+import { BlogComponent } from './page-user/blog/blog.component';
 const routes: Routes = [
   // Public routes
   { path: '', redirectTo: 'products', pathMatch: 'full' },
   { path: 'products', component: ProductListComponent },
   { path: 'product/:id', component: ProductDetailComponent },
   { path: 'cart', component: CartComponent },
+  { path: 'blog', component: BlogComponent },
   { path: 'payment/result', component: PaymentResultComponent },
   {
     path: 'payment-result',

@@ -20,6 +20,7 @@ export interface ReturnResponse {
     description?: string;
     status?: ReturnResponseStatusEnum;
     refundAmount?: number;
+    totalReturnValue?: number;
     refundTransactionId?: string;
     adminNote?: string;
     returnTrackingCode?: string;

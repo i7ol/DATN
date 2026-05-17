@@ -20,7 +20,7 @@ public class OrderReturnItemEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "return_id", nullable = false)
     private OrderReturnEntity orderReturn;
-
+    private String productName;
     private Long orderItemId;      // liên kết với OrderItemEntity
     private Long productId;
 
@@ -28,4 +28,5 @@ public class OrderReturnItemEntity {
     private Integer quantity;
 
     private String reason;
+    private BigDecimal unitPrice;
 }

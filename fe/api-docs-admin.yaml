@@ -1402,6 +1402,10 @@ components:
           format: int32
         reason:
           type: string
+        unitPrice:
+          type: number
+        subtotal:
+          type: number
         images:
           type: array
           items:
@@ -1440,6 +1444,8 @@ components:
           - COMPLETED
           - CANCELLED
         refundAmount:
+          type: number
+        totalReturnValue:
           type: number
         refundTransactionId:
           type: string
@@ -2137,12 +2143,12 @@ components:
     PageProductResponse:
       type: object
       properties:
-        totalPages:
-          type: integer
-          format: int32
         totalElements:
           type: integer
           format: int64
+        totalPages:
+          type: integer
+          format: int32
         size:
           type: integer
           format: int32
@@ -2229,12 +2235,12 @@ components:
     PagePaymentResponse:
       type: object
       properties:
-        totalPages:
-          type: integer
-          format: int32
         totalElements:
           type: integer
           format: int64
+        totalPages:
+          type: integer
+          format: int32
         size:
           type: integer
           format: int32
@@ -2282,12 +2288,12 @@ components:
     PageInventoryResponse:
       type: object
       properties:
-        totalPages:
-          type: integer
-          format: int32
         totalElements:
           type: integer
           format: int64
+        totalPages:
+          type: integer
+          format: int32
         size:
           type: integer
           format: int32
@@ -2332,12 +2338,12 @@ components:
     PageUserResponse:
       type: object
       properties:
-        totalPages:
-          type: integer
-          format: int32
         totalElements:
           type: integer
           format: int64
+        totalPages:
+          type: integer
+          format: int32
         size:
           type: integer
           format: int32

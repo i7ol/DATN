@@ -34,6 +34,7 @@
     <tr>
       <th>ID</th>
       <th>Sản phẩm</th>
+      <th>Số lượng</th>
       <th>Lý do</th>
       <th>Trạng thái</th>
       <th>Hành động</th>
@@ -43,7 +44,16 @@
   <tbody>
     <tr *ngFor="let item of basicTable.data">
       <td>#{{ item.id }}</td>
-      <td>{{ item.orderItem?.productName }}</td>
+
+      <!-- Sửa phần hiển thị sản phẩm -->
+      <td>
+        {{ item.items?.[0]?.productName || "N/A" }}
+      </td>
+
+      <td>
+        {{ item.items?.[0]?.quantity || 1 }}
+      </td>
+
       <td>{{ item.reason }}</td>
 
       <td>
@@ -53,19 +63,14 @@
       </td>
 
       <td>
-        <button
-          nz-button
-          nzType="default"
-          [routerLink]="['/admin/returns', item.id]"
-        >
+        <button nz-button nzType="default" (click)="openDetail(item.id)">
           Chi tiết
         </button>
       </td>
     </tr>
 
-    <!-- Empty -->
     <tr *ngIf="returns.length === 0">
-      <td colspan="5" style="text-align: center">Không có dữ liệu</td>
+      <td colspan="6" style="text-align: center">Không có dữ liệu</td>
     </tr>
   </tbody>
 </nz-table>

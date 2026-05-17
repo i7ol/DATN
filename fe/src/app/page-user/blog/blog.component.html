@@ -1,0 +1,41 @@
+<div class="blog-page">
+  <div class="banner">
+    <div class="overlay"></div>
+
+    <div class="banner-content container">
+      <h1>TIN TỨC</h1>
+      <p>Cập nhật xu hướng thời trang mới nhất</p>
+    </div>
+  </div>
+
+  <div class="container content-wrapper">
+    <div class="blog-grid">
+      <div class="blog-card" *ngFor="let blog of blogs">
+        <div class="thumbnail">
+          <img [src]="blog.thumbnail" [alt]="blog.title" />
+        </div>
+
+        <div class="card-content">
+          <span class="category">
+            {{ blog.category }}
+          </span>
+
+          <h3>
+            {{ blog.title }}
+          </h3>
+
+          <p>
+            {{ blog.description }}
+          </p>
+
+          <div class="meta">
+            <span>{{ blog.createdAt }}</span>
+            <span>{{ blog.author }}</span>
+          </div>
+
+          <button class="read-more">XEM THÊM</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

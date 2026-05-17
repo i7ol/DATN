@@ -1,9 +1,6 @@
 package com.datn.shoporder.service;
 
-import com.datn.shopdatabase.entity.OrderEntity;
-import com.datn.shopdatabase.entity.OrderReturnEntity;
-import com.datn.shopdatabase.entity.OrderReturnItemEntity;
-import com.datn.shopdatabase.entity.ReturnImageEntity;
+import com.datn.shopdatabase.entity.*;
 import com.datn.shopdatabase.enums.OrderStatus;
 import com.datn.shopdatabase.enums.ReturnStatus;
 import com.datn.shopdatabase.enums.ReturnType;
@@ -11,6 +8,7 @@ import com.datn.shopdatabase.exception.AppException;
 import com.datn.shopdatabase.exception.ErrorCode;
 import com.datn.shopdatabase.repository.OrderRepository;
 import com.datn.shopdatabase.repository.OrderReturnRepository;
+import com.datn.shopdatabase.repository.ProductRepository;
 import com.datn.shopobject.dto.request.CreateReturnRequest;
 import com.datn.shopobject.dto.request.ReturnItemRequest;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +34,7 @@ public class ReturnService {
 
     private final OrderReturnRepository returnRepository;
     private final OrderRepository orderRepository;
-
+    private final ProductRepository productRepository;
     @Transactional
     public OrderReturnEntity createReturnRequest(
             Long userId, String guestId, CreateReturnRequest request) {
@@ -45,35 +43,28 @@ public class ReturnService {
         log.info("UserId={}, GuestId={}, OrderId={}, ReturnType={}, Items={}",
                 userId, guestId, request.getOrderId(), request.getReturnType(), request.getItems());
 
-        // 1. Tìm order
         OrderEntity order = orderRepository.findById(request.getOrderId())
                 .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND, "Không tìm thấy đơn hàng"));
 
         log.info("Order found - ID={}, Status={}, UserId={}, ActualDeliveryDate={}",
                 order.getId(), order.getStatus(), order.getUserId(), order.getActualDeliveryDate());
 
-        // 2. Kiểm tra quyền sở hữu
+        // Kiểm tra quyền
         boolean isValidOwner = (userId != null && Objects.equals(order.getUserId(), userId)) ||
                 (guestId != null && Objects.equals(order.getGuestId(), guestId));
         if (!isValidOwner) {
-            log.error("Permission denied! User {} / Guest {} is not owner of order {}",
-                    userId, guestId, order.getId());
             throw new AppException(ErrorCode.FORBIDDEN, "Bạn không có quyền đổi trả đơn hàng này");
         }
 
-        // 3. Validate thời gian
         validateReturnEligibility(order);
 
-        // 4. Kiểm tra đã có return active chưa
+        // Kiểm tra return active
         Optional<OrderReturnEntity> activeReturn = returnRepository.findActiveReturnByOrderId(order.getId());
-        log.info("Has active return: {}", activeReturn.isPresent());
         if (activeReturn.isPresent()) {
-            log.warn("Order {} already has an active return with ID: {}",
-                    order.getId(), activeReturn.get().getId());
             throw new AppException(ErrorCode.INVALID_REQUEST, "Đơn hàng này đã có yêu cầu đổi trả đang xử lý");
         }
 
-        // 5. Tạo entity
+        // Tạo return
         OrderReturnEntity returnRequest = OrderReturnEntity.builder()
                 .orderId(order.getId())
                 .userId(userId)
@@ -84,36 +75,36 @@ public class ReturnService {
                 .status(ReturnStatus.PENDING)
                 .build();
 
-        // === KHỞI TẠO LIST AN TOÀN ===
-        if (returnRequest.getItems() == null) {
-            returnRequest.setItems(new ArrayList<>());
-        }
-        if (returnRequest.getImages() == null) {
-            returnRequest.setImages(new ArrayList<>());
-        }
+        if (returnRequest.getItems() == null) returnRequest.setItems(new ArrayList<>());
+        if (returnRequest.getImages() == null) returnRequest.setImages(new ArrayList<>());
 
-        log.info("Entity built successfully. Items list size before adding: {}", returnRequest.getItems().size());
-
-        // 6. Thêm items
-        if (request.getItems() == null || request.getItems().isEmpty()) {
-            throw new AppException(ErrorCode.INVALID_REQUEST, "Phải chọn ít nhất một sản phẩm để đổi trả");
-        }
+        BigDecimal totalReturnValue = BigDecimal.ZERO;
 
         for (ReturnItemRequest itemReq : request.getItems()) {
-            log.info("Adding item - orderItemId={}, productId={}, quantity={}",
-                    itemReq.getOrderItemId(), itemReq.getProductId(), itemReq.getQuantity());
-
             OrderReturnItemEntity item = new OrderReturnItemEntity();
             item.setOrderItemId(itemReq.getOrderItemId());
             item.setProductId(itemReq.getProductId());
             item.setQuantity(itemReq.getQuantity() != null ? itemReq.getQuantity() : 1);
             item.setReason(itemReq.getReason() != null ? itemReq.getReason() : request.getReason());
 
+            // Lấy thông tin sản phẩm
+            ProductEntity product = productRepository.findById(itemReq.getProductId()).orElse(null);
+            String productName = product != null ? product.getName() : "Sản phẩm #" + itemReq.getProductId();
+            BigDecimal unitPrice = product != null ? product.getPrice() : BigDecimal.ZERO;
+
+            item.setProductName(productName);
+            item.setUnitPrice(unitPrice);
+
+            BigDecimal itemTotal = unitPrice.multiply(BigDecimal.valueOf(item.getQuantity()));
+            totalReturnValue = totalReturnValue.add(itemTotal);
+
             returnRequest.addItem(item);
         }
 
-        // 7. Thêm ảnh (nếu có)
-        if (request.getImageUrls() != null && !request.getImageUrls().isEmpty()) {
+        returnRequest.setTotalReturnValue(totalReturnValue);
+
+        // Thêm ảnh
+        if (request.getImageUrls() != null) {
             for (String url : request.getImageUrls()) {
                 ReturnImageEntity image = new ReturnImageEntity();
                 image.setImageUrl(url);
@@ -121,10 +112,8 @@ public class ReturnService {
             }
         }
 
-        log.info("Saving return to database...");
         OrderReturnEntity saved = returnRepository.save(returnRequest);
-
-        log.info("✅ RETURN CREATED SUCCESSFULLY - Return ID: {}", saved.getId());
+        log.info("✅ RETURN CREATED SUCCESSFULLY - ID: {}, Total Value: {}", saved.getId(), totalReturnValue);
         return saved;
     }
 

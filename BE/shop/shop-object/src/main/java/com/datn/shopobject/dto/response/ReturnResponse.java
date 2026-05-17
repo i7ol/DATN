@@ -30,6 +30,7 @@ public class ReturnResponse {
     private ReturnStatus status;
 
     private BigDecimal refundAmount;
+    private BigDecimal totalReturnValue;
     private String refundTransactionId;
 
     private String adminNote;

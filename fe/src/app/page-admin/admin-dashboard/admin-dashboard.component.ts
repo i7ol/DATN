@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { RevenueService } from './revenue.service';
-import { ReportService } from './report.service';
+import { OrderAdminControllerService } from 'src/app/api/admin';
 import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
 
 @Component({
@@ -15,7 +14,7 @@ export class AdminDashboardComponent implements OnInit {
   stats = {
     totalRevenue: 0,
     monthRevenue: 0,
-    todayRevenue: 0, // giữ lại phòng trường hợp dùng sau
+    todayRevenue: 0,
   };
 
   totalOrders: number = 0;
@@ -66,10 +65,7 @@ export class AdminDashboardComponent implements OnInit {
     ],
   };
 
-  constructor(
-    private revenueService: RevenueService,
-    private reportService: ReportService,
-  ) {}
+  constructor(private orderAdminService: OrderAdminControllerService) {}
 
   ngOnInit(): void {
     this.loadOverviewData();
@@ -78,7 +74,7 @@ export class AdminDashboardComponent implements OnInit {
 
   // ==================== LOAD OVERVIEW ====================
   loadOverviewData(): void {
-    this.revenueService.getRevenueStatistics().subscribe({
+    this.orderAdminService.getRevenueStatistics().subscribe({
       next: (data: any) => {
         this.stats.totalRevenue = data.totalRevenue || 0;
         this.stats.monthRevenue = data.monthRevenue || 0;
@@ -107,7 +103,7 @@ export class AdminDashboardComponent implements OnInit {
 
   // ==================== TOP PRODUCTS ====================
   loadTopProducts(): void {
-    this.reportService.getTopSellingProducts(10).subscribe({
+    this.orderAdminService.getTopSellingProducts(10).subscribe({
       next: (data) => (this.topProducts = data || []),
       error: (err) => console.error('Lỗi load top products', err),
     });
@@ -115,7 +111,7 @@ export class AdminDashboardComponent implements OnInit {
 
   // ==================== REVENUE BY DATE ====================
   loadRevenueByDate(startDate: string, endDate: string): void {
-    this.reportService.getRevenueByDate(startDate, endDate).subscribe({
+    this.orderAdminService.getRevenueByDate(startDate, endDate).subscribe({
       next: (data) => (this.revenueByDate = data || []),
       error: (err) => console.error('Lỗi load revenue by date', err),
     });

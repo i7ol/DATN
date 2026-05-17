@@ -6,6 +6,7 @@ import com.datn.shopdatabase.entity.ReturnImageEntity;
 import com.datn.shopobject.dto.response.ReturnItemResponse;
 import com.datn.shopobject.dto.response.ReturnResponse;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -20,6 +21,7 @@ public class ReturnMapper {
         res.setId(entity.getId());
         res.setOrderId(entity.getOrderId());
         res.setUserId(entity.getUserId());
+        res.setGuestId(entity.getGuestId());
 
         res.setReturnType(entity.getReturnType());
         res.setReason(entity.getReason());
@@ -27,6 +29,7 @@ public class ReturnMapper {
         res.setStatus(entity.getStatus());
 
         res.setRefundAmount(entity.getRefundAmount());
+        res.setTotalReturnValue(entity.getTotalReturnValue());
         res.setRefundTransactionId(entity.getRefundTransactionId());
         res.setAdminNote(entity.getAdminNote());
         res.setReturnTrackingCode(entity.getReturnTrackingCode());
@@ -35,7 +38,7 @@ public class ReturnMapper {
         res.setProcessedDate(entity.getProcessedDate());
         res.setCompletedDate(entity.getCompletedDate());
 
-        // Mapping Items
+        // Mapping Items với productName
         if (entity.getItems() != null) {
             res.setItems(
                     entity.getItems().stream()
@@ -68,8 +71,13 @@ public class ReturnMapper {
         dto.setProductId(item.getProductId());
         dto.setQuantity(item.getQuantity());
         dto.setReason(item.getReason());
-        // dto.setProductName(...) → sẽ enrich sau nếu cần
+        dto.setProductName(item.getProductName() != null ?
+                item.getProductName() : "Sản phẩm #" + item.getProductId());
+        dto.setUnitPrice(item.getUnitPrice());
 
+        if (item.getUnitPrice() != null && item.getQuantity() != null) {
+            dto.setSubtotal(item.getUnitPrice().multiply(BigDecimal.valueOf(item.getQuantity())));
+        }
         return dto;
     }
 
