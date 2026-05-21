@@ -1,4 +1,3 @@
-import { ApiAdminModule } from './../../../api/admin/api-admin.module';
 import { Component, Input, OnInit } from '@angular/core';
 import { NzModalRef } from 'ng-zorro-antd/modal';
 import { NzMessageService } from 'ng-zorro-antd/message';

@@ -9,15 +9,15 @@ import { HttpClient } from '@angular/common/http';
   exports:      [],
   providers: []
 })
-export class ApiAdminModule {
-    public static forRoot(configurationFactory: () => Configuration): ModuleWithProviders<ApiAdminModule> {
+export class ApiModule {
+    public static forRoot(configurationFactory: () => Configuration): ModuleWithProviders<ApiModule> {
         return {
-            ngModule: ApiAdminModule,
+            ngModule: ApiModule,
             providers: [ { provide: Configuration, useFactory: configurationFactory } ]
         };
     }
 
-    constructor( @Optional() @SkipSelf() parentModule: ApiAdminModule,
+    constructor( @Optional() @SkipSelf() parentModule: ApiModule,
                  @Optional() http: HttpClient) {
         if (parentModule) {
             throw new Error('ApiModule is already loaded. Import in your base AppModule only.');

@@ -92,6 +92,10 @@
             <groupId>com.datn</groupId>
             <artifactId>shop-payment</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.datn</groupId>
+            <artifactId>shop-inventory</artifactId>
+        </dependency>
 
     </dependencies>
 </project>

@@ -60,5 +60,11 @@ public interface OrderAdminClient {
     Map<String, Object> getRevenueSummary(
             @RequestParam String startDate,
             @RequestParam String endDate);
+
+    @GetMapping(value = "/api/admin/orders/statistics/revenue-range",
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    List<Map<String, Object>> getRevenueByDateRange(
+            @RequestParam("startDate") String startDate,
+            @RequestParam("endDate") String endDate);
 }
 

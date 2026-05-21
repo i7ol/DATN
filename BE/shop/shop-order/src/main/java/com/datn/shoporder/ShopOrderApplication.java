@@ -11,7 +11,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @EntityScan("com.datn.shopdatabase.entity")
 @ComponentScan({
         "com.datn.shoporder",
-        "com.datn.shopdatabase"
+        "com.datn.shopdatabase",
 })
 @EnableJpaRepositories("com.datn.shopdatabase.repository")
 @EnableFeignClients(basePackages = {

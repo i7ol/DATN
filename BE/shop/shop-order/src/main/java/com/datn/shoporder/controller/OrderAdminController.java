@@ -10,6 +10,7 @@ import com.datn.shoporder.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.PageRequest;
@@ -96,6 +97,13 @@ public class OrderAdminController {
         LocalDate start = LocalDate.parse(startDate);
         LocalDate end = LocalDate.parse(endDate);
         return orderService.getRevenueSummary(start, end);
+    }
+    @GetMapping("/statistics/revenue-range")
+    public List<Map<String, Object>> getRevenueByRange(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+
+        return orderService.getRevenueByDateRangeFlexible(startDate, endDate);
     }
 }
 

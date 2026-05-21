@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { OrderAdminControllerService } from 'src/app/api/admin';
 import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
+import { BaseChartDirective } from 'ng2-charts';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -8,43 +9,38 @@ import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
   styleUrls: ['./admin-dashboard.component.scss'],
 })
 export class AdminDashboardComponent implements OnInit {
+  @ViewChild(BaseChartDirective) chart?: BaseChartDirective;
+
   currentTab: string = 'overview';
+  chartType: 'line' | 'bar' = 'line';
 
-  // ==================== STATS ====================
-  stats = {
-    totalRevenue: 0,
-    monthRevenue: 0,
-    todayRevenue: 0,
-  };
+  filterStartDate: string = '';
+  filterEndDate: string = '';
 
+  stats = { totalRevenue: 0, monthRevenue: 0, todayRevenue: 0 };
   totalOrders: number = 0;
   totalCustomers: number = 0;
   totalProducts: number = 0;
 
-  // Top Products
   topProducts: any[] = [];
-
-  // Revenue by Date
   revenueByDate: any[] = [];
 
-  // Line Chart
+  // ==================== CHART 7 NGÀY ====================
   public lineChartOptions: ChartConfiguration['options'] = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-      legend: { display: true, position: 'top' as const },
+      legend: { position: 'top' as const },
       tooltip: {
         callbacks: {
-          label: (context: any) => context.raw.toLocaleString('vi-VN') + ' ₫',
+          label: (ctx: any) => ctx.raw.toLocaleString('vi-VN') + ' ₫',
         },
       },
     },
     scales: {
       y: {
         beginAtZero: true,
-        ticks: {
-          callback: (value: any) => (value / 1000000).toFixed(1) + 'M',
-        },
+        ticks: { callback: (v: any) => (v / 1000000).toFixed(1) + 'M' },
       },
     },
   };
@@ -65,14 +61,59 @@ export class AdminDashboardComponent implements OnInit {
     ],
   };
 
+  // ==================== CHART THEO KHOẢNG THỜI GIAN ====================
+  public revenueRangeChartOptions: ChartConfiguration['options'] = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'top' as const },
+      tooltip: {
+        callbacks: {
+          label: (ctx: any) => ctx.raw.toLocaleString('vi-VN') + ' ₫',
+        },
+      },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: { callback: (v: any) => (v / 1000000).toFixed(1) + 'M ₫' },
+      },
+    },
+  };
+
+  public revenueRangeChartType: ChartType = 'line' as const;
+  public revenueRangeChartData: ChartData<'line' | 'bar'> = {
+    labels: [],
+    datasets: [
+      {
+        data: [],
+        label: 'Doanh thu',
+        borderColor: '#10b981',
+        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+        borderWidth: 3,
+        tension: 0.4,
+      },
+    ],
+  };
+
   constructor(private orderAdminService: OrderAdminControllerService) {}
 
-  ngOnInit(): void {
+  ngOnInit() {
     this.loadOverviewData();
     this.loadTopProducts();
+    this.initDefaultDateRange();
   }
 
-  // ==================== LOAD OVERVIEW ====================
+  private initDefaultDateRange() {
+    const today = new Date();
+    const ago = new Date(today);
+    ago.setDate(today.getDate() - 30);
+
+    this.filterEndDate = today.toISOString().split('T')[0];
+    this.filterStartDate = ago.toISOString().split('T')[0];
+  }
+
+  // ==================== TỔNG QUAN ====================
   loadOverviewData(): void {
     this.orderAdminService.getRevenueStatistics().subscribe({
       next: (data: any) => {
@@ -97,34 +138,84 @@ export class AdminDashboardComponent implements OnInit {
           );
         }
       },
-      error: (err) => console.error('Lỗi load overview', err),
+      error: (err) => console.error('Lỗi load overview:', err),
     });
   }
 
-  // ==================== TOP PRODUCTS ====================
+  // ==================== TOP SẢN PHẨM ====================
   loadTopProducts(): void {
     this.orderAdminService.getTopSellingProducts(10).subscribe({
-      next: (data) => (this.topProducts = data || []),
-      error: (err) => console.error('Lỗi load top products', err),
+      next: (data) => {
+        this.topProducts = data || [];
+      },
+      error: (err) => console.error('Lỗi load top products:', err),
     });
   }
 
-  // ==================== REVENUE BY DATE ====================
-  loadRevenueByDate(startDate: string, endDate: string): void {
-    this.orderAdminService.getRevenueByDate(startDate, endDate).subscribe({
-      next: (data) => (this.revenueByDate = data || []),
-      error: (err) => console.error('Lỗi load revenue by date', err),
-    });
+  // ==================== DOANH THU THEO KHOẢNG THỜI GIAN ====================
+  loadRevenueByDateRange(): void {
+    if (!this.filterStartDate || !this.filterEndDate) {
+      alert('Vui lòng chọn đầy đủ khoảng thời gian!');
+      return;
+    }
+
+    this.orderAdminService
+      .getRevenueByDate(this.filterStartDate, this.filterEndDate)
+      .subscribe({
+        next: (data: any) => {
+          this.revenueByDate = data || [];
+
+          if (data?.length > 0) {
+            this.revenueRangeChartData.labels = data.map((item: any) =>
+              new Date(item.date).toLocaleDateString('vi-VN', {
+                day: '2-digit',
+                month: '2-digit',
+              }),
+            );
+            this.revenueRangeChartData.datasets[0].data = data.map(
+              (item: any) => Number(item.revenue) || 0,
+            );
+          } else {
+            this.revenueRangeChartData.labels = [];
+            this.revenueRangeChartData.datasets[0].data = [];
+          }
+          this.chart?.update();
+        },
+        error: (err) => {
+          console.error('Lỗi load doanh thu:', err);
+          alert('Có lỗi khi tải dữ liệu biểu đồ');
+        },
+      });
   }
 
-  changeTab(tab: string): void {
+  toggleChartType() {
+    this.chartType = this.chartType === 'line' ? 'bar' : 'line';
+    this.revenueRangeChartType = this.chartType;
+
+    const dataset = this.revenueRangeChartData.datasets[0];
+
+    if (this.chartType === 'bar') {
+      dataset.backgroundColor = 'rgba(16, 185, 129, 0.75)';
+      (dataset as any).fill = false;
+      (dataset as any).tension = 0;
+    } else {
+      dataset.backgroundColor = 'rgba(16, 185, 129, 0.1)';
+      (dataset as any).fill = true;
+      (dataset as any).tension = 0.4;
+    }
+
+    this.chart?.update();
+  }
+
+  resetDateFilter() {
+    this.initDefaultDateRange();
+    this.loadRevenueByDateRange();
+  }
+
+  changeTab(tab: string) {
     this.currentTab = tab;
     if (tab === 'revenue-date') {
-      const end = new Date().toISOString().split('T')[0];
-      const start = new Date(Date.now() - 30 * 86400000)
-        .toISOString()
-        .split('T')[0];
-      this.loadRevenueByDate(start, end);
+      setTimeout(() => this.loadRevenueByDateRange(), 100);
     }
   }
 }

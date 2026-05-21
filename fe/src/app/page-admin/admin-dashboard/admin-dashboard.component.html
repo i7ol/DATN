@@ -20,7 +20,6 @@
         >
           Tổng quan
         </button>
-
         <button
           (click)="changeTab('top-products')"
           class="px-6 py-3 text-sm font-medium border-b-2"
@@ -32,7 +31,6 @@
         >
           Sản phẩm bán chạy
         </button>
-
         <button
           (click)="changeTab('revenue-date')"
           class="px-6 py-3 text-sm font-medium border-b-2"
@@ -47,9 +45,9 @@
       </div>
     </div>
 
-    <!-- ================= TAB 1 ================= -->
+    <!-- TAB 1: TỔNG QUAN -->
     <div *ngIf="currentTab === 'overview'">
-      <!-- STATS -->
+      <!-- Stats -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <div class="bg-white p-6 rounded-2xl shadow border">
           <p class="text-sm text-gray-500">Doanh thu tổng</p>
@@ -57,21 +55,18 @@
             {{ stats.totalRevenue | currency: "VND" : "symbol" : "1.0-0" }}
           </h3>
         </div>
-
         <div class="bg-white p-6 rounded-2xl shadow border">
           <p class="text-sm text-gray-500">Doanh thu tháng</p>
           <h3 class="text-3xl font-bold text-emerald-600 mt-2">
             {{ stats.monthRevenue | currency: "VND" : "symbol" : "1.0-0" }}
           </h3>
         </div>
-
         <div class="bg-white p-6 rounded-2xl shadow border">
           <p class="text-sm text-gray-500">Đơn hàng</p>
           <h3 class="text-3xl font-bold text-blue-600 mt-2">
             {{ totalOrders }}
           </h3>
         </div>
-
         <div class="bg-white p-6 rounded-2xl shadow border">
           <p class="text-sm text-gray-500">Khách hàng</p>
           <h3 class="text-3xl font-bold text-purple-600 mt-2">
@@ -80,29 +75,26 @@
         </div>
       </div>
 
-      <!-- CHART -->
+      <!-- Chart 7 ngày -->
       <div class="bg-white rounded-2xl shadow p-6 border">
         <h2 class="text-lg font-semibold mb-4">Doanh thu 7 ngày gần nhất</h2>
-
         <div class="h-80">
           <canvas
             baseChart
             [data]="lineChartData"
             [options]="lineChartOptions"
             [type]="lineChartType"
-          >
-          </canvas>
+          ></canvas>
         </div>
       </div>
     </div>
 
-    <!-- ================= TAB 2 ================= -->
+    <!-- TAB 2: TOP SẢN PHẨM -->
     <div
       *ngIf="currentTab === 'top-products'"
       class="bg-white rounded-2xl shadow p-6 border"
     >
       <h2 class="text-lg font-semibold mb-4">Top Sản Phẩm</h2>
-
       <table class="min-w-full border rounded-lg overflow-hidden">
         <thead>
           <tr class="bg-gray-100">
@@ -111,7 +103,6 @@
             <th class="px-6 py-3 text-right">Doanh thu</th>
           </tr>
         </thead>
-
         <tbody class="divide-y">
           <tr *ngFor="let p of topProducts">
             <td class="px-6 py-4">{{ p.productName }}</td>
@@ -124,34 +115,113 @@
       </table>
     </div>
 
-    <!-- ================= TAB 3 ================= -->
+    <!-- TAB 3: DOANH THU THEO KHOẢNG THỜI GIAN -->
     <div
       *ngIf="currentTab === 'revenue-date'"
       class="bg-white rounded-2xl shadow p-6 border"
     >
-      <h2 class="text-lg font-semibold mb-4">Doanh thu theo thời gian</h2>
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-lg font-semibold">Doanh thu theo khoảng thời gian</h2>
 
-      <table class="min-w-full border rounded-lg overflow-hidden">
-        <thead>
-          <tr class="bg-gray-100">
-            <th class="px-6 py-3 text-left">Ngày</th>
-            <th class="px-6 py-3 text-right">Số đơn</th>
-            <th class="px-6 py-3 text-right">Doanh thu</th>
-          </tr>
-        </thead>
+        <!-- Toggle Line / Bar -->
+        <div class="flex border rounded-lg overflow-hidden">
+          <button
+            (click)="toggleChartType()"
+            [ngClass]="
+              chartType === 'line'
+                ? 'bg-blue-600 text-white'
+                : 'bg-white text-gray-700'
+            "
+            class="px-5 py-2 text-sm font-medium border-r"
+          >
+            Đường
+          </button>
+          <button
+            (click)="toggleChartType()"
+            [ngClass]="
+              chartType === 'bar'
+                ? 'bg-blue-600 text-white'
+                : 'bg-white text-gray-700'
+            "
+            class="px-5 py-2 text-sm font-medium"
+          >
+            Cột
+          </button>
+        </div>
+      </div>
 
-        <tbody class="divide-y">
-          <tr *ngFor="let item of revenueByDate">
-            <td class="px-6 py-4">
-              {{ item.date | date: "dd/MM/yyyy" }}
-            </td>
-            <td class="px-6 py-4 text-right">{{ item.orderCount }}</td>
-            <td class="px-6 py-4 text-right text-green-600 font-semibold">
-              {{ item.revenue | currency: "VND" : "symbol" : "1.0-0" }}
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <!-- Bộ lọc ngày -->
+      <div
+        class="flex flex-wrap items-end gap-4 mb-6 bg-gray-50 p-4 rounded-xl"
+      >
+        <div>
+          <label class="block text-sm font-medium text-gray-600 mb-1"
+            >Từ ngày</label
+          >
+          <input
+            type="date"
+            [(ngModel)]="filterStartDate"
+            class="form-control border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-600 mb-1"
+            >Đến ngày</label
+          >
+          <input
+            type="date"
+            [(ngModel)]="filterEndDate"
+            class="form-control border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        <button
+          (click)="loadRevenueByDateRange()"
+          class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg font-medium transition"
+        >
+          <i class="fas fa-chart-line mr-2"></i> Xem biểu đồ
+        </button>
+        <button
+          (click)="resetDateFilter()"
+          class="bg-gray-500 hover:bg-gray-600 text-white px-5 py-2.5 rounded-lg font-medium transition"
+        >
+          Reset
+        </button>
+      </div>
+
+      <!-- Biểu đồ -->
+      <div class="h-[420px]">
+        <canvas
+          baseChart
+          [data]="revenueRangeChartData"
+          [options]="revenueRangeChartOptions"
+          [type]="revenueRangeChartType"
+        >
+        </canvas>
+      </div>
+
+      <!-- Bảng dữ liệu -->
+      <div class="mt-8">
+        <h3 class="font-semibold mb-3">Chi tiết dữ liệu</h3>
+        <table class="min-w-full border rounded-lg overflow-hidden">
+          <thead>
+            <tr class="bg-gray-100">
+              <th class="px-6 py-3 text-left">Ngày</th>
+              <th class="px-6 py-3 text-right">Số đơn hàng</th>
+              <th class="px-6 py-3 text-right">Doanh thu</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y">
+            <tr *ngFor="let item of revenueByDate">
+              <td class="px-6 py-4">{{ item.date | date: "dd/MM/yyyy" }}</td>
+              <td class="px-6 py-4 text-right">{{ item.orderCount }}</td>
+              <td class="px-6 py-4 text-right font-semibold text-green-600">
+                {{ item.revenue | currency: "VND" : "symbol" : "1.0-0" }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 </div>

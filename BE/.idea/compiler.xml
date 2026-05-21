@@ -16,9 +16,9 @@
         <module name="shop-cart" />
         <module name="shop-auth" />
         <module name="shop-object" />
-        <module name="shop-admin" />
         <module name="shop-client" />
         <module name="shop-inventory" />
+        <module name="shop-admin" />
         <module name="shop-database" />
         <module name="shop-shipping" />
         <module name="shop-app" />

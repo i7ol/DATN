@@ -1,5 +1,6 @@
 package com.datn.shoporder.service;
 
+import com.datn.shopclient.client.InventoryClient;
 import com.datn.shopdatabase.entity.OrderEntity;
 import com.datn.shopdatabase.entity.OrderItemEntity;
 import com.datn.shopdatabase.entity.ProductEntity;
@@ -14,11 +15,12 @@ import com.datn.shopdatabase.repository.ProductRepository;
 import com.datn.shopdatabase.repository.UserRepository;
 import com.datn.shopobject.dto.request.CreateOrderRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import com.datn.shopinventory.service.InventoryService;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -32,12 +34,14 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class OrderService {
 
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
+    private final InventoryClient inventoryClient;
     @Transactional
     public OrderEntity createOrderFromCheckout(
             Long userId,
@@ -198,7 +202,7 @@ public class OrderService {
         orderRepository.flush();
 
         savedOrder.setTrackingCode(generateTrackingCode(savedOrder.getId()));
-
+        deductInventoryForOrder(savedOrder);
         return savedOrder;
     }
 
@@ -256,8 +260,9 @@ public class OrderService {
         OrderEntity savedOrder = orderRepository.save(order);
 
         savedOrder.setTrackingCode(generateTrackingCode(savedOrder.getId()));
+        deductInventoryForOrder(savedOrder);
 
-        return orderRepository.save(savedOrder);
+        return savedOrder;
     }
 
     // =============================================
@@ -291,7 +296,17 @@ public class OrderService {
 
         return orderRepository.save(order);
     }
-
+    private void deductInventoryForOrder(OrderEntity order) {
+        for (OrderItemEntity item : order.getItems()) {
+            if (item.getVariantId() != null) {
+                try {
+                    inventoryClient.deduct(item.getVariantId(), item.getQuantity());
+                } catch (Exception e) {
+                    log.error("Không thể trừ kho variant {} - qty {}", item.getVariantId(), item.getQuantity(), e);
+                    // Có thể throw hoặc rollback transaction tùy policy
+                }
+            }
+        }}
     @Transactional
     public OrderEntity updateOrderDetails(Long orderId, BigDecimal shippingFee, BigDecimal discountAmount) {
         OrderEntity order = getOrder(orderId);
@@ -534,5 +549,36 @@ public class OrderService {
         result.put("totalRevenue", summary[1] != null ? summary[1] : BigDecimal.ZERO);
         result.put("avgOrderValue", summary[2] != null ? summary[2] : BigDecimal.ZERO);
         return result;
+    }
+
+    /**
+     * Báo cáo doanh thu theo khoảng thời gian tùy chọn
+     */
+    public List<Map<String, Object>> getRevenueByDateRangeFlexible(
+            LocalDate startDate,
+            LocalDate endDate) {
+
+        if (startDate == null || endDate == null) {
+            throw new AppException(ErrorCode.INVALID_REQUEST, "Ngày bắt đầu và kết thúc là bắt buộc");
+        }
+
+        if (startDate.isAfter(endDate)) {
+            throw new AppException(ErrorCode.INVALID_REQUEST, "Ngày bắt đầu không được lớn hơn ngày kết thúc");
+        }
+
+        LocalDateTime start = startDate.atStartOfDay();
+        LocalDateTime end = endDate.atTime(23, 59, 59, 999_999_999);
+
+        List<Object[]> raw = orderRepository.getRevenueByDateRange(
+                java.sql.Timestamp.valueOf(start),
+                java.sql.Timestamp.valueOf(end));
+
+        return raw.stream().map(row -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("date", row[0]);           // java.sql.Date
+            map.put("orderCount", row[1]);
+            map.put("revenue", row[2]);
+            return map;
+        }).collect(Collectors.toList());
     }
 }

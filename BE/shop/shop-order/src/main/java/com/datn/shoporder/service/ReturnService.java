@@ -1,14 +1,16 @@
 package com.datn.shoporder.service;
 
+import com.datn.shopclient.client.InventoryClient;
 import com.datn.shopdatabase.entity.*;
 import com.datn.shopdatabase.enums.OrderStatus;
 import com.datn.shopdatabase.enums.ReturnStatus;
-import com.datn.shopdatabase.enums.ReturnType;
+import com.datn.shopdatabase.repository.OrderItemRepository;
 import com.datn.shopdatabase.exception.AppException;
 import com.datn.shopdatabase.exception.ErrorCode;
 import com.datn.shopdatabase.repository.OrderRepository;
 import com.datn.shopdatabase.repository.OrderReturnRepository;
 import com.datn.shopdatabase.repository.ProductRepository;
+
 import com.datn.shopobject.dto.request.CreateReturnRequest;
 import com.datn.shopobject.dto.request.ReturnItemRequest;
 import lombok.RequiredArgsConstructor;
@@ -22,8 +24,6 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.List;
-import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -35,6 +35,9 @@ public class ReturnService {
     private final OrderReturnRepository returnRepository;
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
+    private final OrderItemRepository orderItemRepository;
+    private final InventoryClient inventoryClient;
+
     @Transactional
     public OrderReturnEntity createReturnRequest(
             Long userId, String guestId, CreateReturnRequest request) {
@@ -45,9 +48,6 @@ public class ReturnService {
 
         OrderEntity order = orderRepository.findById(request.getOrderId())
                 .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND, "Không tìm thấy đơn hàng"));
-
-        log.info("Order found - ID={}, Status={}, UserId={}, ActualDeliveryDate={}",
-                order.getId(), order.getStatus(), order.getUserId(), order.getActualDeliveryDate());
 
         // Kiểm tra quyền
         boolean isValidOwner = (userId != null && Objects.equals(order.getUserId(), userId)) ||
@@ -150,6 +150,9 @@ public class ReturnService {
         ret.setAdminNote(adminNote);
         ret.setRefundAmount(refundAmount);
         ret.setProcessedDate(Instant.now());
+
+        addStockForReturn(ret);                    // Cộng kho khi duyệt
+
         return returnRepository.save(ret);
     }
 
@@ -168,8 +171,51 @@ public class ReturnService {
         ret.setStatus(ReturnStatus.COMPLETED);
         ret.setRefundTransactionId(refundTransactionId);
         ret.setCompletedDate(Instant.now());
+
+        // Chỉ cộng kho nếu chưa được cộng ở bước approve
+        if (ret.getStatus() != ReturnStatus.APPROVED) {
+            addStockForReturn(ret);
+        }
+
         return returnRepository.save(ret);
     }
+
+    // ==================== INVENTORY HELPER ====================
+
+    private void addStockForReturn(OrderReturnEntity returnEntity) {
+        for (OrderReturnItemEntity item : returnEntity.getItems()) {
+            if (item.getOrderItemId() == null) continue;
+
+            OrderItemEntity orderItem = findOrderItemById(item.getOrderItemId());
+
+            if (orderItem != null && orderItem.getVariantId() != null) {
+                try {
+                    inventoryClient.importStock(
+                            orderItem.getVariantId(),
+                            item.getQuantity(),
+                            null,
+                            "Hoàn trả đơn #" + returnEntity.getOrderId()
+                    );
+                    log.info("✅ Đã cộng kho variantId={} | qty={}",
+                            orderItem.getVariantId(), item.getQuantity());
+                } catch (Exception e) {
+                    log.error("❌ Lỗi cộng kho khi trả hàng variantId={}", orderItem.getVariantId(), e);
+                }
+            } else {
+                log.warn("⚠️ Không tìm thấy OrderItem hoặc VariantId cho returnItemId={}", item.getId());
+            }
+        }
+    }
+
+    /**
+     * ✅ Method này đã được thêm để fix lỗi "Cannot resolve method 'findOrderItemById'"
+     */
+    private OrderItemEntity findOrderItemById(Long orderItemId) {
+        if (orderItemId == null) return null;
+        return orderItemRepository.findById(orderItemId).orElse(null);
+    }
+
+    // ==================== OTHER METHODS ====================
 
     public OrderReturnEntity getReturnById(Long id) {
         return returnRepository.findById(id)
